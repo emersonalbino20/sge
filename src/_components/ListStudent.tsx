@@ -30,7 +30,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useForm } from 'react-hook-form'
 import { zodResolver} from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import {nomeCompletoZod,  dataNascimentoZod, generoZod, numeroBiZod, bairroZod, ruaZod, numeroCasaZod, telefoneZod, emailZod, idZod} from '../_zodValidations/validations'
+import {nomeCompletoZod,  dataNascimentoZod, generoZod,bairroZod, ruaZod, telefoneZod, emailZod, idZod} from '../_zodValidations/validations'
 import { MyDialog, MyDialogContent } from './my_dialog'
 import InputMask from 'react-input-mask'
 
@@ -50,7 +50,6 @@ const TForm =  z.object({
 
   const TFormConfirmacao =  z.object({
     classeId: idZod,
-    cursoId: idZod,
     turmaId: idZod,
     turnoId: idZod,
     metodoPagamentoId: idZod
@@ -157,7 +156,6 @@ export default function ListStudent(){
             const conv1 = JSON.parse(conv)
             setAluno(conv1)
             console.log(Object.values(Object.values(aluno)[7])[0])
-            console.log(aluno)
             setNome(receve.nomeCompleto)
             setPai(receve.nomeCompletoPai)
             setMae(receve.nomeCompletoMae)
@@ -178,62 +176,76 @@ export default function ListStudent(){
 
   /*Área q implementa o código pra pesquisar cursos*/
 const [metodo, setMetodo] = React.useState([]);
-const [ano, setAno] = React.useState([]);
-const [classe, setClasse] = React.useState([]);
+const [ano, setAno] = React.useState();
+const [grade, setGrade] = React.useState([]);
 const [turma, setTurma] = React.useState([]);
 const [turno, setTurno] = React.useState([]);
-const [idCurso, setIdCurso] = React.useState(0);
 const [idClasse, setIdClasse] = React.useState(0);
 const [dataApiCursos, setDataApiCursos] = React.useState([]);
-const URLCURSO = "http://localhost:8000/api/cursos"
+
+const URLCURSO = `http://localhost:8000/api/ano-lectivos/${ano}/
+classes`;
 const URLPAGAMENTO = "http://localhost:8000/api/metodos-pagamento"
 const URLLECTIVO = "http://localhost:8000/api/ano-lectivos"
-const URLCLASSE = `http://localhost:8000/api/cursos/${idCurso}/classes`
 const URLTURMA = `http://localhost:8000/api/classes/${idClasse}/turmas`
 const URLTURNO = `http://localhost:8000/api/turnos/`
 React.useEffect( () => {
     const respFetchCursos = async () => {
+          //Buscar Ano Lectivos
+          const resplectivo = await fetch (URLLECTIVO);
+          const resplectivoJson = await resplectivo.json();
+          const convlectivo1 = JSON.stringify(resplectivoJson.data)
+          const convlectivo2 = JSON.parse(convlectivo1)
+          var meuarray = convlectivo2.filter((c)=>{
+            return c.activo === true
+          })
+          setAno(meuarray[parseInt(String(Object.keys(meuarray)))].id);
+
           const resp = await fetch (URLCURSO);
           const respJson = await resp.json();
-          const conv1 = JSON.stringify(respJson.data)
-          const conv2 = JSON.parse(conv1)
-          setDataApiCursos(conv2)
+          const conv1 = JSON.stringify(respJson.data);
+          const conv2 = JSON.parse(conv1);
+          let nArray = Object.values(conv2.cursos)
+          setDataApiCursos(nArray);
+
           //Buscar Métodos de pagamento
           const resppay = await fetch (URLPAGAMENTO);
           const resppayJson = await resppay.json();
           const convpay1 = JSON.stringify(resppayJson.data)
           const convpay2 = JSON.parse(convpay1)
           setMetodo(convpay2);
-          //Buscar Ano Lectivos
-          const resplectivo = await fetch (URLLECTIVO);
-          const resplectivoJson = await resplectivo.json();
-          const convlectivo1 = JSON.stringify(resplectivoJson.data)
-          const convlectivo2 = JSON.parse(convlectivo1)
-          setAno(convlectivo2);
-          //Buscar Classes
-          const respclasse = await fetch (URLCLASSE);
-          const respclasseJson = await respclasse.json();
-          const convclasse1 = JSON.stringify(respclasseJson.data)
-          const convclasse2 = JSON.parse(convclasse1)
-          setClasse(convclasse2)
+          
           //Buscar Turmas
-          const respturma = await fetch (URLTURMA);
-          const respturmaJson = await respturma.json();
-          const convturma1 = JSON.stringify(respturmaJson.data)
-          const convturma2 = JSON.parse(convturma1)
-          setTurma(convturma2)
-         // console.log(convturma2)
+          if (idClasse > 0)
+          {
+            const respturma = await fetch (URLTURMA);
+            const respturmaJson = await respturma.json();
+            const convturma1 = JSON.stringify(respturmaJson.data)
+            const convturma2 = JSON.parse(convturma1)
+            setTurma(convturma2)
+          }
           //Buscar Turnos
           const respturno = await fetch (URLTURNO);
           const respturnoJson = await respturno.json();
           const convturno1 = JSON.stringify(respturnoJson.data)
           const convturno2 = JSON.parse(convturno1)
           setTurno(convturno2)
-         // console.log(convturno2)
           
     } 
      respFetchCursos()
-},[idCurso, idClasse])
+},[ano, idClasse])
+
+const handleGrade =  (event) => {
+  const curso = Object.values(dataApiCursos).find(curso => curso.nome === event.target.value);
+  if(curso)
+  {
+    let i = curso.classes.map( classe =>
+      {
+        return classe;
+      })
+      setGrade(i)
+  }
+}
 
   const changeResource=(id)=>{
         setBuscar(id)
@@ -557,28 +569,15 @@ React.useEffect( () => {
             <legend className='bg-blue-600 w-full h-9 pl-2 mr-2 text-white flex items-center'><p>Informações Essenciais</p></legend>
             <div className='flex flex-col space-y-3 mb-5'>
                 <div className='flex flex-col'>
-                    <FormField
-                    control={formConfirmacao.control}
-                    name='cursoId'
-                    render={({field})=>(
-                    <FormItem>
-                        <FormLabel>Cursos*</FormLabel>
-                        <FormControl>
-                        <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))
-                          setIdCurso(parseInt(e.target.value, 10) || 0)
-                        }}>
+                     <FormLabel>Cursos*</FormLabel>
+                      <select className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={handleGrade}>
                       <option >Selecione o curso</option>
                       {
                             dataApiCursos.map((field)=>{
-                                return <option value={`${field.id}`}>{field.nome}</option>
+                            return <option>{field.nome}</option>
                             })
                       }
                   </select>
-                        </FormControl>
-                        <FormMessage className='text-red-500 text-xs'/>
-                    </FormItem>)
-                    }
-                    />
                 </div>
                 <div className='flex flex-col w-full'>
                     <FormField
@@ -588,12 +587,13 @@ React.useEffect( () => {
                     <FormItem>
                         <FormLabel>Classes*</FormLabel>
                         <FormControl>
-                          <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                          <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{
+                            field.onChange(parseInt(e.target.value))
                             setIdClasse(parseInt(e.target.value, 10) || 0)
                           }}>
                         <option >Selecione a classe</option>
                         {
-                              classe.map((field)=>{
+                              grade.map((field)=>{
                                   return <option value={`${field.id}`}>{field.nome}</option>
                               })
                         }

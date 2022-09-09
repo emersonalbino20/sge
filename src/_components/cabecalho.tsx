@@ -3,7 +3,7 @@ import { ArrowDown, ArrowRight, Clock, HomeIcon } from 'lucide-react';
 import IPPUImage from '../assets /_images/IPPU.png'
 import {Link} from 'react-router-dom'
 
-export default function Header(){
+export default function cabecalho(){
     const listMarked = "relative flex flex-flex items-center  cursor-pointer pr-3 pl-3  bg-[#1c64f2] hover:bg-[#2e6fee] p-2 rounded-md font-semibold capitalize text-[20px] hover:underline ";
     const list = "bg-transparent p-2 rounded-md font-medium cursor-pointer hover:bg-[#293a52]";
     const subList = "bg-transparent p-2 rounded-md font-medium cursor-pointer hover:bg-[#424e5f]";

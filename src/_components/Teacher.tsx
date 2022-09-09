@@ -19,18 +19,17 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { AlertCircleIcon, CheckCircleIcon, Check, CombineIcon, EditIcon, PlusIcon, PrinterIcon, SaveIcon, Trash } from 'lucide-react'
-import { InfoIcon } from 'lucide-react'
-import { UserPlus } from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, FolderOpenIcon, SaveIcon} from 'lucide-react'
 import DataTable from 'react-data-table-component'
-import { useForm, useFieldArray } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, disciplinas } from '@/_zodValidations/validations'
+import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, disciplinas, idZod } from '@/_zodValidations/validations'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Select from 'react-select';
 import { MyDialog, MyDialogContent } from './my_dialog'
 import InputMask from 'react-input-mask'
+import { AroundDiv, CombineButton, EditButton, InfoButton, LibraryButton, TrashButton, UserPlusButton } from './MyButton'
 
 const TForm =  z.object({
   nomeCompleto: nomeCompletoZod,
@@ -47,6 +46,13 @@ const TFormUpdate =  z.object({
   email: emailZod,
   disciplinas: disciplinas,
   id: z.number()
+})
+
+const TFormClasse =  z.object({
+  idProfessor: idZod,
+  disciplinaId: idZod,
+  classeId: idZod,
+  turmaId: idZod
 })
 
 /*Vinculo de professor e disciplina*/
@@ -87,12 +93,17 @@ export default function Teacher (){
     resolver: zodResolver(TFormUnConnect)
    })
 
+   const formClasse  = useForm<z.infer<typeof TFormClasse>>({
+    mode: 'all', 
+    resolver: zodResolver(TFormClasse)
+   })
+
    const [updateTable, setUpdateTable] = React.useState(false)
    const[estado, setEstado] = React.useState(false);
    const [showModal, setShowModal] = React.useState(false);
-   const [modalMessage, setModalMessage] = React.useState('');  
-   const handleSubmitCreate = async (data: z.infer<typeof TForm>,e) => {
+   const [modalMessage, setModalMessage] = React.useState('');
 
+   const handleSubmitCreate = async (data: z.infer<typeof TForm>,e) => {
     const dados = {
       nomeCompleto: data.nomeCompleto,
       dataNascimento: data.dataNascimento,
@@ -118,7 +129,6 @@ export default function Teacher (){
           }else{
             setModalMessage(resp.message);
           }
-          console.log(resp)
         })
         .catch((error) => console.log(`error: ${error}`))
         setUpdateTable(!updateTable) 
@@ -197,8 +207,6 @@ export default function Teacher (){
       } 
       respFetch()
    },[])
-
-    
   
   
 const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
@@ -207,7 +215,6 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
     {
       disciplinas: data.disciplinas
     }
-    //console.log(data.disciplinas)
   
     await fetch(`http://localhost:8000/api/professores/${data.idProfessor}/disciplinas`,{
               method: 'POST',
@@ -257,6 +264,114 @@ const handleSubmitUnConnect = async (data: z.infer<typeof TFormUnConnect>,e) => 
              .catch((error) => console.log(`error: ${error}`))
      }
 
+     /*Área q implementa o código pra pesquisar cursos*/
+const [ano, setAno] = React.useState();
+const [turma, setTurma] = React.useState([]);
+const [idClasse, setIdClasse] = React.useState(0);
+const [grade, setGrade] = React.useState([]);
+const [dataApiCursos, setDataApiCursos] = React.useState([]);
+
+const URLCURSO = `http://localhost:8000/api/ano-lectivos/${ano}/
+classes`;
+const URLLECTIVO = "http://localhost:8000/api/ano-lectivos"
+const URLTURMA = `http://localhost:8000/api/classes/${idClasse}/turmas`
+React.useEffect( () => {
+  const respFetchCursos = async () => {
+      //Buscar Ano Lectivos
+      const resplectivo = await fetch (URLLECTIVO);
+      const resplectivoJson = await resplectivo.json();
+      const convlectivo1 = JSON.stringify(resplectivoJson.data)
+      const convlectivo2 = JSON.parse(convlectivo1)
+      var meuarray = convlectivo2.filter((c)=>{
+        return c.activo === true
+      })
+      setAno(meuarray[parseInt(String(Object.keys(meuarray)))].id);
+
+      const resp = await fetch (URLCURSO);
+      const respJson = await resp.json();
+      const conv1 = JSON.stringify(respJson.data);
+      const conv2 = JSON.parse(conv1);
+      let nArray = Object.values(conv2.cursos)
+      setDataApiCursos(nArray);
+      
+      //Buscar Turmas
+      if (idClasse > 0)
+      {
+        const respturma = await fetch (URLTURMA);
+        const respturmaJson = await respturma.json();
+        const convturma1 = JSON.stringify(respturmaJson.data)
+        const convturma2 = JSON.parse(convturma1)
+        setTurma(convturma2)
+        }
+    } 
+     respFetchCursos()
+},[ano, idClasse])
+
+const handleGrade =  (event) => {
+  const curso = Object.values(dataApiCursos).find(curso => curso.nome === event.target.value);
+  if(curso)
+  {
+    let i = curso.classes.map( classe =>
+      {
+        return classe;
+      })
+      setGrade(i)
+  }
+}
+    const [disciplinaProf, setDisciplinaProf] = React.useState([]);
+    const [classeProf, setClasseProf] = React.useState([]);
+    const URLDISCPROF = `http://localhost:8000/api/professores/${formClasse.getValues('idProfessor')}/disciplinas`;
+    const URLCLASSPROF = `http://localhost:8000/api/professores/${formClasse.getValues('idProfessor')}/classes`;
+
+    React.useEffect( () => {
+      const respFetch = async () =>{
+          const resp = await fetch (URLDISCPROF);
+          const respJson = await resp.json();
+          const conv = JSON.stringify(respJson.data)
+          const conv2 = JSON.parse(conv)
+          setDisciplinaProf(conv2);
+
+          const  respI = await fetch (URLCLASSPROF);
+          const respJsonI = await respI.json();
+          const convI = JSON.stringify(respJsonI.data);
+          const conv2I = JSON.parse(convI);
+          setClasseProf(conv2I);
+          conv2I.forEach(element => {
+            console.log("Curso: "+element.curso.nome+"\nClasse: "+element.nome)
+          });
+          //console.log(conv2I);
+        }
+          respFetch();
+    }, [formClasse.getValues('idProfessor')])
+     const handleSubmitClasse = async (data: z.infer<typeof TFormClasse>,e) => {
+
+      const classes = {
+        disciplinaId: data.disciplinaId,
+        classeId: data.classeId,
+        turmaId: data.turmaId
+      };
+    
+      await fetch(`http://localhost:8000/api/professores/${data.idProfessor}/classes`,{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(classes)
+            })
+            .then((resp => resp.json()))
+            .then((resp) =>{ 
+              setShowModal(true);  
+              if (resp.message != null) {
+                setModalMessage("Disciplina: "+resp.errors.disciplinaId[0]);
+                console.log(resp.errors.disciplinaId[0])
+              }else{
+                setModalMessage(resp.message);
+              }
+              
+            })
+            .catch((error) => console.log(`error: ${error}`))
+        }
+
       //Vincular um professor a multiplas disciplinas
       const[selectedValues, setSelectedValues] = React.useState([]);
       const[selectedLabels, setSelectedLabels] = React.useState([]);
@@ -290,6 +405,7 @@ const handleSubmitUnConnect = async (data: z.infer<typeof TFormUnConnect>,e) => 
             name: 'Ação',
             cell: (row) => (<div className='flex flex-row space-x-2'  onClick={()=>{
               changeResource(row.id)
+              formClasse.setValue('idProfessor', row.id)
               if(estado){
               formUpdate.setValue('nomeCompleto', nome)
               formUpdate.setValue('dataNascimento', nasc)
@@ -301,11 +417,9 @@ const handleSubmitUnConnect = async (data: z.infer<typeof TFormUnConnect>,e) => 
             }}>
          <Dialog >
       <DialogTrigger asChild >
-    <div title='actualizar' className='relative flex justify-center items-center' >
-    <EditIcon className='w-5 h-4 absolute text-white'/> 
-      <Button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm border-blue-600' ></Button>
+      <div title='actualizar' className={AroundDiv} >
+        <EditButton/>
       </div>
-      
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
@@ -418,18 +532,17 @@ const handleSubmitUnConnect = async (data: z.infer<typeof TFormUnConnect>,e) => 
         )}/>
         </div>
       </div>
-      <DialogFooter><Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+      <DialogFooter>
+        <Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
   </Dialog>
-    
             <Dialog >
           <DialogTrigger asChild >
-          <div title='vincular' className='relative flex justify-center items-center'>
-          <CombineIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-            <Button className='h-7 px-5 bg-yellow-600 text-white font-semibold hover:bg-yellow-600 rounded-sm border-yellow-600'></Button>
-            </div>
+          <div title='vincular' className={AroundDiv}>
+          <CombineButton/>
+          </div>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
                 <DialogHeader>
@@ -482,10 +595,9 @@ const handleSubmitUnConnect = async (data: z.infer<typeof TFormUnConnect>,e) => 
   </Dialog>
             <Dialog >
           <DialogTrigger asChild >
-          <div title='desvincular' className='relative flex justify-center items-center'>
-          <Trash className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-            <Button className='h-7 px-5 bg-red-600 text-white font-semibold hover:bg-red-600 rounded-sm border-red-600'></Button>
-            </div>
+          <div title='desvincular' className={AroundDiv}>
+              <TrashButton/>
+          </div>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
                 <DialogHeader>
@@ -536,37 +648,85 @@ const handleSubmitUnConnect = async (data: z.infer<typeof TFormUnConnect>,e) => 
       </form></Form>
     </DialogContent>
   </Dialog>
-  <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>
-           
-            <Popover >
-      <PopoverTrigger asChild className='bg-white'>
+  <div  className='relative flex justify-center items-center cursor-pointer'>
+  <Dialog >
+    <DialogTrigger asChild>
+    <div title='ver dados' className={AroundDiv}>
+        <InfoButton/>
+    </div>
+      
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[425px] bg-white">
+      <DialogHeader>
+        <DialogTitle>Informações sobre {row.nomeCompleto}</DialogTitle>
+        <DialogDescription >
+        As informações relevantes do professor, são listadas aqui!
+        </DialogDescription>
+      </DialogHeader>
+     
+      <div className="grid gap-4 py-4 bg-white">
+        <div className="flex flex-col w-full"><fieldset>
+            <legend className='font-robotoSlab text-sm'>Dados Pessoal</legend>
+            <div className='w-full flex flex-col space-y-3'>
+            <div className="w-full flex flex-row justify-between px-2">
+            <div>
+                <Label className='font-poppins'>Nome Completo</Label>
+                <p className='font-thin text-sm'>{row.nomeCompleto}</p>
+            </div>
+            <div>
+                 <Label className='font-poppins'>Data de Nasc. </Label>		
+                  <p className='font-thin text-sm'>{row.dataNascimento}</p>
+            </div>
+            </div>
+            <fieldset>
+            <legend className='font-robotoSlab text-sm'>Contacto</legend>
+            <div className="w-full flex flex-col justify-between px-2">
+            <div>
+                <Label className='font-poppins'>Telefone</Label>	
+                <p className='font-thin text-sm'>{telefone}</p>
+            </div>
+            <div>
+              {email &&
+               (<> <Label className='font-poppins'>E-mail</Label>
+                <p className='font-thin text-sm text-wrap'>{email}</p></>)
+              }
+            </div>
+            </div>
+            </fieldset>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend className='font-robotoSlab text-sm'>Disciplinas Curricular</legend>
+            <div className="w-full flex flex-col justify-between px-2">
+            <div>
+                <p className='font-thin text-sm'>{disciplinaProf.map((value)=>{return (
+                <ol type='A'><li>{value.nome}</li></ol>)})}</p>
+            </div>
+            </div>
+            </fieldset>
+            <fieldset>
+          <legend className='font-robotoSlab text-sm'>Classes Ministradas</legend>
+          <div className="w-full flex flex-col justify-between px-2">
+          <div>
+                {classeProf.map((e)=>{
+                  return (<>
+                  <Label className='font-poppins'>Curso: {e.curso.nome}, {"("+e.nome+" classe);"}
+                  </Label>
+                  <br/>
+                  </>
+                  )
+                })}
+          </div>
+          </div>
+          </fieldset>
+        </div>
+      </div>
+      <DialogFooter>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 
-      <div className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
-        <Button className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
-        </div>
-      </PopoverTrigger >
-      <PopoverContent className="w-80 bg-white">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-medium leading-none">Dados Pessoal</h4>
-            <p className="text-sm text-muted-foreground">
-              Inspecione os dados do professor
-            </p>
-          </div>
-          <div className="flex flex-col space-y-2">
-            <div className="w-full flex space-x-2">
-              <Label htmlFor="height">Telf:</Label>
-              <p className='text-sm lowercase'>{telefone}</p>
-            </div>
-            <div className="w-full flex space-x-2">
-              <Label htmlFor="height">Email:</Label>
-              <p className='text-sm lowercase'>{email}</p>
-            </div>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
-            </div>
+           </div>
             
             </div>),
         }, 
@@ -643,18 +803,147 @@ const handleSubmitUnConnect = async (data: z.infer<typeof TFormUnConnect>,e) => 
     subHeader
    subHeaderComponent={ 
        <div className='flex flex-row space-x-2'><input className=' rounded-sm border-2 border-gray-400 placeholder:text-gray-400 placeholder:font-bold outline-none py-1 indent-2' type='text' placeholder='Pesquisar aqui...' onChange={handleFilter}/>
-       
-       <div className='relative flex justify-center items-center'>
-           <PrinterIcon className='w-5 h-4 absolute text-white font-extrabold'/>
-           <button className='py-4 px-5 bg-green-700 border-green-700 rounded-sm ' onClick={() => window.print()}></button>
-       </div>
+      <Dialog >
+    <DialogTrigger asChild >
+    <div title='Add classes' className={AroundDiv} >
+        <LibraryButton/>
+    </div>
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[685px] overflow-y-scroll h-[640px] bg-white">
+      <DialogHeader>
+        <DialogTitle>Inserir na Classe</DialogTitle>
+        <DialogDescription>
+        <p>Adiciona as classes que um professor lecionará no ano acádemico corrente.
+        </p>
+        </DialogDescription>
+      </DialogHeader>
      
+      <Form {...formClasse} >
+     <form onSubmit={formClasse.handleSubmit(handleSubmitClasse)} >
+     <fieldset>
+            <legend className='bg-blue-600 w-full h-9 pl-2 mr-2 text-white flex items-center'><p>Informações Essenciais</p></legend>
+            <div className='flex flex-col space-y-3 mb-5'>
+                <div className='flex flex-col'>
+                <FormLabel>Cursos*</FormLabel>
+                    <select className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={handleGrade}>
+                      <option >Selecione o curso</option>
+                      {
+                            dataApiCursos.map((field)=>{
+                                return <option >{field.nome}</option>
+                            })
+                      }
+                  </select>
+                      
+                </div>
+                <div className='flex flex-col w-full'>
+                    <FormField
+                    control={formClasse.control}
+                    name='classeId'
+                    render={({field})=>(
+                    <FormItem>
+                        <FormLabel>Classes*</FormLabel>
+                        <FormControl>
+                          <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                            setIdClasse(parseInt(e.target.value, 10) || 0)
+                          }}>
+                        <option >Selecione a classe</option>
+                        {
+                              grade.map((field)=>{
+                                  return <option value={`${field.id}`}>{field.nome}</option>
+                              })
+                        }
+                    </select>
+                        </FormControl>
+                        <FormMessage className='text-red-500 text-xs'/>
+                    </FormItem>)
+                    }
+                    />
+                    </div>
+                    <div className='flex flex-col w-full'>
+                    <FormField
+                    control={formClasse.control}
+                    name='turmaId'
+                    render={({field})=>(
+                    <FormItem>
+                        <FormLabel>Turmas*</FormLabel>
+                        <FormControl>
+                        <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                        <option >Selecione a turma</option>
+                        {
+                              turma.map((field)=>{
+                                  return <option value={`${field.id}`}>{field.nome}</option>
+                              })
+                        }
+                    </select>
+                        </FormControl>
+                        <FormMessage className='text-red-500 text-xs'/>
+                    </FormItem>)
+                    }
+                    />
+                    </div>
+                    <div className='w-full'>
+              <Label htmlFor="id" className="text-right">
+                ID do Professor
+              </Label>
+            
+                <FormField
+              control={formClasse.control}
+              name="idProfessor"
+              render={({field})=>(
+                <FormControl>
+                <FormItem>
+              <Input id="id" type='number' {...field} className="w-full" min={0} onChange={(e)=>{
+                formClasse.setValue('idProfessor', parseInt(e.target.value))
+                field.onChange(parseInt( e.target.value))}}/>
+              <FormMessage className='text-red-500 text-xs'/>
+              </FormItem>
+              </FormControl>
+            )}/>
+            </div>
+                    <div className="w-full">
+                    <FormField
+              control={formClasse.control}
+              name="disciplinaId"
+              render={({field})=>(
+              <FormItem>
+                <Label htmlFor="disciplina" className="text-right">
+                Disciplinas Curricular
+              </Label>
+                  <FormControl>
+                  <FormControl>
+                        <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                        <option >Selecione a disciplina</option>
+                        {
+                              disciplinaProf.map((field)=>{
+                                  return <option value={`${field.id}`}>{field.nome}</option>
+                              })
+                        }
+                    </select>
+                        </FormControl>
+                  </FormControl>
+                <FormMessage className='text-red-500 text-xs'/>
+              </FormItem>)
+              }
+              />
+              </div>
+              
+                </div>
+                </fieldset>
+      
+      <DialogFooter>
+        <Button className='bg-blue-600 border-blue-600 text-white hover:bg-blue-600 font-semibold w-12' type='submit' 
+          ><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+      </DialogFooter>
+      </form>
+      </Form>
+    </DialogContent>
+  </Dialog>
+
        <Dialog >
     <DialogTrigger asChild>
-    <div title='cadastrar' className='relative flex justify-center items-center'>
-    <UserPlus className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
-      </div>
+    <div title='cadastrar' className={AroundDiv}>
+      <UserPlusButton/>
+    </div>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
@@ -799,7 +1088,6 @@ const handleSubmitUnConnect = async (data: z.infer<typeof TFormUnConnect>,e) => 
       </div>
       <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
       <CheckCircleIcon className='w-28 h-20 text-green-400'/>
-      
       <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
       <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
         <Button className='bg-green-400 hover:bg-green-500

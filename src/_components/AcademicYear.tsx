@@ -97,6 +97,7 @@ React.useEffect(()=>{
         setTermino(receve.termino)
         setActivo(receve.activo)
         setEstado(true);
+        console.log(receve)
     }
     search()
 },[buscar])

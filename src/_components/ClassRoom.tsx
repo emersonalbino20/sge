@@ -268,7 +268,7 @@ const changeResource = (id)=>{
           </div>
           <div className="grid gap-2">
             <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="maxWidth">Cacidade</Label>
+              <Label htmlFor="maxWidth">Capacidade</Label>
               <p>{capacidade}</p>
             </div>
             <div className="grid grid-cols-3 items-center gap-4">

@@ -6,7 +6,7 @@ import StudentInsertPage from './_pages/StudentInsertPage';
 import Fetch from './Fetch';
 import StudentListPage from './_pages/StudentListPage';
 import AppRoutes from './_routes/AppRoutes';
-import Teacher from './_components/Teacher';
+import Table from './_components/table';
 
 
 function App(){

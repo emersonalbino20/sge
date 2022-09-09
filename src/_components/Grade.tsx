@@ -76,7 +76,7 @@ await fetch(`http://localhost:8000/api/classes/`,{
   .then((resp => resp.json()))
   .then((resp) =>{ 
           setShowModal(true);  
-          if (resp.message != null) {
+          if (resp.message != null && resp.statusCode != 400) {
             setModalMessage(resp.message);  
           }else{
             setModalMessage(resp.message);
@@ -123,18 +123,15 @@ const URLCURSO = `http://localhost:8000/api/cursos/`
 
 React.useEffect(()=>{
     const search = async () => {
-        const resp = await fetch(`http://localhost:8000/api/ano-lectivos/`);//Pelo facto de nao colocar a bara no final todos estados sao retornados como false "STRANGE"
+        const resp = await fetch(`http://localhost:8000/api/ano-lectivos/`);
         const receve = await resp.json()
         const convlectivo1 = JSON.stringify(receve.data)
         const convlectivo2 = JSON.parse(convlectivo1)
-        
-        
         var meuarray = convlectivo2.filter((c)=>{
           return c.activo === true
         })
-        
         setIdAno(meuarray[parseInt(String(Object.keys(meuarray)))].id)
-        console.log(idAno)
+        
         const respC = await fetch(URLCURSO);
         const receveC = await respC.json()
         const convC = JSON.stringify(receveC.data)
@@ -277,6 +274,7 @@ const changeResource = (id)=>{
    
 
     const tableStyle = {
+     
         headCells: {
             style: {
                 backgroundColor: '#e8e9eb',
@@ -305,7 +303,6 @@ const changeResource = (id)=>{
         ];
 
         const handleFilter =  (event) => {
-          
             const curso = Object.values(dataApi).find(curso => curso.nome === event.target.value);
             if(curso)
             {
