@@ -64,9 +64,15 @@
 .dropdownServicos{
   display: none;
 }
+.dropdownAlunos{
+  display: none;
+}
 .menuPerfil:hover > .dropdownPerfil {
   display: flex;
 }
 .menuServicos:hover > .dropdownServicos {
+  display: flex;
+}
+.menuAlunos:hover > .dropdownAlunos {
   display: flex;
 }

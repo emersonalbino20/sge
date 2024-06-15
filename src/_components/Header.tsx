@@ -8,22 +8,27 @@ import {ArrowDownCircleIcon as Arrow} from '@heroicons/react/24/solid'
 import {UserCircleIcon as UserCircle} from '@heroicons/react/24/solid'
 import { useNavigate } from 'react-router-dom'
 import globalStyle from "../_pages/Style"
+import { useDispatch, useSelector } from "react-redux"
+import { logout, selectUserName } from "@/_redux/User/slice"
 
 
 
 
 export default function Header(){
+    const dispatch = useDispatch()
     const navigate = useNavigate()
     const sair = () =>{
+            dispatch(logout())
             navigate('/')
     }
     const tempo = new Date()
+    const select = useSelector(selectUserName)
     
     return(
         <>
             <div className="flex flex-row items-end justify-end space-x-3 pr-3 pt-2 bg-white p-8 font-medium">
                 <p className='flex flex-row space-x-3'>
-                    <span>Seja Bem - Vindo Sr. Secretário</span> &nbsp;&nbsp; | 
+                    <span>Seja Bem - Vindo Sr. {select}</span> &nbsp;&nbsp; | 
                     <span>Hora: {tempo.getHours()}h : {tempo.getMinutes()}m</span>
                 </p>
                <button className="buttonRed" onClick={sair}>Sair</button>
@@ -54,13 +59,22 @@ export default function Header(){
                             Pagamentos
                         </span>
                     </li>
-                    <li className='flex flex-col items-center justify-center pb-2'>
+                    <li className='menuAlunos flex flex-col items-center justify-center pb-2'>
                         <span>   
                              <Alunos className='h-6 w-6'/>
                         </span>
                         <span>
                             Alunos
                         </span>
+                        <ul className="dropdownAlunos absolute top-20  flex-col bg-gray-700">
+                            <li className=" px-4 py-2 hover:bg-slate-400">
+                                <a href="#" >Matricular</a>
+                            </li>
+                            <li className="px-4 py-2 hover:bg-slate-400"><a href="#" >Confirmar</a></li>
+
+                            <li className="px-4 py-2 hover:bg-slate-400"><a href="#" >Nível de Aproveitamento</a></li>
+
+                        </ul>
                     </li>
                     <li className='menuServicos flex flex-col items-center justify-center  pb-2'>
                         <span>   

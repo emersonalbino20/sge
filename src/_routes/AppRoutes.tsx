@@ -1,6 +1,8 @@
 import * as React from "react"
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
+import { selectUserState } from "@/_redux/User/slice";
+import { useSelector } from "react-redux";
 
 const LoginPage = lazy(()=>import('../_pages/Index'))
 const RegisterPage = lazy(()=>import('../_pages/RegisterPage'))
@@ -9,6 +11,7 @@ const StudentPage = lazy(()=>import('../_pages/StudentPage'))
 
 
 export default function AppRoutes(){
+    
     return(
         <BrowserRouter>
         <Suspense fallback={<div className="text-black">Carregando...</div>}>

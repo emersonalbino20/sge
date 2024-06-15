@@ -3,22 +3,24 @@ import { createSlice } from "@reduxjs/toolkit";
 
 
 export const slice = createSlice({
-    name: 'visivel',
+    name: 'user',
     initialState : {
-        currentUser: false, student: ''
+        name : '',
+        isLogged : false
     },
     reducers: {
-        logged: (state, {payload}) => {
-            return {...state, currentUser: true, student: payload}
+        changeUser(state, {payload}){
+            return {...state, isLogged: true, name: payload}
         },
-        logout: (state) => {
-            return {...state, currentUser: false}
+        logout(state){
+            return {...state, isLogged: false, name: ''}
         }
         }
 
     }
 )
 
-export const {logged, logout} = slice.actions
-export  const selector = state => state.visivel
+export const {changeUser, logout} = slice.actions
+export  const selectUserName = state => state.user.name
+export  const selectUserState = state => state.user.isLogged
 export default slice.reducer

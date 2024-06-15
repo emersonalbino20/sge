@@ -8,6 +8,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import {z} from 'zod';
 import { useForm } from "react-hook-form"
 import { zodResolver} from '@hookform/resolvers/zod'
+import { useDispatch } from "react-redux"
+import { changeUser } from "@/_redux/User/slice"
 
 
 const usernameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/
@@ -28,9 +30,12 @@ export default function LoginPage(){
         resolver: zodResolver(schema)
        })
 
+    const dispatch = useDispatch()
     const navigate = useNavigate()
     const handleForm = (data: FormProps) => {
+        dispatch(changeUser(data.nome))
         navigate('/HomePage')
+        
     }
     
     return (
