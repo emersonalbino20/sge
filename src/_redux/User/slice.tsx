@@ -8,14 +8,17 @@ export const slice = createSlice({
         currentUser: false, student: ''
     },
     reducers: {
-        modify: (state, {payload}) => {
+        logged: (state, {payload}) => {
             return {...state, currentUser: true, student: payload}
+        },
+        logout: (state) => {
+            return {...state, currentUser: false}
         }
         }
 
     }
 )
 
-export const {modify} = slice.actions
+export const {logged, logout} = slice.actions
 export  const selector = state => state.visivel
 export default slice.reducer

@@ -11,19 +11,22 @@ import { zodResolver} from '@hookform/resolvers/zod'
 
 
 const usernameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/
-const capitalizeWords = (str) => str.replace(/\b\w/g, (char) => char.toUpperCase());
 
 const schema = z.object({
-    nome: z.string().nonempty("Nome de usuário é obrigatório").regex(usernameRegex,'O campo só pode conter letrar e espaços').min(8,'O nome do usuário deve conter pelo menos 8 letras').transform(capitalizeWords),
-    senha: z.coerce.string().nonempty("Senha de usuário é obrigatória").min(8,'A senha precisa conter pelo menos 8 letras'),
+    nome: z.string().nonempty("Campo obrigatório").min(4, {message:'O campo não pode conter menos de 4 letras'}).regex(usernameRegex, {message:'O campo só pode conter letras'}),
+    
+    senha: z.coerce.string().nonempty("Campo obrigatória").min(8,'O campo não pode conter menos de 8 letras'),
 })
 //Criando tipagem com TypeScript
 type FormProps =  z.infer<typeof schema>;
 
 export default function LoginPage(){
 
-    const {register, handleSubmit, formState: {errors} = useForm<FormProps>} = useForm({mode: 'all', 
-    resolver: zodResolver(schema)})
+    const {register, handleSubmit,
+        formState: {errors} } = useForm<FormProps>({
+        mode: 'all', 
+        resolver: zodResolver(schema)
+       })
 
     const navigate = useNavigate()
     const handleForm = (data: FormProps) => {

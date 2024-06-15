@@ -16,3 +16,8 @@
 .buttonGreen:active{
     @apply ring-2 ring-greenRing
 }
+
+/*Estilo dos inputs pra formulários de cadastro, input[text, number, email, date]*/
+.input-form-text{
+    @apply py-6 w-full rounded-form outline border-2 border-form bg-input shadow-none mb-6 pl-10
+}

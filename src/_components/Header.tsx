@@ -7,7 +7,7 @@ import {FolderOpenIcon as Servicos} from '@heroicons/react/24/solid'
 import {ArrowDownCircleIcon as Arrow} from '@heroicons/react/24/solid'
 import {UserCircleIcon as UserCircle} from '@heroicons/react/24/solid'
 import { useNavigate } from 'react-router-dom'
-import NavigationBar from "./NavigationBar"
+import globalStyle from "../_pages/Style"
 
 
 
@@ -18,6 +18,7 @@ export default function Header(){
             navigate('/')
     }
     const tempo = new Date()
+    
     return(
         <>
             <div className="flex flex-row items-end justify-end space-x-3 pr-3 pt-2 bg-white p-8 font-medium">

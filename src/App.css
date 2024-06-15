@@ -57,6 +57,16 @@
 .read-the-docs {
   color: #888;
 }
-.dropdownServicos, .dropdownPerfil {
+/*Este código afecta o menu do componente Header.tsx*/
+.dropdownPerfil{
   display: none;
+}
+.dropdownServicos{
+  display: none;
+}
+.menuPerfil:hover > .dropdownPerfil {
+  display: flex;
+}
+.menuServicos:hover > .dropdownServicos {
+  display: flex;
 }

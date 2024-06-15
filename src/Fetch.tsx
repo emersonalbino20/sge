@@ -5,15 +5,18 @@ export default function Fetch(){
 
     const [data, setData] = useState([]);
     useEffect (()=>{
-    
-     fetch('./src/fake-api.json')
-    .then(response => response.json())
-    .then(data => setData(data))
-    .catch(error => console.log(`error:${error}`))
+        async function fetching (){
+            const response = await fetch('./src/fake-api.json');
+            const result = await response.json()
+            setData(result)
+            console.log(result)
+        }
+        fetching()
+     
     },[])
     
     
     
-    return  <> {data ? <pre> {JSON.stringify(data[0], null, 2)}</pre> : 'Carregando...'}</>
+    return  <div> {data && data.map((d)=>{return <pre> {d.name} </pre>}) } <button>Render</button></div>
     
 }
