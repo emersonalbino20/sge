@@ -1,0 +1,18 @@
+.buttonRed{
+    @apply bg-red-500 border-red-600 text-white
+}
+.buttonRed:hover{
+    @apply bg-red-500
+}
+.buttonRed:active{
+    @apply ring-2 ring-red-400
+}
+.buttonGreen{
+    @apply bg-greenColor border-greenColor text-white
+}
+.buttonGreen:hover{
+    @apply bg-greenColor
+}
+.buttonGreen:active{
+    @apply ring-2 ring-greenRing
+}

@@ -1,0 +1,20 @@
+div{
+    
+}
+
+p{
+}
+button{
+    @apply border border-blue-600 text-blue-500 rounded-lg w-24 h-7
+}
+button:hover{
+    @apply bg-blue-500 text-white
+}
+button:active{
+    @apply ring-2 ring-blue-400
+}
+input{
+    @apply border border-gray-300 h-7 w-64 rounded-md outline-none pl-4 mt-2 mb-2 shadow-lg
+}
+a{
+}
