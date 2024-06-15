@@ -98,7 +98,8 @@ module.exports = {
       textColor: {
         'blueColorLoginParagraf':'#008ae1',
         'blueColorLoginTitle':'#1e293b',
-        'icone':'#3c4852'
+        'icone':'#3c4852',
+        'input':'#3c4852'
       },
       backgroundColor:{
         'greenColor':'#617749',

@@ -21,7 +21,7 @@ export function Input(props){
 
 export function Button(){
     return (
-        <button className='border-none bg-green-500 text-white rounded-lg w-28 h-10'>Enviar</button>
+        <button className='border-none bg-green-500 text-white rounded-lg w-28 h-10 m-6'>Enviar</button>
     );
 }
 

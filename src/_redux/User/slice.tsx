@@ -17,5 +17,5 @@ export const slice = createSlice({
 )
 
 export const {modify} = slice.actions
-export const selector = state => state.student
+export  const selector = state => state.visivel
 export default slice.reducer
