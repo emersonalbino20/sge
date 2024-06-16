@@ -1,5 +1,4 @@
 import { configureStore } from '@reduxjs/toolkit'
-import logger from 'redux-logger'
 import rootReducer from './root-reducer'
 
 const store = configureStore({

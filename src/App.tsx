@@ -12,7 +12,7 @@ import rootReducer from './_redux/root-reducer';
 
 
 function App(){
-  return <><Student/></>;
+  return <><AppRoutes/></>;
 }
 
 export default App

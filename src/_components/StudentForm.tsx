@@ -4,26 +4,13 @@ import imagemLogin from '../assets/_images/fundo-estudante.jpg'
 import { PhoneIcon } from '@heroicons/react/24/outline'
 import { AtSymbolIcon } from '@heroicons/react/24/outline'
 import { MapPinIcon as LocalIcon } from '@heroicons/react/24/outline'
-import {Input, Button, Icon} from './StudentStyle'
+import {Input, Button, Icon, schema} from './StudentStyle'
 import {z} from 'zod'
 import {useForm} from 'react-hook-form'
 import { zodResolver } from "@hookform/resolvers/zod"
 
 
-const usernameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/
-const capitalizeWords = (str) => str.replace(/\b\w/g, (char) => char.toUpperCase());
 
-const phoneNumberSchema = z.string().regex(/^\d+$/, {message: 'O número de telefone deve conter apenas dígitos'}).transform((val)=>{
-    const onlydigits = val.replace(/\D/g,'');
-    const formatterNumber = onlydigits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-    return formatterNumber
-})
-const schema = z.object({
-    firstName: z.string().nonempty('Primeiro nome do aluno é obrigatório').min(4,'O nome não pode conter menos de 4 letras').regex(usernameRegex, 'O campo só pode conter letras').transform(capitalizeWords),
-    lastName: z.string().nonempty('Primeiro nome do aluno é obrigatório').min(4,'O nome não pode conter menos de 4 letras').regex(usernameRegex, 'O campo só pode conter letras').transform(capitalizeWords),
-    address: z.string().min(8, 'O campo não pode conter menos de 8 caracteres'),
-    phonee: phoneNumberSchema
-})
 
 //Criando tipagem com TypeScript
 type FormProps =  z.infer<typeof schema>;
