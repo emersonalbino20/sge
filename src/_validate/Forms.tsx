@@ -21,7 +21,7 @@ export const schema = z.object({
     address: z.string().min(8, 'O campo não pode conter menos de 8 caracteres'),
     phone: phoneNumberSchema,
     email: z.string().nonempty('campo opcional').optional(),
-    senha: z.coerce.string().nonempty("Campo obrigatória").min(8,'O campo não pode conter menos de 8 letras'),
+   
     
 })
 
