@@ -1,22 +1,22 @@
 import { Button } from "./components/ui/button";
 import * as React from "react"
 import {useEffect, useState } from "react";
+import axios from 'axios'
 export default function Fetch(){
 
-    const [data, setData] = useState([]);
-    useEffect (()=>{
-        async function fetching (){
-            const response = await fetch('./src/fake-api.json');
-            const result = await response.json()
-            setData(result)
-            console.log(result)
-        }
-        fetching()
-     
-    },[])
+   useEffect( ()=>{
+    
+    axios.get(
+        'http://localhost:8000/api/alunos?page_size=2'
+    )
+    .then((response) => {
+  
+        console.log(response.data)})
+    .catch(error => {console.log('erro na requisição',error)})
+},[])
     
     
     
-    return  <div> {data && data.map((d)=>{return <pre> {d.name} </pre>}) } <button>Render</button></div>
+    return <><button>Render</button></>
     
 }

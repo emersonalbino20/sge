@@ -3,8 +3,8 @@ module.exports = {
   darkMode: ["class"],
   content: [
     './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,ts}',
-    './app/**/*.{ts,tsx}',
+    './components/**/*.{ts,ts, js}',
+    './app/**/*.{ts,tsx,js}',
     './src/**/*.{astro, html, js, jsx, md, mdx, svelte, ts,tsx, vue}',
   ],
   prefix: "",
@@ -99,26 +99,31 @@ module.exports = {
         'blueColorLoginParagraf':'#008ae1',
         'blueColorLoginTitle':'#1e293b',
         'icone':'#3c4852',
-        'input':'#3c4852'
+        'input':'#3c4852',
+        'thead':'#6e7786',
+        'label':'#5d6066',
       },
       backgroundColor:{
         'greenColor':'#617749',
         'cinzaColor':'#282a36',
         'homeBackground':'#e2eff2',
         'form':'#15202b',
-        'input':'#192734'
+        'input':'#192734',
+        'thead':'#384152',
+        'fieldSet':'#f0f2f5',
       },
       borderColor:{
         'greenColor':'#43650b',
         'greenAcesaColor':'#04a96d',
-        'form':'#3c4852'
+        'form':'#b0b1b2'
       },
       ringColor:{
         'greenRing':'#617749'
       },
       borderRadius:{
-        'form':'6px'
+        'form':'6px',
       },
+      
     },
   },
   plugins: [require("tailwindcss-animate")],

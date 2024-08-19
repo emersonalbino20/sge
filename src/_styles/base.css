@@ -1,20 +1,12 @@
-div{
-    
-}
-
-p{
+input{
+    @apply border-gray-500 bg-white
 }
 button{
-    @apply border border-blue-600 text-blue-500 rounded-lg w-24 h-7
+    @apply py-1 px-2 rounded-lg bg-transparent  border border-blue-500 text-blue-500
 }
-button:hover{
-    @apply bg-blue-500 text-white
+fieldset{
+    @apply mb-4 border p-2 rounded-md border-gray-300 bg-fieldSet
 }
-button:active{
-    @apply ring-2 ring-blue-400
-}
-input{
-    @apply border border-gray-300 h-7 w-64 rounded-md outline-none pl-4 mt-2 mb-2 shadow-lg
-}
-a{
+FormLabel{
+    @apply text-label font-playfair font-semibold
 }

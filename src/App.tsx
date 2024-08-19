@@ -1,18 +1,15 @@
 import './App.css'
 import * as React from "react"
-import { useContext } from "react";
-import Student from './_components/StudentForm'
-import AppRoutes from './_routes/AppRoutes'
+import HomePage from './_pages/HomePage';
+import Form from './_components/FormStudent';
+import StudentInsertPage from './_pages/StudentInsertPage';
 import Fetch from './Fetch';
-import { useSelector, useDispatch } from 'react-redux';
-import rootReducer from './_redux/root-reducer';
-
-
-
+import ListStudent from './_components/ListStudent';
+import {BasicTable} from './_components/BasicTable'
 
 
 function App(){
-  return <><AppRoutes/></>;
+  return <><ListStudent/></>;
 }
 
 export default App

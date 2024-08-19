@@ -1,114 +1,59 @@
-import * as React from "react"
-import {MagnifyingGlassIcon as Lupa} from '@heroicons/react/24/solid'
-import {HomeIcon as Home} from '@heroicons/react/24/solid'
-import {CurrencyDollarIcon as Euro} from '@heroicons/react/24/solid'
-import {UsersIcon as Alunos} from '@heroicons/react/24/solid'
-import {FolderOpenIcon as Servicos} from '@heroicons/react/24/solid'
-import {ArrowDownCircleIcon as Arrow} from '@heroicons/react/24/solid'
-import {UserCircleIcon as UserCircle} from '@heroicons/react/24/solid'
-import { useNavigate } from 'react-router-dom'
-import globalStyle from "../_pages/Style"
-import { useDispatch, useSelector } from "react-redux"
-import { logout, selectUserName } from "@/_redux/User/slice"
-
-
-
-
+import * as React from 'react'
+import { useState, useEffect } from 'react';
+import { setTimeout } from 'timers/promises';
 export default function Header(){
-    const dispatch = useDispatch()
-    const navigate = useNavigate()
-    const sair = () =>{
-            dispatch(logout())
-            navigate('/')
-    }
-    const tempo = new Date()
-    const select = useSelector(selectUserName)
+    const lista = ['Home', 'Estudante', 'Pagamento','Professores','Curso','Classe','Relatórios Financeiro'];
+    const [visivel, setVisivel] = useState(false)
+    const newDate = new Date();
+    const [hour, setHour] = useState(0);
+    const [minute, setMinute] = useState(0);
+
+    const handleVisivel = () => {setVisivel(!visivel)}
+
     
-    return(
-        <>
-            <div className="flex flex-row items-end justify-end space-x-3 pr-3 pt-2 bg-white p-8 font-medium">
-                <p className='flex flex-row space-x-3'>
-                    <span>Seja Bem - Vindo Sr. {select}</span> &nbsp;&nbsp; | 
-                    <span>Hora: {tempo.getHours()}h : {tempo.getMinutes()}m</span>
-                </p>
-               <button className="buttonRed" onClick={sair}>Sair</button>
-            </div>
-            <div className="top-0 sticky flex items-end justify-end pt-5  pr-12 shadow-2xl bg-cinzaColor">
-                <ul className="flex flex-row space-x-8  cursor-pointer text-white items-baseline font-merriweather text-md group">
-                    <li className='flex flex-col items-center justify-center h-4'>
-                        <span>   
-                             <Lupa className='h-6 w-6'/>
-                        </span>
-                        <span>
-                            Pesquisar
-                        </span>
-                    </li>
-                    <li className='flex flex-col items-center justify-center pr-3 pl-3 border-b-4 border-greenAcesaColor pb-2'>
-                        <span>   
-                             <Home className='h-6 w-6'/>
-                        </span>
-                        <span>
-                            Home
-                        </span>
-                    </li>
-                    <li className='flex flex-col items-center justify-center h-4 pb-2'>
-                        <span>   
-                             <Euro className='h-6 w-6'/>
-                        </span>
-                        <span>
-                            Pagamentos
-                        </span>
-                    </li>
-                    <li className='menuAlunos flex flex-col items-center justify-center pb-2'>
-                        <span>   
-                             <Alunos className='h-6 w-6'/>
-                        </span>
-                        <span>
-                            Alunos
-                        </span>
-                        <ul className="dropdownAlunos absolute top-20  flex-col bg-gray-700">
-                            <li className=" px-4 py-2 hover:bg-slate-400">
-                                <a href="#" >Matricular</a>
-                            </li>
-                            <li className="px-4 py-2 hover:bg-slate-400"><a href="#" >Confirmar</a></li>
+    const horario = (date: Date)=>{return new 
+    Intl.DateTimeFormat("pt-pt",{
+        dateStyle:"medium"
+    }).format(date)}
+    const periodo = (date: Date)=>{return new 
+        Intl.DateTimeFormat("pt-pt",{
+            dayPeriod:"long"
+        }).format(date)}
+        
+    let timer;
+    useEffect(()=>{
+        timer = setInterval(()=>{
+            setHour(newDate.getHours())
+            setMinute(newDate.getMinutes())
+            
+        },1000)
+        return () => clearInterval(timer)
+    }, [])
 
-                            <li className="px-4 py-2 hover:bg-slate-400"><a href="#" >Nível de Aproveitamento</a></li>
-
-                        </ul>
-                    </li>
-                    <li className='menuServicos flex flex-col items-center justify-center  pb-2'>
-                        <span>   
-                             <Servicos className='h-6 w-6'/>
-                        </span>
-                        <span>
-                            Serviços
-                        </span>
-                        <ul className="dropdownServicos absolute top-20  flex-col bg-gray-700">
-                            <li className=" px-4 py-2 hover:bg-slate-400">
-                                <a href="#" >Classes</a>
-                            </li>
-                            <li className="px-4 py-2 hover:bg-slate-400"><a href="#" >Turma</a></li>
-                        </ul>
-                        
-                    </li>
-                    <li className='menuPerfil flex flex-col items-center justify-center  pb-2'>
-                    <span><UserCircle className='h-6 w-6'/></span>
-                    <span  className='flex flex-row'>
-                    <span >Eu</span>
-                        <span><Arrow className='h-5 w-5 mt-2'/></span>
-                    
-                    </span>
-                        <ul className="dropdownPerfil absolute top-20  flex-col bg-gray-700">
-                            <li className=" px-4 py-2 hover:bg-slate-400">
-                                <a href="#" >Detalhe</a>
-                            </li>
-                            <li className="px-4 py-2 hover:bg-slate-400"><a href="#" >Sair</a></li>
-                        </ul>
-                    </li>
+    return( 
+        
+    <div className='absolute top-0 w-full'>
+        <div className='flex flex-row space-x-3 py-4 items-end justify-end  bg-gradient-to-r from-slate-800 via-slate-400 to-white font-playfair' style={{backgroundImage: ''}}>
+            <p>Bem-Vindo Hora:{hour < 10 ? '0' + hour : hour }:{minute < 10 ? '0' + minute: minute} {periodo(newDate)} {horario(newDate)}</ p>
+            <button className='border-0 py-2 px-3 ml-2 rounded-full bg-red-600 text-white'>Sair</button>
+        </div>
+        <div className='sticky top-0 flex py-5 bg-slate-800 items-center justify-center'>
+            <ul className='flex flex-row space-x-3 text-white shadow-2xl'>
+            <li>Home</li>
+            <li className='flex flex-col items-center justify-center  pb-2 cursor-pointer' onClick={handleVisivel}>Estudante
+            {visivel &&
+                <ul className=" absolute top-[72px] flex-col bg-slate-800 cursor-pointer">
+                    <li  className=" px-4 py-2 hover:bg-slate-400">Matricular</li>
+                    <li  className=" px-4 py-2 hover:bg-slate-400">Listagem</li>
                 </ul>
-             
-            </div>
-        </>
-    );
-
+                }
+            </li>
+            <li>Pagamento</li>
+            <li>Professores</li>
+            <li>Curso</li>
+            <li>Classe</li>
+            <li>Relatórios Financeiro</li>
+            </ul>
+        </div>
+    </div>); 
 }
