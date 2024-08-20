@@ -12,6 +12,26 @@ import {nomeCompletoZod,  dataNascimentoZod, generoZod, numeroBiZod, bairroZod, 
 
 //define the data that will send for the server to be insert on database
 
+const responsaveisEndereco = z.object({
+    bairro: bairroZod,
+    rua: ruaZod,
+    numeroCasa: numeroCasaZod
+})
+
+const responsaveisSchema =  z.array(
+    z.object(
+        {
+            nomeCompleto: nomeCompletoZod,
+            parentescoId: z.number(),
+            bairro: bairroZod,
+            rua: ruaZod,
+            numeroCasa: z.number(),
+            telefone: telefoneZod,
+            email: emailZod
+        }
+    )
+)
+
 const TFormCreate =  z.object({
     nomeCompleto: nomeCompletoZod,
     nomeCompletoPai: nomeCompletoZod,
@@ -24,47 +44,29 @@ const TFormCreate =  z.object({
     numeroCasa: z.number(),
     telefone: telefoneZod,
     email: emailZod,
-    classeId: z.number(),
-    anoId: z.number(),
-    metodoId: z.number(),
-    turmaId: z.number(),
-    responsaveis: z.array(
-        z.object(
-            {
-                nomeCompleto: nomeCompletoZod,
-                parentescoId: z.number(),
-                endereco: z.object({
-                    bairro: bairroZod,
-                    rua: ruaZod,
-                    numeroCasa: z.number(),
-                }),
-                contacto: z.object({
-                    telefone: telefoneZod,
-                    email: emailZod
-                })
-            }
-        )
-    )
+    responsaveis: responsaveisSchema,
+    classeId: idZod,
+    cursoId: idZod,
+    turmaId: idZod,
+    metodoPagamentoId: idZod,
+    anoLectivoId: idZod
 })
+        
 
 export default function FormStudent(){
 const form  = useForm<z.infer<typeof TFormCreate>>
 ({ mode: 'all', resolver: zodResolver(TFormCreate),
 defaultValues:{
-    numeroCasa: 1,
+    numeroCasa: 0,
     responsaveis:
         [{
         nomeCompleto: '',
+        bairro: '',
+        rua: '',
+        numeroCasa: 0,
+        telefone: '',
+        email: '',
         parentescoId: 0,
-        endereco: {
-                bairro: '',
-                rua: '',
-                numeroCasa: 1
-        },
-        contacto: {
-            telefone: '',
-            email: ''
-        }        
     }]
 }
 })
@@ -75,6 +77,62 @@ const { fields, append, remove } =
         name: 'responsaveis',
         control
     })
+
+const handleSubmitCreate = async (dados: z.infer<typeof TFormCreate>) => {
+    const data = {
+        aluno: {
+          nomeCompleto: dados.nomeCompleto,
+          nomeCompletoPai: dados.nomeCompletoPai,
+          nomeCompletoMae: dados.nomeCompletoMae,
+          numeroBi: dados.numeroBi,
+          dataNascimento: dados.dataNascimento,
+          genero: dados.genero,
+          endereco: {
+            bairro: dados.bairro,
+            rua: dados.rua,
+            numeroCasa: dados.numeroCasa
+          },
+          contacto: {
+            telefone: dados.telefone,
+            email: dados.email
+          },
+          responsaveis: [
+            {
+                nomeCompleto: dados.responsaveis.map((n)=>n.nomeCompleto),
+                parentecoId: dados.responsaveis.map((p)=>p.parentescoId),
+                endereco: 
+                {
+                    bairro: dados.responsaveis.map((eb)=>eb.bairro),
+                    rua: dados.responsaveis.map((er)=>er.rua),
+                    numeroCasa: dados.responsaveis.map((ec)=>ec.numeroCasa)
+                },
+                contacto:
+                {
+                    telefone: dados.responsaveis.map((et)=>et.telefone),
+                    email: dados.responsaveis.map((ee)=>ee.email)
+                }
+            }]
+        },
+        classeId: dados.classeId,
+        cursoId: dados.cursoId,
+        turmaId: dados.turmaId,
+        metodoPagamentoId: dados.metodoPagamentoId,
+        anoLectivoId: dados.anoLectivoId
+      }
+    await fetch(`http://localhost:8000/api/matriculas/`,{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then((resp => resp.json()))
+        .then((resp) =>{ console.log(resp)})
+        .catch((error) => console.log(`error: ${error}`))
+        console.log(data)
+    }
+                
+
 
 /*Área q implementa o código pra pesquisar cursos*/
 const [dataCursos, setDataCursos] = React.useState([]);
@@ -132,46 +190,6 @@ React.useEffect(()=>{
     search()
 },[])
 
-//Funcao de matricula
-const handleSubmitCreate = async (dados: z.infer<typeof TFormCreate>) => {
-    const data = {
-        aluno: {
-          nomeCompleto: dados.nomeCompleto,
-          nomeCompletoPai: dados.nomeCompletoPai,
-          nomeCompletoMae: dados.nomeCompletoMae,
-          numeroBi: dados.numeroBi,
-          dataNascimento: dados.dataNascimento,
-          genero: dados.genero,
-          endereco: {
-            bairro: dados.bairro,
-            rua: dados.rua,
-            numeroCasa: dados.numeroCasa
-          },
-          contacto: {
-            telefone: dados.telefone,
-            email: dados.email
-          },
-          responsaveis: dados.responsaveis
-        },
-        classeId: dados.classeId,
-        cursoId: idCurso,
-        turmaId: dados.turmaId,
-        metodoPagamentoId: dados.metodoId,
-        anoLectivoId: dados.anoId
-      }
-    await fetch('http://localhost:8000/api/matriculas',{
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        .then((resp => resp.json()))
-        .then((resp) =>{ console.log(resp)})
-        .catch((error) => console.log(`error: ${error}`))
-        console.log(data)
-    }
-
 return(
     <div className='flex flex-col h-screen w-full p-3 pt-36'>
     <fieldset className='flex flex-col justify-center  bg-slate-700 md:bg-gray-300'>
@@ -189,7 +207,7 @@ return(
   <TabsContent value="entrada" className='w-[900px] flex flex-col '> 
         <div className='flex flex-col '>
         <fieldset >
-            <legend >Informações Pessoais</legend>
+            <legend>Informações Pessoais</legend>
             <div className='flex flex-col space-y-3 mb-5'>
                 <div className='flex flex-col'>
                     <FormField
@@ -261,9 +279,9 @@ return(
                         <FormLabel>Telefone</FormLabel>
                         <FormControl>
                         {errors.telefone?.message ?
-                        <Input className='text-red-400 border-red-500 focus:border-red-500 ' type='text' {...field} />
+                        <Input className='text-red-400 border-red-500 focus:border-red-500 placeholder-red-400' type='text' placeholder='+244 993-222-111' {...field} />
                         :
-                        <Input className='placeholder-gray-200 placeholder-opacity-55' type='text' {...field} />
+                        <Input className='placeholder-gray-200' type='text' placeholder='+244 993-222-111' {...field} />
                         }
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -331,7 +349,7 @@ return(
                         {errors.numeroCasa?.message ?
                         <Input type='number' className='text-red-400 border-red-500 focus:border-red-500 placeholder-red-400'  min={0} {...field} onChange={(e)=>{ field.onChange(parseInt(e.target.value))}} />
                         :
-                        <Input type='number' min={1} {...field} onChange={(e)=>{ field.onChange(parseInt(e.target.value))}} />
+                        <Input type='number' min={0} {...field} onChange={(e)=>{ field.onChange(parseInt(e.target.value))}} />
                         }
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -423,13 +441,6 @@ return(
                 fields.map((field, index) => {
                     return <fieldset key={field.id}>
                         <legend>Dados do Encarregado</legend>
-                        {
-                        (index != 0)  && (
-                        <div className='w-full'>
-                            <h2 className='text-green-500 uppercase text-center bg-green-200 text-wrap'>Certifique-se que os encarregados não possuem mesmo contacto!</h2>
-                        </div>
-                        )
-                    }
                         <div className='flex flex-row space-x-3'>
                             <div className='flex flex-col w-full'>
                                 <FormField
@@ -440,8 +451,7 @@ return(
                                     <FormLabel>Nome Completo</FormLabel>
                                     <FormControl>
                                     {errors.responsaveis?.message ?
-                                    <Input type='text' 
-                                    className='text-red-400 border-red-500 focus:border-red-500 placeholder-red-400' {...field}/>
+                                    <Input type='text' className='text-red-400 border-red-500 focus:border-red-500 placeholder-red-400' {...field}/>
                                     :
                                     <Input type='text' {...field}/>
                                     }
@@ -485,7 +495,7 @@ return(
                             <div className='flex flex-col w-full'>
                             <FormField
                             control={form.control}
-                            name={`responsaveis.${index}.contacto.telefone`}
+                            name={`responsaveis.${index}.telefone`}
                             render={({field})=>(
                             <FormItem>
                                 <FormLabel>Telefone</FormLabel>
@@ -500,7 +510,7 @@ return(
                             <div className='flex flex-col w-full'>
                                 <FormField
                                 control={form.control}
-                                name={`responsaveis.${index}.contacto.email`}
+                                name={`responsaveis.${index}.email`}
                                 render={({field})=>(
                                 <FormItem>
                                     <FormLabel>Email</FormLabel>
@@ -520,12 +530,12 @@ return(
                         <div className='flex flex-col w-full'>
                             <FormField
                             control={form.control}
-                            name={`responsaveis.${index}.endereco.numeroCasa`}
+                            name={`responsaveis.${index}.numeroCasa`}
                             render={({field})=>(
                             <FormItem>
                                 <FormLabel>Número de Casa</FormLabel>
                                 <FormControl>
-                                <Input type='number' min={1} {...field}  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
+                                <Input type='number' min={0} {...field}  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
                                 </FormControl>
                                 <FormMessage className='text-red-500 text-xs'/>
                             </FormItem>
@@ -535,7 +545,7 @@ return(
                         <div className='flex flex-col w-full'>
                         <FormField
                         control={form.control}
-                        name={`responsaveis.${index}.endereco.bairro`}
+                        name={`responsaveis.${index}.bairro`}
                         render={({field})=>(
                         <FormItem>
                             <FormLabel>Bairro</FormLabel>
@@ -550,7 +560,7 @@ return(
                 <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
-                    name={`responsaveis.${index}.endereco.rua`}
+                    name={`responsaveis.${index}.rua`}
                     render={({field})=>(
                     <FormItem>
                         <FormLabel>Rua</FormLabel>
@@ -564,7 +574,7 @@ return(
                 </div>
                 </div>
                     {
-                        (index > 0)  && (
+                        index  && (
                         <p className='text-red-600 cursor-pointer text-center' onClick={()=>{ remove( index )}}>remove</p>
                         )
                     }
@@ -595,7 +605,7 @@ return(
                         <Input type='text'
                         placeholder='search by...'
                         onChange={handleFilterCurses}/>
-                    <p className='text-blue-500 italic font-bold'>{nomeCurso}</p>
+                    <p className='text-blue-500 italic font-bold'>{nomeCurso}{idCurso}</p>
                 </div>
                 <div className='flex flex-col w-full'>
                     <FormField
@@ -622,36 +632,14 @@ return(
                     <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
-                    name='turmaId'
-                    render={({field})=>(
-                    <FormItem>
-                        <FormLabel>Turmas</FormLabel>
-                        <FormControl>
-                        <Select onValueChange={(value) => field.onChange(parseInt(value, 10))}>
-                            <SelectTrigger className='text-black bg-white mt-0 border-gray-300 rounded-sm'>
-                                <SelectValue placeholder="Seleciona a turma"  {...field} />
-                            </SelectTrigger>
-                            <SelectContent className='bg-white'>
-                                <SelectItem value='1'>Turma A</SelectItem>
-                            </SelectContent>
-                            </Select>
-                        </FormControl>
-                        <FormMessage className='text-red-500 text-xs'/>
-                    </FormItem>)
-                    }
-                    />
-                    </div>
-                    <div className='flex flex-col w-full'>
-                    <FormField
-                    control={form.control}
-                    name='anoId'
+                    name='anoLectivoId'
                     render={({field})=>(
                     <FormItem>
                         <FormLabel>Ano Académico</FormLabel>
                         <FormControl>
                         <Select onValueChange={(value) => field.onChange(parseInt(value, 10))}>
                             <SelectTrigger className='text-black bg-white mt-0 border-gray-300 rounded-sm'>
-                                <SelectValue placeholder="Seleciona o ano"  {...field} />
+                                <SelectValue placeholder="Seleciona o grau"  {...field} />
                             </SelectTrigger>
                             <SelectContent className='bg-white'>
                                 {
@@ -671,14 +659,14 @@ return(
                     <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
-                    name='metodoId'
+                    name='metodoPagamentoId'
                     render={({field})=>(
                     <FormItem>
                         <FormLabel>Pagamento em:</FormLabel>
                         <FormControl>
                         <Select onValueChange={(value) => field.onChange(parseInt(value, 10))}>
                             <SelectTrigger className='text-black bg-white mt-0 border-gray-300 rounded-sm'>
-                                <SelectValue placeholder="Seleciona o método"  {...field} />
+                                <SelectValue placeholder="Seleciona o métodos"  {...field} />
                             </SelectTrigger>
                             <SelectContent className='bg-white'>
                                 {
@@ -701,9 +689,9 @@ return(
             
          </TabsContent>
         </Tabs>
-        <div className='w-full flex items-center justify-center'>
-            <button type='submit' className='w-28 py-1 mb-4 bg-blue-600 text-white font-semibold' >Cadastrar</button>  
-        </div>
+        <button type='submit' className='w-24 py-1 mb-4 bg-blue-600 text-white font-semibold' onClick={()=>{
+                    form.setValue('cursoId', idCurso);
+                }}>Cadastrar</button>  
         </form>
       </Form>
      </div>

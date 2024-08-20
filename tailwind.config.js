@@ -92,7 +92,7 @@ module.exports = {
         poppins: ['Poppins', 'sans-serif'],
         playfair: ['PlayfairDisplay','serif'],
         lato: ['Lato','sans-serif'],
-        robotoSlab: ['RobotoSlab','serif'],
+        robotoSlab: ['RobotoSlab','sans-serif'],
         merriweather: ['MerriWeather','sans-serif']
       },
       textColor: {

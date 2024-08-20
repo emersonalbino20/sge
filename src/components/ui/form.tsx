@@ -140,7 +140,7 @@ const FormDescription = React.forwardRef<
 })
 FormDescription.displayName = "FormDescription"
 
-const FormMessage = React.forwardRef<
+ const FormMessage = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, children, ...props }, ref) => {
@@ -162,6 +162,7 @@ const FormMessage = React.forwardRef<
     </p>
   )
 })
+
 FormMessage.displayName = "FormMessage"
 
 export {
