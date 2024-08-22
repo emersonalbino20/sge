@@ -23,7 +23,7 @@ Agora podes abrir o projecto num editor de código de sua preferência, mas o re
 ## Instalar as Dependências node package manager
 ```user@user-HP-Pro3500-Series:~/Documentos/sge-project/sge$npm install ```
 ## Dar um start no Server
-```user@user-HP-Pro3500-Series:~/Documentos/sge-project/sge$npm run start ```
+```user@user-HP-Pro3500-Series:~/Documentos/sge-project/sge$npm run dev ```
 como os passos acima mencionados consegues instalar as depências do projecto e usar.
 
 # Algumas Recomendações
