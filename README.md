@@ -40,13 +40,13 @@ TailwindCSS é um framework de CSS utilitário que permite uma estilização rá
 
 Instale as dependências do projeto com npm:  
     ```bash
-        npm install  
+            npm install  
 
-### Executando o Projeto
+### Executando o Projeto  
 
     Inicie o servidor de desenvolvimento com o comando:  
     ```bash
-        npm run dev  
+            npm run dev  
 
 O projeto será iniciado e você poderá acessá-lo em **http://localhost:3000** (ou outra porta, se configurada).
 
