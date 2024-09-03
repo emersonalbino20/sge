@@ -42,9 +42,9 @@ Instale as dependências do projeto com npm:
     ```bash
             npm install  
 
-### Executando o Projeto  
+### Executando o Projeto   
 
-    Inicie o servidor de desenvolvimento com o comando:  
+Inicie o servidor de desenvolvimento com o comando:  
     ```bash
             npm run dev  
 
