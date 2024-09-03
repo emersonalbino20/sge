@@ -149,9 +149,9 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
                 <DialogHeader>
-                  <DialogTitle>Actualizar Dados da Classe</DialogTitle>
+                  <DialogTitle>Actualizar Sala</DialogTitle>
                   <DialogDescription>
-                  Actualiza uma sala aqui, click em actualizar quando terminar.
+                  <p>altere uma informação do registro click em <span className='font-bold text-green-500'>actualizar</span> quando terminar.</p>
                   </DialogDescription>
                 </DialogHeader>
                 <Form {...formUpdate} >
@@ -229,7 +229,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
               </div>
       </div>
       <DialogFooter>
-        <Button type="submit">Actualizar</Button>
+      <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold' type='submit'>Actualizar</Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -372,7 +372,8 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
       <DialogHeader>
         <DialogTitle>Cadastrar Sala</DialogTitle>
         <DialogDescription>
-        Cadastre aqui uma sala, click em cadastrar quando terminar.
+        <p>preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
+        </p>
         </DialogDescription>
       </DialogHeader>
       <Form {...formCreate} >
@@ -429,7 +430,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
         </div>
       </div>
       <DialogFooter>
-        <Button type="submit">Cadastrar</Button>
+      <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold' type='submit'>Cadastrar</Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>

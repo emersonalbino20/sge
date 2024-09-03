@@ -129,6 +129,19 @@ export default function PersonIncharge (){
           console.log(data)
           
       }
+
+/*Buscar dados do parentetesco*/
+const[parentesco, setParentesco] = React.useState([]);
+React.useEffect(()=>{
+    const search = async () => {
+        const resp = await fetch(`http://localhost:8000/api/parentescos/`);
+        const respJson = await resp.json()
+        const conv1 = JSON.stringify(respJson.data)
+        const conv2 = JSON.parse(conv1)
+        setParentesco(conv2)
+    }
+    search()
+},[])
     const[nome, setNome] = React.useState();
     const[bairro, setBairro] = React.useState();
     const[rua, setRua] = React.useState();
@@ -202,9 +215,9 @@ export default function PersonIncharge (){
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
-        <DialogTitle>Actualizar registro do parentesco</DialogTitle>
+        <DialogTitle>Actualizar Registro</DialogTitle>
         <DialogDescription>
-        Actualiza o registro do parentesco aqui.
+        <p>altere uma informação do registro click em <span className='font-bold text-green-500'>actualizar</span> quando terminar.</p>
         </DialogDescription>
       </DialogHeader>
       <Form {...formUpdate} >
@@ -250,10 +263,11 @@ export default function PersonIncharge (){
           <FormControl>
           <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                       <option value="">Selecione o grau</option>
-                      <option value="1" >Pai</option>
-                      <option value="2">Mãe</option>
-                      <option value="3">Tio</option>
-                      <option value="4">Irmão</option>
+                      {
+                            parentesco.map((field)=>{
+                                return <option value={`${field.id}`}>{field.nome}</option>
+                            })
+                      }
                   </select>
                   </FormControl>
                   <FormMessage className='text-red-500 text-xs'/>
@@ -378,7 +392,7 @@ export default function PersonIncharge (){
         </div>
       </div>
  <DialogFooter>
-      <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500' type='submit'>Acualizar registro</Button>
+      <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold' type='submit'>Actualizar</Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -460,8 +474,9 @@ export default function PersonIncharge (){
       <DialogHeader>
         <DialogTitle>Excluir Registro</DialogTitle>
         <DialogDescription>
-        Caso queira exluir o registro do encarregado, Basta confirmar em excluir.
+        <p>Caso queira exluir o registro, basta confirmar em excluir.</p>
         </DialogDescription>
+        <hr/>
       </DialogHeader>
       <Form {...formDelete} >
      <form onSubmit={formDelete.handleSubmit(handleSubmitDelete)} >
@@ -477,7 +492,7 @@ export default function PersonIncharge (){
           </FormControl>
         )}/>
  <DialogFooter>
-      <Button className='h-7 bg-red-500 border-red-500 text-white hover:bg-red-500' type='submit'>Excluir</Button>
+      <Button className='h-8 bg-red-500 border-red-500 text-white hover:bg-red-500 font-semibold' type='submit'>Excluir</Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -514,14 +529,6 @@ export default function PersonIncharge (){
             },
         ];
         
-        
-        
-      
-        
-        
-       
-
-    
         const handleFilter =  (event) => {
           setBuscar(parseInt(event.target.value.trim()))
         }
@@ -563,9 +570,10 @@ export default function PersonIncharge (){
     </DialogTrigger>
     <DialogContent className="sm:max-w-[625px] overflow-y-scroll h-[550px] bg-white">
       <DialogHeader>
-        <DialogTitle>Cadastrar Encarregado</DialogTitle>
+        <DialogTitle>Cadastrar Registro</DialogTitle>
         <DialogDescription>
-        cadastre um registro, click em cadastrar quando terminar.
+        <p>preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
+        </p>
         </DialogDescription>
       </DialogHeader>
      
@@ -610,10 +618,11 @@ export default function PersonIncharge (){
           <FormControl>
           <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                       <option value="">Selecione o grau</option>
-                      <option value="1" >Pai</option>
-                      <option value="2">Mãe</option>
-                      <option value="3">Tio</option>
-                      <option value="4">Irmão</option>
+                      {
+                            parentesco.map((field)=>{
+                                return <option value={`${field.id}`}>{field.nome}</option>
+                            })
+                      }
                   </select>
                   </FormControl>
                   <FormMessage className='text-red-500 text-xs'/>
@@ -742,7 +751,7 @@ export default function PersonIncharge (){
       </div>
       
       <DialogFooter>
-        <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500' type='submit'>Guardar Mudanças</Button>
+        <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold' type='submit'>Cadastrar</Button>
       </DialogFooter>
       </form>
       </Form>

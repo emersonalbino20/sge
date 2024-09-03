@@ -215,9 +215,9 @@ export default function Teacher (){
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
-        <DialogTitle>Actualizar registro do professor</DialogTitle>
+        <DialogTitle>Actualizar Registro</DialogTitle>
         <DialogDescription>
-        Actualiza o registro do professor aqui.
+        <p>altere uma informação do registro click em <span className='font-bold text-green-500'>actualizar</span> quando terminar.</p>
         </DialogDescription>
       </DialogHeader>
       <Form {...formUpdate} >
@@ -313,8 +313,7 @@ export default function Teacher (){
         )}/>
         </div>
       </div>
-      <DialogFooter>
-      <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500' type='submit'>Acualizar registro</Button>
+      <DialogFooter><Button className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold' type='submit'>Actualizar</Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -499,9 +498,11 @@ export default function Teacher (){
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
-        <DialogTitle>Cadastrar professor</DialogTitle>
+        <DialogTitle>Cadastrar Registro</DialogTitle>
         <DialogDescription>
-        Cadastre aqui um novo registro.
+          <p>
+          preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
+        </p>
         </DialogDescription>
       </DialogHeader>
       <Form {...form} >
@@ -580,7 +581,7 @@ export default function Teacher (){
         </div>
       </div>
       <DialogFooter>
-        <Button type='submit'>Cadastra professor</Button>
+      <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold' type='submit'>Cadastrar</Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>

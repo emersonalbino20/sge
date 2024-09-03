@@ -178,9 +178,9 @@ React.useEffect(()=>{
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
                 <DialogHeader>
-                  <DialogTitle>Actualizar Dados da Classe</DialogTitle>
+                  <DialogTitle>Actualizar Classe</DialogTitle>
                   <DialogDescription>
-                  Actualiza uma classe aqui, click em actualizar quando terminar.
+                  <p>altere uma informação do registro click em <span className='font-bold text-green-500'>actualizar</span> quando terminar.</p>
                   </DialogDescription>
                 </DialogHeader>
                 <Form {...formUpdate} >
@@ -290,7 +290,7 @@ React.useEffect(()=>{
         </div>
       </div>
       <DialogFooter>
-        <Button type="submit">Actualizar</Button>
+      <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold' type='submit'>Actualizar</Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -434,7 +434,8 @@ React.useEffect(()=>{
       <DialogHeader>
         <DialogTitle>Cadastrar Classe</DialogTitle>
         <DialogDescription>
-        Cadastre aqui uma classe, click em cadastrar quando terminar.
+        <p>preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
+        </p>
         </DialogDescription>
       </DialogHeader>
       <Form {...formCreate} >
@@ -522,7 +523,7 @@ React.useEffect(()=>{
         </div>
       </div>
       <DialogFooter>
-        <Button type="submit">Cadastrar</Button>
+      <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold' type='submit'>Cadastrar</Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>

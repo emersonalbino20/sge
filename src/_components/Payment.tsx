@@ -32,7 +32,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 const TFormMethod =  z.object({
   nome: methodPay,
-  
+  id: z.number()
 })
 
 
@@ -56,14 +56,18 @@ export default function Payment (){
     resolver: zodResolver(TFormUpdateMethod)
    })
    
-   const handleSubmitCreateMethod = async (data: z.infer<typeof TFormMethod>,e) => {
-          
+   const handleSubmitCreateMethod = async (dado: z.infer<typeof TFormMethod>,e) => {
+          const data1 = 
+            {
+              nome: dado.nome 
+            }
+            
     await fetch(`http://localhost:8000/api/metodos-pagamento`,{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data1)
         })
         .then((resp => resp.json()))
         .then((resp) =>{console.log(resp)})
@@ -90,6 +94,20 @@ export default function Payment (){
         
     }
 
+    /*Buscar dados do parentetesco*/
+const[metodo, setMetodo] = React.useState([]);
+const URLPAGAMENTO = "http://localhost:8000/api/metodos-pagamento"
+React.useEffect(()=>{
+    const search = async () => {
+        //Buscar Métodos de pagamento
+        const resppay = await fetch (URLPAGAMENTO);
+        const resppayJson = await resppay.json();
+        const convpay1 = JSON.stringify(resppayJson.data)
+        const convpay2 = JSON.parse(convpay1)
+        setMetodo(convpay2);
+    }
+    search()
+},[])
     const[nomeMethod, setNomeMethod] = React.useState();
     const [dados, setDados] = React.useState([])
     const [dataApi, setDataApi] = React.useState([])
@@ -252,7 +270,27 @@ export default function Payment (){
           </FormItem>
         )}
            />
-           
+           <FormField
+          name={'id'}
+          render={({field})=>(
+          <FormItem>
+            <Label htmlFor="method" className="text-right">
+            Todos métodos
+          </Label>
+              <FormControl>
+              <select id='method' {...field} className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                        <option>Selecione</option>
+                        {
+                            metodo.map((field)=>{
+                                return <option value={`${field.id}`}>{field.nome}</option>
+                            })
+                      }
+                  </select>
+              </FormControl>
+            <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>)
+          }
+          />
            <div className='flex flex-row space-x-2 mt-2'>
            <div className='relative flex justify-center items-center' >
                  <SendIcon className='w-4 h-3 absolute text-white font-extrabold'/>
@@ -265,27 +303,7 @@ export default function Payment (){
           </div>
           </div>
            </div>
-           <div className="w-full">
-        <FormField
-          control={formMethod.control}
-          name={'nome'}
-          render={({field})=>(
-          <FormItem>
-            <Label htmlFor="method" className="text-right">
-            Todos métodos
-          </Label>
-              <FormControl>
-              <select id='method' {...field} className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
-                        <option>Selecione</option>
-                        <option value={1}>Cash</option>
-                        <option value={2}>TPA</option>
-                  </select>
-              </FormControl>
-            <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>)
-          }
-          />
-        </div></div>
+          </div>
            </form>
            </Form>
            </DialogHeader>
