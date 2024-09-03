@@ -36,17 +36,18 @@ TailwindCSS é um framework de CSS utilitário que permite uma estilização rá
     ```bash
          cd sge  
 
-### Instalando Dependências
+### Instalando Dependências  
 
 Instale as dependências do projeto com npm:  
     ```bash
          npm install  
 
-### Executando o Projeto
+### Executando o Projeto  
 
 Inicie o servidor de desenvolvimento com o comando:  
    ```bash
-         npm run dev  
+         npm run dev   
+
 O projeto será iniciado e você poderá acessá-lo em **http://localhost:3000** (ou outra porta, se configurada).
 
 **Nota:** Este repositório contém apenas o *front-end* do sistema de gestão escolar. Para ver o sistema completo em funcionamento, você precisará clonar e configurar o repositório do *back-end*, que pode ser encontrado aqui.  
