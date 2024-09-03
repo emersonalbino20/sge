@@ -1,5 +1,5 @@
 input{
-    @apply border-gray-500 bg-white
+    @apply border-gray-500 bg-white 
 }
 button{
     @apply py-1 px-2 rounded-lg bg-transparent  border border-blue-500 text-blue-500

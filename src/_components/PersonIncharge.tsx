@@ -66,7 +66,9 @@ export default function PersonIncharge (){
   
   const form  = useForm<z.infer<typeof TForm>>({
     mode: 'all', 
-    resolver: zodResolver(TForm)
+    resolver: zodResolver(TForm),
+    defaultValues:{
+      numeroCasa: 1}
    })
 
    const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
@@ -148,7 +150,7 @@ React.useEffect(()=>{
     const[casa, setCasa] = React.useState();
     const[telefone,setTelefone] = React.useState();
     const[email,setEmail] = React.useState();
-    
+    const[eoq, setEoq] = React.useState();
     const [dados, setDados] = React.useState([])
     const [dataApi, setDataApi] = React.useState([])
     const[buscar, setBuscar] = React.useState(0);
@@ -159,6 +161,7 @@ React.useEffect(()=>{
           const respJson = await resp.json();
           
           console.log(respJson)
+          setEoq(respJson.parentesco)
           setNome(respJson.nomeCompleto)
           setBairro(respJson.endereco.bairro)
           setRua(respJson.endereco.rua)
@@ -318,7 +321,7 @@ React.useEffect(()=>{
         </div>
         <div className='w-full'>
           <Label htmlFor="casa" className="text-right">
-            Número da Casa
+            No. Casa
           </Label>
          
             <FormField
@@ -328,7 +331,7 @@ React.useEffect(()=>{
             <FormControl>
             <FormItem>
          
-          <Input id="casa" type='number' {...field} className="w-full"  min={0}  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
+          <Input id="casa" type='number' {...field} className="w-full"  min="0"  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
           <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
           </FormControl>
@@ -408,7 +411,7 @@ React.useEffect(()=>{
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
-        <DialogTitle>Informações sobre {row.nomeCompleto}</DialogTitle>
+        <DialogTitle>{row.nomeCompleto}, {eoq}</DialogTitle>
         <DialogDescription >
         As informações relevantes do encarregado, são listadas aqui!
         </DialogDescription>
@@ -683,7 +686,7 @@ React.useEffect(()=>{
             <FormControl>
             <FormItem>
          
-          <Input id="casa" type='number' {...field} className="w-full"  min={0}  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
+          <Input id="casa" type='number' {...field} className="w-full"  min="1"  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
           <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
           </FormControl>

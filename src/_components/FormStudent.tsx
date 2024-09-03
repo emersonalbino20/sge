@@ -1,5 +1,14 @@
 'use client'
 import * as React from 'react'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+  } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -132,6 +141,10 @@ React.useEffect(()=>{
     search()
 },[])
 
+
+const [showModal, setShowModal] = React.useState(false);
+const [modalMessage, setModalMessage] = React.useState('');         
+
 //Funcao de matricula
 const handleSubmitCreate = async (dados: z.infer<typeof TFormCreate>) => {
     const data = {
@@ -167,7 +180,12 @@ const handleSubmitCreate = async (dados: z.infer<typeof TFormCreate>) => {
             body: JSON.stringify(data)
         })
         .then((resp => resp.json()))
-        .then((resp) =>{ console.log(resp)})
+        .then((resp) =>{ 
+            setShowModal(true);
+            setModalMessage(resp.message);
+           console.log(resp.message);
+        }
+        )
         .catch((error) => console.log(`error: ${error}`))
         console.log(data)
     }
@@ -189,7 +207,7 @@ return(
   <TabsContent value="entrada" className='w-[900px] flex flex-col '> 
         <div className='flex flex-col '>
         <fieldset >
-            <legend >Informações Pessoais</legend>
+            <legend className='bg-blue-600 w-full h-9 pl-2 mr-2 text-white flex items-center'><p>Informações do Aluno</p></legend>
             <div className='flex flex-col space-y-3 mb-5'>
                 <div className='flex flex-col'>
                     <FormField
@@ -202,7 +220,7 @@ return(
                         {errors.nomeCompleto?.message ?
                         <Input className='text-red-400 border-red-500 focus:border-red-500' type='text' {...field} />
                         :
-                        <Input  type='text' {...field} />
+                        <Input type='text' {...field} />
                         }
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -422,7 +440,7 @@ return(
                 {
                 fields.map((field, index) => {
                     return <fieldset key={field.id}>
-                        <legend>Dados do Encarregado</legend>
+                        <legend className='bg-blue-600 w-full h-9 pl-2 mr-2 text-white flex items-center'><p>Informações do Encarregado</p></legend>
                         {
                         (index != 0)  && (
                         <div className='w-full'>
@@ -588,7 +606,7 @@ return(
 </TabsContent>
  <TabsContent value="juridico" className='w-[900px]'>
             <fieldset>
-            <legend>Informações Essenciais</legend>
+            <legend className='bg-blue-600 w-full h-9 pl-2 mr-2 text-white flex items-center'><p>Informações Essenciais</p></legend>
             <div className='flex flex-col space-y-3 mb-5'>
                 <div className='flex flex-col'>
                         <FormLabel>Persquisar Cursos</FormLabel>
@@ -698,14 +716,29 @@ return(
                    
                 </div>
                 </fieldset>
-            
          </TabsContent>
         </Tabs>
         <div className='w-full flex items-center justify-center'>
-            <button type='submit' className='w-28 py-1 mb-4 bg-blue-600 text-white font-semibold' >Cadastrar</button>  
+            <button type='submit' className='w-28 py-1 mb-4 bg-blue-700 text-white ' >Cadastrar</button>  
         </div>
         </form>
       </Form>
+      {showModal && 
+  <Dialog open={showModal} onOpenChange={setShowModal}>
+    <DialogTrigger asChild>
+    <div className='relative flex justify-center items-center'>
+      </div>
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[425px] bg-white">
+      <DialogHeader>
+        <DialogTitle>Resposta</DialogTitle>
+        <DialogDescription>
+          {modalMessage}
+        </DialogDescription>
+      </DialogHeader>
+         </DialogContent>
+        </Dialog>
+    }
      </div>
      
 )

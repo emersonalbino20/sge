@@ -17,7 +17,7 @@
     @apply ring-2 ring-greenRing
 }
 
-/*Estilo dos inputs pra formulários de cadastro, input[text, number, email, date]*/
-.input-form-text{
-    @apply py-6 w-full rounded-form outline border-2 border-form bg-input shadow-none mb-6 pl-10
+.input-std
+{
+    @apply rounded-md focus:ring-blue-400 focus:ring-1 focus:border-blue-400
 }

@@ -50,23 +50,42 @@ export default function ListStudent(){
         resolver: zodResolver(TForm)
        })
 
-
+       const [showModal, setShowModal] = React.useState(false);
+       const [modalMessage, setModalMessage] = React.useState('');  
        const [updateTable, setUpdateTable] = React.useState(false)
         const handleSubmitUpdate = async (data: z.infer<typeof TForm>,e) => {
           
+          const dados = 	{
+            nomeCompleto: data.nomeCompleto,
+            nomeCompletoPai: data.nomeCompletoPai,
+            nomeCompletoMae: data.nomeCompletoMae,
+            dataNascimento: data.dataNascimento,
+            genero: data.genero,
+            endereco: {
+              bairro: data.bairro,
+              rua: data.rua,
+              numeroCasa: data.numeroCasa
+            },
+            contacto: {
+              telefone: data.telefone,
+              email: data.email
+            }
+          }
           await fetch(`http://localhost:8000/api/alunos/${data.id}`,{
                   method: 'PUT',
                   headers: {
                       'Content-Type': 'application/json',
                   },
-                  body: JSON.stringify(data)
+                  body: JSON.stringify(dados)
               })
               .then((resp => resp.json()))
-              .then((resp) =>{ console.log(resp)})
+              .then((resp) =>{ 
+                setShowModal(true);
+                setModalMessage(resp.message);
+               console.log(resp.message);
+              })
               .catch((error) => console.log(`error: ${error}`))
               setUpdateTable(true)
-              
-              
           }
 
     const[buscar, setBuscar] = React.useState(2);
@@ -86,18 +105,19 @@ export default function ListStudent(){
         const search = async () => {
             const resp = await fetch(`http://localhost:8000/api/alunos/${buscar}`);
             const receve = await resp.json()
-            console.log(receve.id)
+            console.log(receve)
             setNome(receve.nomeCompleto)
             setPai(receve.nomeCompletoPai)
             setMae(receve.nomeCompletoMae)
             setBi(receve.numeroBi)
             setNasc(receve.dataNascimento)
             setGenero(receve.genero)
-            setBairro(receve.bairro)
-            setRua(receve.rua)
-            setCasa(receve.numeroCasa)
-            setTelefone(receve.telefone)
-            setEmail(receve.email)
+            setBairro(receve.endereco.bairro)
+            setRua(receve.endereco.rua)
+            setCasa(receve.endereco.numeroCasa)
+            setTelefone(receve.contacto.telefone)
+            setEmail(receve.contacto.email)
+            
         }
         search()
     },[buscar])
@@ -496,9 +516,9 @@ export default function ListStudent(){
               const respJson = await resp.json();
               const conv1 = JSON.stringify(respJson.data)
               const conv2 = JSON.parse(conv1)
-              
               setDados(conv2)
               setDataApi(conv2)
+              setUpdateTable(false)
         } 
          respFetch()
    },[updateTable])
@@ -527,5 +547,21 @@ export default function ListStudent(){
     return (
     <>
     <Table title="Lista dos Estudantes" dados={dados} handleFilter={handleFilter} columns={columns}  handleRows={handleRows} handleSort={handleSort}/>
+    {showModal && 
+  <Dialog open={showModal} onOpenChange={setShowModal}>
+    <DialogTrigger asChild>
+    <div className='relative flex justify-center items-center'>
+      </div>
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[425px] bg-white">
+      <DialogHeader>
+        <DialogTitle>Resposta</DialogTitle>
+        <DialogDescription>
+          {modalMessage}
+        </DialogDescription>
+      </DialogHeader>
+         </DialogContent>
+        </Dialog>
+    }
     </>)
 }

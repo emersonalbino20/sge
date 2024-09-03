@@ -51,8 +51,11 @@ const formCreate  = useForm<z.infer<typeof TFormCreate>>({
   resolver: zodResolver(TFormCreate)
 })
 
+const [showModal, setShowModal] = useState(false);
+const [modalMessage, setModalMessage] = useState('');
+
 const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>,e) => {
-      
+ 
 await fetch(`http://localhost:8000/api/ano-lectivos/`,{
     method: 'POST',
     headers: {
@@ -61,9 +64,11 @@ await fetch(`http://localhost:8000/api/ano-lectivos/`,{
     body: JSON.stringify(data)
   })
   .then((resp => resp.json()))
-  .then((resp) =>{ console.log(resp)})
+  .then((resp) =>{  setShowModal(true)
+                    setModalMessage(resp.message);
+                   console.log(resp.message)})
   .catch((error) => console.log(`error: ${error}`))
-  console.log(data)
+  //console.log(data)
 }
 
 const[buscar, setBuscar] = React.useState();
@@ -362,6 +367,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
            <PrinterIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
            <button className='py-4 px-5 bg-green-700 border-green-700 rounded-sm ' onClick={() => window.print()}></button>
        </div>
+       {!showModal && 
        <Dialog>
     <DialogTrigger asChild>
     <div title='cadastrar' className='relative flex justify-center items-center'>
@@ -419,7 +425,25 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
       </form></Form>
     </DialogContent>
   </Dialog>
-
+  }
+  {showModal && 
+  <Dialog open={showModal} onOpenChange={setShowModal}>
+    <DialogTrigger asChild>
+    <div className='relative flex justify-center items-center'>
+    <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
+      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
+      </div>
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[425px] bg-white">
+      <DialogHeader>
+        <DialogTitle>Resposta</DialogTitle>
+        <DialogDescription>
+          {modalMessage}
+        </DialogDescription>
+      </DialogHeader>
+         </DialogContent>
+        </Dialog>
+    }
         </div>
    }
 >
