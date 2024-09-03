@@ -30,11 +30,11 @@ TailwindCSS é um framework de CSS utilitário que permite uma estilização rá
 
 1. Clone este repositório usando o comando:  
    ```bash
-        git clone https://github.com/SEU_USUARIO/NOME_DO_REPOSITORIO.git  
+        git clone https://github.com/emersonalbino20/sge.git  
 
 2. Navegue até o diretório do projeto:  
     ```bash
-         cd NOME_DO_REPOSITORIO  
+         cd sge  
 
 ### Instalando Dependências  
 
