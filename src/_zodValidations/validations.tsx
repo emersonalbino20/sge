@@ -94,7 +94,6 @@ export const  numeroCasaZod = z
       message: 'O número de telefone é inválido.',
     })
  export const emailZod = z.string({
-      required_error: 'campo obrigatório.',
       invalid_type_error: 'O endereço de email deve ser uma string.',
     })
     .trim()

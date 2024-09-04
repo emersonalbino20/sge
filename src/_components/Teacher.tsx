@@ -69,17 +69,35 @@ export default function Teacher (){
     resolver: zodResolver(TFormUpdate)
    })
 
+   const [showModal, setShowModal] = React.useState(false);
+       const [modalMessage, setModalMessage] = React.useState('');  
    const handleSubmitCreate = async (data: z.infer<typeof TForm>,e) => {
+
+    const dados = {
+      nomeCompleto: data.nomeCompleto,
+      dataNascimento: data.dataNascimento,
+      contacto: {
+        telefone: data.telefone,
+        email: data.email,
+      },
+      disciplinas: [
+        1
+      ]
+    }
           
     await fetch(`http://localhost:8000/api/professores/`,{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(dados)
         })
         .then((resp => resp.json()))
-        .then((resp) =>{ console.log(resp)})
+        .then((resp) =>{ 
+                setShowModal(true);
+                setModalMessage(resp.message);
+               console.log(resp);
+        })
         .catch((error) => console.log(`error: ${error}`))
         console.log(data)
         
@@ -111,15 +129,25 @@ export default function Teacher (){
     const [updateTable, setUpdateTable] = React.useState(false)
    const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>) => {
           
+    const dados = {
+      nomeCompleto: data.nomeCompleto,
+      dataNascimento: data.dataNascimento,
+      contacto: {
+        telefone: data.telefone,
+        email: data.email,
+      }
+    }
     await fetch(`http://localhost:8000/api/professores/${data.id}`,{
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(dados)
         })
         .then((resp => resp.json()))
-        .then((resp) =>{ console.log(resp)})
+        .then((resp) =>{
+               console.log(resp);
+              })
         .catch((error) => console.log(`error: ${error}`))
         setUpdateTable(true)
         console.log(data)
@@ -199,6 +227,7 @@ export default function Teacher (){
         {
             name: 'Ação',
             cell: (row) => (<div className='flex flex-row space-x-2'>
+              
             <Dialog >
       <DialogTrigger asChild onClick={()=>{
               formUpdate.setValue('nomeCompleto', nome)
@@ -318,9 +347,8 @@ export default function Teacher (){
       </form></Form>
     </DialogContent>
   </Dialog>
- 
-           
-            <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>
+    
+    <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>
            
             <Popover >
       <PopoverTrigger asChild className='bg-white'>
@@ -488,7 +516,7 @@ export default function Teacher (){
            <PrinterIcon className='w-5 h-4 absolute text-white font-extrabold'/>
            <button className='py-4 px-5 bg-green-700 border-green-700 rounded-sm ' onClick={() => window.print()}></button>
        </div>
-       
+    {!showModal &&   
        <Dialog >
     <DialogTrigger asChild>
     <div title='cadastrar' className='relative flex justify-center items-center'>
@@ -578,6 +606,7 @@ export default function Teacher (){
           <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
+        <i>IMPLEMENTAR INSERÇÃO DE MULTIPLAS DISCIPLINAS</i>
         </div>
       </div>
       <DialogFooter>
@@ -586,6 +615,23 @@ export default function Teacher (){
       </form></Form>
     </DialogContent>
   </Dialog>
+  }
+  {showModal && 
+  <Dialog open={showModal} onOpenChange={setShowModal}>
+    <DialogTrigger asChild>
+    <div className='relative flex justify-center items-center'>
+      </div>
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[425px] bg-white">
+      <DialogHeader>
+        <DialogTitle>Resposta</DialogTitle>
+        <DialogDescription>
+          {modalMessage}
+        </DialogDescription>
+      </DialogHeader>
+         </DialogContent>
+        </Dialog>
+    }
        </div>
       
    }

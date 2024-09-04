@@ -11,6 +11,12 @@ import {
     DialogTitle,
     DialogTrigger,
   } from "@/components/ui/dialog"
+import {FolderOpenIcon as Relatorios} from '@heroicons/react/24/outline';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
@@ -82,7 +88,7 @@ export default function ListStudent(){
               .then((resp) =>{ 
                 setShowModal(true);
                 setModalMessage(resp.message);
-               console.log(resp.message);
+               console.log(resp);
               })
               .catch((error) => console.log(`error: ${error}`))
               setUpdateTable(true)
@@ -105,7 +111,7 @@ export default function ListStudent(){
         const search = async () => {
             const resp = await fetch(`http://localhost:8000/api/alunos/${buscar}`);
             const receve = await resp.json()
-            console.log(receve)
+            //console.log(receve)
             setNome(receve.nomeCompleto)
             setPai(receve.nomeCompletoPai)
             setMae(receve.nomeCompletoMae)
@@ -121,6 +127,21 @@ export default function ListStudent(){
         }
         search()
     },[buscar])
+
+    const[mClasse, setMClasse] = React.useState([]);
+    const[mCurso, setMCurso] = React.useState([]);
+    const[mTurma, setMTurma] = React.useState([]);
+    React.useEffect(()=>{
+      const search = async () => {
+          const resp = await fetch(`http://localhost:8000/api/alunos/${buscar}/matriculas`);
+          const receve = await resp.json()
+          console.log(receve.data[0])
+          setMClasse(receve.data[0].classe)
+          setMCurso(receve.data[0].curso)
+          setMTurma(receve.data[0].turma)
+      }
+      search()
+  },[buscar])
     const changeResource=(id)=>{
         setBuscar(id)
     }
@@ -503,6 +524,42 @@ export default function ListStudent(){
       </DialogFooter>
     </DialogContent>
   </Dialog>
+  <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>
+           
+           <Popover >
+     <PopoverTrigger asChild className='bg-white'>
+
+     <div className='relative flex justify-center items-center cursor-pointer'>  <Relatorios className='w-5 h-4 absolute text-white'/> 
+       <Button className='h-7 px-5 bg-gray-600 text-white font-semibold hover:bg-gray-600 rounded-sm border-gray-600'></Button>
+       </div>
+     </PopoverTrigger >
+     <PopoverContent className="w-80 bg-white">
+       <div className="grid gap-4">
+         <div className="space-y-2">
+           <h4 className="font-medium leading-none">Dados da Matrícula</h4>
+           <p className="text-sm text-muted-foreground">
+             Inspecione os dados da matrícula
+           </p>
+         </div>
+         <div className="grid gap-2">
+           
+           <div className="grid grid-cols-3 items-center gap-4">
+             <Label htmlFor="maxWidth">Classe</Label>
+             <p>{mClasse}</p>
+           </div>
+           <div className="grid grid-cols-3 items-center gap-4">
+             <Label htmlFor="maxWidth">Curso</Label>
+             <p>{mCurso}</p>
+           </div>
+           <div className="grid grid-cols-3 items-center gap-4">
+             <Label htmlFor="maxWidth">Turma</Label>
+             <p>{mTurma}</p>
+           </div>
+         </div>
+       </div>
+     </PopoverContent>
+   </Popover>
+           </div>
         </div>),
     }, 
 ];
