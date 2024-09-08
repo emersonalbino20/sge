@@ -18,18 +18,19 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { EditIcon, PrinterIcon, Trash} from 'lucide-react'
-import { InfoIcon } from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, Trash} from 'lucide-react'
+import { InfoIcon, CombineIcon } from 'lucide-react'
 import { UserPlus } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
 import DataTable from 'react-data-table-component'
 import { Textarea } from '@/components/ui/textarea'
-import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, nomeCursoZod, descricaoZod, duracaoZod } from '@/_zodValidations/validations'
+import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, nomeCursoZod, descricaoZod, duracaoZod, disciplinas } from '@/_zodValidations/validations'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-
+import Select from 'react-select';
+import { MyDialog, MyDialogContent } from './my_dialog'
 
 
 const TFormCreate =  z.object({
@@ -45,6 +46,12 @@ const TFormUpdate =  z.object({
   id: z.number()
 })
 
+/*Vinculo de curso e disciplina*/
+const TFormConnect =  z.object({
+  idCursos: z.number(),
+  disciplinas: disciplinas
+})
+
 export default function Curse(){
 
 const formCreate  = useForm<z.infer<typeof TFormCreate>>({
@@ -52,6 +59,19 @@ const formCreate  = useForm<z.infer<typeof TFormCreate>>({
   resolver: zodResolver(TFormCreate)
 })
 
+const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
+  mode: 'all', 
+  resolver: zodResolver(TFormUpdate)
+  })
+
+const formConnect  = useForm<z.infer<typeof TFormConnect>>({
+  mode: 'all', 
+  resolver: zodResolver(TFormConnect)
+ })
+
+const [updateTable, setUpdateTable] = React.useState(false)
+const [showModal, setShowModal] = React.useState(false);
+const [modalMessage, setModalMessage] = React.useState('');
 const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>,e) => {
       
 await fetch(`http://localhost:8000/api/cursos`,{
@@ -62,9 +82,17 @@ await fetch(`http://localhost:8000/api/cursos`,{
     body: JSON.stringify(data)
   })
   .then((resp => resp.json()))
-  .then((resp) =>{ console.log(resp)})
+  .then((resp) =>{
+    setShowModal(true);  
+    if (resp.message != null) {
+      setModalMessage(resp.message);  
+    }else{
+      setModalMessage(resp.message);
+    }
+  })
   .catch((error) => console.log(`error: ${error}`))
-  console.log(data)
+  setUpdateTable(!updateTable)
+  //console.log(data)
 }
 
 const[buscar, setBuscar] = React.useState();
@@ -72,7 +100,7 @@ const[nome, setNome] = React.useState();
 const[descricao, setDescricao] = React.useState();
 const[duracao,setDuracao] = React.useState();
 const[id,setId] = React.useState();
-
+const[estado, setEstado] = React.useState(false);
 React.useEffect(()=>{
     const search = async () => {
         const resp = await fetch(`http://localhost:8000/api/cursos/${buscar}`);
@@ -81,22 +109,17 @@ React.useEffect(()=>{
         setDescricao(receve.descricao)
         setDuracao(receve.duracao)
         setId(receve.id)
-        console.log(receve)
+        //console.log(receve)
+        setEstado(true);
     }
     search()
 },[buscar])
-
 
 const changeResource = (id)=>{
     setBuscar(id)
 }
 
-const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
-  mode: 'all', 
-  resolver: zodResolver(TFormUpdate)
-  })
 
-const [updateTable, setUpdateTable] = React.useState(false)
 const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
   await fetch(`http://localhost:8000/api/cursos/${data.id}`,{
         method: 'PUT',
@@ -106,10 +129,68 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
         body: JSON.stringify(data)
     })
     .then((resp => resp.json()))
-    .then((resp) =>{ console.log(resp)})
+    .then((resp) =>{
+      setShowModal(true);  
+      if (resp.message != null) {
+        setModalMessage(resp.message);  
+      }else{
+        setModalMessage(resp.message);
+      }
+      })
     .catch((error) => console.log(`error: ${error}`))
-    setUpdateTable(true)
+    setUpdateTable(!updateTable)
 }
+
+/*Área q implementa o código pra pesquisar disciplinas*/
+    const [disciplina, setDisciplina] = React.useState([]);
+    const URLDISCIPLINA = "http://localhost:8000/api/disciplinas"
+   
+    useEffect( () => {
+      const respFetch = async () => {
+            const resp = await fetch (URLDISCIPLINA);
+            const respJson = await resp.json();
+            const conv1 = JSON.stringify(respJson.data)
+            const conv2 = JSON.parse(conv1)
+            setDisciplina(conv2)
+      } 
+      respFetch()
+   },[])
+
+   const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
+    /*vincular curso à classe*/       
+    const disciplinas = 
+    {
+      disciplinas: data.disciplinas
+    }
+  
+    await fetch(`http://localhost:8000/api/cursos/${data.idCursos}/disciplinas`,{
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(disciplinas)
+          })
+          .then((resp => resp.json()))
+          .then((resp) =>{ 
+            setShowModal(true);  
+            if (resp.message != null) {
+              setModalMessage(resp.errors.disciplinas[0]);  
+            }else{
+              setModalMessage(resp.message);
+            }
+          })
+          .catch((error) => console.log(`error: ${error}`))
+      }
+
+       //Vincular um curso a multiplas disciplina
+       const[selectedValues, setSelectedValues] = React.useState([]);
+       const disciplinaOptions = disciplina.map((c)=>{return {value: c.id, label: c.nome}});
+       const handleChange = (selectedOptions) => {
+         // Extrair valores e labels
+         const values = selectedOptions.map(option => option.value);
+         setSelectedValues(values);
+       };
+
     const columns = 
     [
         { 
@@ -122,27 +203,20 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
             selector: row => row.nome,
             sortable:true
          },
-        { 
-            name: 'Descrição',
-            selector: row => row.descricao,
-            sortable:true
-        },
-        {
-            name: 'Duracao',
-            selector: row => row.duracao +" Anos",
-            sortable: true
-        },
         {
             name: 'Ação',
-            cell: (row) => (<div className='flex flex-row space-x-2'><EditIcon className='w-5 h-4 absolute text-white'/> 
-            <Dialog >
-          <DialogTrigger asChild onClick={()=>{
+            cell: (row) => (<div className='flex flex-row space-x-2' onClick={()=>{
               changeResource(row.id)
+              if(estado){
               formUpdate.setValue('nome', nome)
               formUpdate.setValue('descricao', descricao)
               formUpdate.setValue('duracao', duracao)
               formUpdate.setValue('id', row.id)
-            }}>
+            }
+            setEstado(false)
+            }}><EditIcon className='w-5 h-4 absolute text-white'/> 
+            <Dialog >
+          <DialogTrigger asChild >
           <div title='actualizar' className='relative flex justify-center items-center'>
           <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
             <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
@@ -252,17 +326,14 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
             </p>
           </div>
           <div className="grid gap-2">
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="maxWidth">Nome</Label>
-              <p>{nome}</p>
-            </div>
+            
             <div className="grid grid-cols-3 items-center gap-4">
               <Label htmlFor="height">Descrição</Label>
               <p className='text-xs'>{descricao}</p>
             </div>
-            <div className="">
+            <div className="grid grid-cols-3 items-center gap-4">
               <Label htmlFor="height">Duração</Label>
-              <p >{duracao} Anos</p>
+              <p className='text-xs'>{duracao} Anos</p>
             </div>
           </div>
         </div>
@@ -270,7 +341,64 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
     </Popover>
             </div>
             <div title='excluir' className='relative flex justify-center items-center cursor-pointer' ><Trash className='w-5 h-4 absolute text-white'/> <button className='py-3 px-5 rounded-sm bg-red-600  border-red-600'></button></div>
-            </div>),
+            
+            <Dialog>
+            <DialogTrigger asChild >
+            <div title='vincular' className='relative flex justify-center items-center'>
+            <CombineIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
+              <Button className='h-7 px-5 bg-yellow-600 text-white font-semibold hover:bg-yellow-600 rounded-sm border-yellow-600'></Button>
+              </div>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px] bg-white">
+                  <DialogHeader>
+                    <DialogTitle>Vincular Curso</DialogTitle>
+                    <DialogDescription>
+                    Essa secção tem como objectivo relacionar cursos em alguma disciplina especifíca.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Form {...formConnect} >
+                <form onSubmit={formConnect.handleSubmit(handleSubmitConnect)
+                
+                } >
+                <div className="flex flex-col w-full py-4 bg-white">              
+                <div className="w-full">
+                <FormField
+                control={formConnect.control}
+                name="disciplinas"
+                render={({field})=>(
+                <FormItem>
+                  <Label htmlFor="disciplina" className="text-right">
+                  Disciplinas
+                </Label>
+                    <FormControl>
+                    <Select
+                    name="disciplina"
+                    isMulti
+                    options={disciplinaOptions}
+                    className="basic-multi-select"
+                    onChange={handleChange}
+                    classNamePrefix="select"
+                  />
+                    </FormControl>
+                  <FormMessage className='text-red-500 text-xs'/>
+                </FormItem>)
+                }
+                />
+                </div>
+               <div>
+               </div>
+            </div>
+        <DialogFooter>
+          <Button type="submit" onClick={()=>{
+                  formConnect.setValue('disciplinas', selectedValues)
+                  formConnect.setValue('idCursos', row.id);
+                }}>Vincular</Button>
+        </DialogFooter>
+        </form></Form>
+      </DialogContent>
+    </Dialog>
+    </div>
+            ),
         }, 
     ];
     
@@ -306,7 +434,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
 
         const [dados, setDados] = React.useState([])
         const [dataApi, setDataApi] = React.useState([])
-        const URL = "http://localhost:8000/api/cursos?page_size=15"
+        const URL = "http://localhost:8000/api/cursos"
        
        useEffect( () => {
             const respFetch = async () => {
@@ -327,16 +455,9 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
             setDados(newData)
         }
     
-        const handleRows = ({selectedRows}) => {
-            setTimeout(()=>{
-               changeResource(selectedRows[0].id)
-            },1000)  
-        }
-          
        const handleSort = (column, sortDirection) => {
         console.log({column, sortDirection})
        }
-    
 
     return (
     
@@ -351,9 +472,6 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
    fixedHeaderScrollHeight='300px'
    pagination
    defaultSortFieldId={1}
-   selectableRows
-   selectableRowsSingle
-   onSelectedRowsChange={handleRows}
    onSort={handleSort}
    subHeader
    subHeaderComponent={
@@ -439,9 +557,58 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
     </DialogContent>
   </Dialog>
 
+  {showModal &&
+  <MyDialog open={showModal} onOpenChange={setShowModal}>
+  
+    <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
+    {modalMessage == null &&
+        <div role="alert" className='w-full'>
+      <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+        <div>
+            <p>Sucesso</p>
         </div>
+        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+            <p>X</p>
+          </div>
+      </div>
+      <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
+      <CheckCircleIcon className='w-28 h-20 text-green-400'/>
+      
+      <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
+      <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
+        <Button className='bg-green-400 hover:bg-green-500
+        hover:font-medium
+         font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+    </div>
+    </div>
+    
+      </div>
+  }
+   {modalMessage != null &&
+        <div role="alert" className='w-full'>
+      <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+        <div>
+            <p>Falhou</p>
+        </div>
+        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+            <p>X</p>
+          </div>
+      </div>
+      <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
+      <AlertCircleIcon className='w-28 h-20 text-red-400'/>
+      <p className='font-poppins uppercase'>{modalMessage}</p>
+      <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
+        <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+    </div>
+    </div>
+    
+      </div>
+  }
+         </MyDialogContent>
+        </MyDialog>
    }
->
+        </div>
+      }>
 </DataTable>
 </div>
 )

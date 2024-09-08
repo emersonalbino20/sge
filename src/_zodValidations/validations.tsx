@@ -5,7 +5,7 @@ import { z } from "zod";
  export  const nomeCompletoZod = z.string({
     required_error: 'campo obrigatório',
     invalid_type_error: 'O nome deve ser uma string.',}
- ).min(6, {message:'o campo não pode conter menos de 4 letras'}).trim().max(100, {
+ ).trim().min(4, {message:'o campo não pode conter menos de 4 letras'}).max(100, {
     message: 'Limite de caracteres excedeu.',
   }).regex(FULL_NAME_REGEX, {message:'o campo só pode conter letras'})
 
@@ -242,3 +242,40 @@ export const  numeroCasaZod = z
     .min(1, {
       message: 'o ID do aluno deve ser maior do que 1 e deve ser válido.',
     })
+
+    export const nomeParentescos = z
+    .string({
+      required_error: 'O nome de parentesco é obrigatório.',
+      invalid_type_error: 'O nome de parentesco deve ser uma string.',
+    })
+    .trim()
+    .min(3, {
+      message: 'O nome de parentesco deve ter pelo menos 3 caracteres.',
+    })
+    .max(30, {
+      message: 'O nome de parentesco deve ter no máximo 30 caracteres.',
+    })
+    .regex(/^[a-zA-ZÀ-ÿ]+(?:\s[a-zA-ZÀ-ÿ]+)*$/, {
+      message:
+        'O nome de parentesco deve conter apenas letras e espaços e não pode começar ou terminar com espaço.',
+    })
+
+    export const disciplinas = z.array(
+      z
+        .number({
+          message: 'O array de disciplinas deve conter apenas números.',
+        })
+        .int({
+          message:
+            'O array de disciplinas deve conter apenas números inteiros.',
+        })
+        .positive({
+          message:
+            'O array de disciplinas deve conter apenas números inteiros positivos.',
+        }),
+      {
+        invalid_type_error:
+          'As disciplinas devem ser  enviadas no formato de array.',
+      }
+    )
+    .optional()

@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { EditIcon, PrinterIcon } from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon } from 'lucide-react'
 import { InfoIcon } from 'lucide-react'
 import { UserPlus, Trash } from 'lucide-react'
 import DataTable from 'react-data-table-component'
@@ -28,6 +28,7 @@ import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, ruaZod, bair
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { MyDialog, MyDialogContent } from './my_dialog'
 
 
 const TForm =  z.object({
@@ -81,37 +82,82 @@ export default function PersonIncharge (){
     resolver: zodResolver(TFormDelete)
    })
 
+    const [updateTable, setUpdateTable] = React.useState(false)
+    const [showModal, setShowModal] = React.useState(false);
+    const [modalMessage, setModalMessage] = React.useState('');
+    const [estado, setEstado] = React.useState(false);
    const handleSubmitCreate = async (data: z.infer<typeof TForm>,e) => {
           
-    await fetch(`http://localhost:8000/api/responsaveis/${data.id}/create`,{
+    const dados = 	{
+      nomeCompleto: data.nomeCompleto,
+      parentescoId: data.parentescoId,
+      endereco: {
+        bairro: data.bairro,
+        rua: data.rua,
+        numeroCasa: data.numeroCasa
+      },
+      contacto: {
+        telefone: data.telefone,
+        email: data.email
+      }
+    }
+
+    await fetch(`http://localhost:8000/api/alunos/${data.id}/responsaveis`,{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(dados)
         })
         .then((resp => resp.json()))
-        .then((resp) =>{ console.log(resp)})
+        .then((resp) =>{ 
+                setShowModal(true);  
+                if (resp.message != null) {
+                  setModalMessage(resp.message);  
+                }else{
+                  setModalMessage(resp.message);
+                }
+        })
         .catch((error) => console.log(`error: ${error}`))
-        console.log(data)
-        
+        setUpdateTable(!updateTable)        
     }
 
-    const [updateTable, setUpdateTable] = React.useState(false)
    const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>) => {
-          
+       
+    const dados = 	{
+      nomeCompleto: data.nomeCompleto,
+      parentescoId: data.parentescoId,
+      endereco: {
+        bairro: data.bairro,
+        rua: data.rua,
+        numeroCasa: data.numeroCasa
+      },
+      contacto: {
+        telefone: data.telefone,
+        email: data.email
+      }
+    }
+
     await fetch(`http://localhost:8000/api/responsaveis/${data.responsavelId}`,{
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(dados)
         })
         .then((resp => resp.json()))
-        .then((resp) =>{ console.log(resp)})
+        .then((resp) =>{ 
+          setShowModal(true);  
+          if (resp.message != null) {
+            setModalMessage(resp.message);  
+          }else{
+            setModalMessage(resp.message);
+          }
+            console.log(resp)
+        })
         .catch((error) => console.log(`error: ${error}`))
-        setUpdateTable(true)
-        console.log(data)
+        setUpdateTable(!updateTable)
+        //console.log("olá")
         
     }
 
@@ -125,11 +171,16 @@ export default function PersonIncharge (){
               body: JSON.stringify(data)
           })
           .then((resp => resp.json()))
-          .then((resp) =>{ console.log(resp)})
+          .then((resp) =>{ 
+            setShowModal(true);  
+            if (resp.message != null) {
+              setModalMessage(resp.message);  
+            }else{
+              setModalMessage(resp.message);
+            }
+        })
           .catch((error) => console.log(`error: ${error}`))
-          setUpdateTable(true)
-          console.log(data)
-          
+          setUpdateTable(!updateTable)
       }
 
 /*Buscar dados do parentetesco*/
@@ -175,9 +226,14 @@ React.useEffect(()=>{
           }]
           setDados(obj)
           setDataApi(obj)
+          setEstado(true)
         }
         search()
     },[buscar])
+
+    const changeResource = (id)=>{
+      setBuscar(id)
+    }
 
     const columns = 
     [
@@ -199,17 +255,21 @@ React.useEffect(()=>{
        },
         {
             name: 'Ação',
-            cell: (row) => (<div className='flex flex-row space-x-2'>
+            cell: (row) => (<div className='flex flex-row space-x-2'onClick={()=>{
+              changeResource(row.id)
+              if(estado){
+                formUpdate.setValue('nomeCompleto', nome)
+                formUpdate.setValue('telefone', telefone)
+                formUpdate.setValue('email', email)
+                formUpdate.setValue('bairro', bairro)
+                formUpdate.setValue('rua', rua)
+                formUpdate.setValue('numeroCasa', parseInt(casa))
+                formUpdate.setValue('responsavelId', row.id)
+                setEstado(false)
+              }
+              }}>
             <Dialog >
-      <DialogTrigger asChild onClick={()=>{
-              formUpdate.setValue('nomeCompleto', nome)
-              formUpdate.setValue('telefone', telefone)
-              formUpdate.setValue('email', email)
-              formUpdate.setValue('bairro', bairro)
-              formUpdate.setValue('rua', rua)
-              formUpdate.setValue('numeroCasa', casa)
-              formUpdate.setValue('responsavelId', row.id)
-            }}>
+      <DialogTrigger asChild >
     <div title='actualizar' className='relative flex justify-center items-center' >
     <EditIcon className='w-5 h-4 absolute text-white'/> 
       <Button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm border-blue-600'></Button>
@@ -225,9 +285,7 @@ React.useEffect(()=>{
       </DialogHeader>
       <Form {...formUpdate} >
      <form onSubmit={formUpdate.handleSubmit(handleSubmitUpdate)} >
-     
-  
-  <div className="w-full flex flex-col justify-between  ">
+     <div className="w-full flex flex-col justify-between  ">
         <fieldset>
             <legend className='font-robotoSlab text-sm'>Dados Pessoal</legend>
             <div className='w-full flex flex-col '>
@@ -321,7 +379,7 @@ React.useEffect(()=>{
         </div>
         <div className='w-full'>
           <Label htmlFor="casa" className="text-right">
-            No. Casa
+            Número da Casa
           </Label>
          
             <FormField
@@ -331,7 +389,7 @@ React.useEffect(()=>{
             <FormControl>
             <FormItem>
          
-          <Input id="casa" type='number' {...field} className="w-full"  min="0"  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
+          <Input id="casa" type='number' {...field} className="w-full"  min="1"  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
           <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
           </FormControl>
@@ -379,23 +437,11 @@ React.useEffect(()=>{
           </FormItem>
         )}/>
          </div></div></fieldset>
-         <div className='w-full mb-3'>
          
-            <FormField
-          control={formUpdate.control}
-          name="responsavelId"
-          render={({field})=>(
-            <FormControl>
-            <FormItem>
-          <Input id="id" type='hidden' {...field} className="w-full" min={0} onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
-          <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-          </FormControl>
-        )}/>
-        </div>
       </div>
- <DialogFooter>
-      <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold' type='submit'>Actualizar</Button>
+      
+      <DialogFooter>
+        <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold ' type='submit'>Actualizar</Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -759,7 +805,56 @@ React.useEffect(()=>{
       </form>
       </Form>
     </DialogContent>
-  </Dialog>      </div>
+  </Dialog> 
+  {showModal &&
+  <MyDialog open={showModal} onOpenChange={setShowModal}>
+  
+    <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
+    {modalMessage == null &&
+        <div role="alert" className='w-full'>
+      <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+        <div>
+            <p>Sucesso</p>
+        </div>
+        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+            <p>X</p>
+          </div>
+      </div>
+      <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
+      <CheckCircleIcon className='w-28 h-20 text-green-400'/>
+      
+      <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
+      <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
+        <Button className='bg-green-400 hover:bg-green-400 font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+    </div>
+    </div>
+    
+      </div>
+  }
+   {modalMessage != null &&
+        <div role="alert" className='w-full'>
+      <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+        <div>
+            <p>Falhou</p>
+        </div>
+        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+            <p>X</p>
+          </div>
+      </div>
+      <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
+      <AlertCircleIcon className='w-28 h-20 text-red-400'/>
+      <p className='font-poppins uppercase'>{modalMessage}</p>
+      <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
+        <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+    </div>
+    </div>
+    
+      </div>
+  }
+         </MyDialogContent>
+        </MyDialog>
+   }
+   </div>
       
    }
 >

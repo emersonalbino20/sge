@@ -14,46 +14,45 @@ import {
     PopoverContent,
     PopoverTrigger,
   } from "@/components/ui/popover"
+
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { CombineIcon, EditIcon, PlusIcon, PrinterIcon } from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, Check, CombineIcon, EditIcon, PlusIcon, PrinterIcon } from 'lucide-react'
 import { InfoIcon } from 'lucide-react'
 import { UserPlus } from 'lucide-react'
 import DataTable from 'react-data-table-component'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod } from '@/_zodValidations/validations'
+import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, disciplinas } from '@/_zodValidations/validations'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import Select from 'react-select';
+import { MyDialog, MyDialogContent } from './my_dialog'
+
 
 const TForm =  z.object({
   nomeCompleto: nomeCompletoZod,
   dataNascimento: dataNascimentoZod,
   telefone: telefoneZod,
   email: emailZod,
+  disciplinas: disciplinas
 })
 
-type TFormUpdate = {
-  nome: string,
-  dataNascimento: string,
-  telefone: string,
-  email: string,
-  
-}
 const TFormUpdate =  z.object({
   nomeCompleto: nomeCompletoZod,
   dataNascimento: dataNascimentoZod,
   telefone: telefoneZod,
   email: emailZod,
+  disciplinas: disciplinas,
   id: z.number()
 })
 
 /*Vinculo de professor e disciplina*/
 const TFormConnect =  z.object({
   idProfessor: z.number(),
-  idDisciplina: z.number()
+  disciplinas: disciplinas
 })
 type FormProps =  z.infer<typeof TForm>;
 type FormPropsUpdate =  z.infer<typeof TFormUpdate>;
@@ -69,8 +68,15 @@ export default function Teacher (){
     resolver: zodResolver(TFormUpdate)
    })
 
+   const formConnect  = useForm<z.infer<typeof TFormConnect>>({
+    mode: 'all', 
+    resolver: zodResolver(TFormConnect)
+   })
+
+   const [updateTable, setUpdateTable] = React.useState(false)
+   const[estado, setEstado] = React.useState(false);
    const [showModal, setShowModal] = React.useState(false);
-       const [modalMessage, setModalMessage] = React.useState('');  
+   const [modalMessage, setModalMessage] = React.useState('');  
    const handleSubmitCreate = async (data: z.infer<typeof TForm>,e) => {
 
     const dados = {
@@ -80,9 +86,7 @@ export default function Teacher (){
         telefone: data.telefone,
         email: data.email,
       },
-      disciplinas: [
-        1
-      ]
+      disciplinas: data.disciplinas
     }
           
     await fetch(`http://localhost:8000/api/professores/`,{
@@ -94,13 +98,15 @@ export default function Teacher (){
         })
         .then((resp => resp.json()))
         .then((resp) =>{ 
-                setShowModal(true);
-                setModalMessage(resp.message);
-               console.log(resp);
+          setShowModal(true);  
+          if (resp.message != null) {
+            setModalMessage(resp.message);  
+          }else{
+            setModalMessage(resp.message);
+          }
         })
         .catch((error) => console.log(`error: ${error}`))
-        console.log(data)
-        
+        setUpdateTable(!updateTable) 
     }
 
     const[buscar, setBuscar] = React.useState(2);
@@ -108,25 +114,26 @@ export default function Teacher (){
     const[nasc, setNasc] = React.useState();
     const[telefone,setTelefone] = React.useState();
     const[email,setEmail] = React.useState();
-
+    
     React.useEffect(()=>{
         const search = async () => {
             const resp = await fetch(`http://localhost:8000/api/professores/${buscar}`);
             const receve = await resp.json()
-            console.log(receve.id)
             setNome(receve.nomeCompleto)
             setNasc(receve.dataNascimento)
             setTelefone(receve.contacto.telefone)
             setEmail(receve.contacto.email)
+            setEstado(true);
         }
         search()
     },[buscar])
-    const changeResource=(id)=>{
+
+    const changeResource= (id)=>{
         setBuscar(id)
     }
 
 
-    const [updateTable, setUpdateTable] = React.useState(false)
+  
    const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>) => {
           
     const dados = {
@@ -146,53 +153,45 @@ export default function Teacher (){
         })
         .then((resp => resp.json()))
         .then((resp) =>{
-               console.log(resp);
-              })
+            setShowModal(true);  
+            if (resp.message != null) {
+              setModalMessage(resp.message);  
+            }else{
+              setModalMessage(resp.message);
+            }
+          })
         .catch((error) => console.log(`error: ${error}`))
-        setUpdateTable(true)
+        
+        setUpdateTable(!updateTable)
         console.log(data)
         
     }
 
     /*Área q implementa o código pra pesquisar disciplinas*/
-    const [dataDisciplina, setDataDisciplina] = React.useState([]);
-    const [nomeDisciplina, setNomeDisciplina] = React.useState([]);
-    const [idDisciplina, setIdDisciplina] = React.useState();
-    const [dataApiDisciplina, setDataApiDisciplina] = React.useState([]);
+    const [disciplina, setDisciplina] = React.useState([]);
     const URLDISCIPLINA = "http://localhost:8000/api/disciplinas"
    
-   useEffect( () => {
-        const respFetchDisciplinas = async () => {
-              const resp = await fetch (URLDISCIPLINA);
-              const respJson = await resp.json();
-              const conv1 = JSON.stringify(respJson.data)
-              const conv2 = JSON.parse(conv1)
-              setDataApiDisciplina(conv2)
-              
-        } 
-         respFetchDisciplinas()
+    useEffect( () => {
+      const respFetch = async () => {
+            const resp = await fetch (URLDISCIPLINA);
+            const respJson = await resp.json();
+            const conv1 = JSON.stringify(respJson.data)
+            const conv2 = JSON.parse(conv1)
+            setDisciplina(conv2)
+      } 
+      respFetch()
    },[])
 
-    const handleFilterDisciplina =  (event) => {
-        const newData = dataApiDisciplina.filter( row => {
-            return row.nome.toLowerCase().includes(event.target.value.toLowerCase().trim())
-        })
-        setDataDisciplina(newData[0]);
-        setNomeDisciplina(newData[0].nome);
-        setIdDisciplina(newData[0].id);            
-    }
-
-  const formConnect  = useForm<z.infer<typeof TFormConnect>>({
-      mode: 'all', 
-      resolver: zodResolver(TFormConnect)
-     })
+    
+  
   
   const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
     /*vincular professor à disciplina*/       
     const disciplinas = 
     {
-      disciplinas: [data.idDisciplina]
+      disciplinas: data.disciplinas
     }
+    //console.log(data.disciplinas)
   
     await fetch(`http://localhost:8000/api/professores/${data.idProfessor}/disciplinas`,{
               method: 'POST',
@@ -202,11 +201,26 @@ export default function Teacher (){
               body: JSON.stringify(disciplinas)
           })
           .then((resp => resp.json()))
-          .then((resp) =>{ console.log(resp)})
+          .then((resp) =>{ 
+            setShowModal(true);  
+            if (resp.message != null) {
+              setModalMessage(resp.errors.disciplinas[0]);  
+            }else{
+              setModalMessage(resp.message);
+            }
+          })
           .catch((error) => console.log(`error: ${error}`))
-          console.log(disciplinas)
       }
 
+      //Vincular um professor a multiplas disciplinas
+      const[selectedValues, setSelectedValues] = React.useState([]);
+      const disciplinaOptions = disciplina.map((c)=>{return {value: c.id, label: c.nome}});
+      const handleChange = (selectedOptions) => {
+        // Extrair valores e labels
+        const values = selectedOptions.map(option => option.value);
+        setSelectedValues(values);
+      };
+      
     const columns = 
     [
         { 
@@ -226,19 +240,22 @@ export default function Teacher (){
         },
         {
             name: 'Ação',
-            cell: (row) => (<div className='flex flex-row space-x-2'>
-              
-            <Dialog >
-      <DialogTrigger asChild onClick={()=>{
+            cell: (row) => (<div className='flex flex-row space-x-2'  onClick={()=>{
+              changeResource(row.id)
+              if(estado){
               formUpdate.setValue('nomeCompleto', nome)
               formUpdate.setValue('dataNascimento', nasc)
               formUpdate.setValue('telefone', telefone)
               formUpdate.setValue('email', email)
               formUpdate.setValue('id', row.id)
+            }
+            setEstado(false)
             }}>
+         <Dialog >
+      <DialogTrigger asChild >
     <div title='actualizar' className='relative flex justify-center items-center' >
     <EditIcon className='w-5 h-4 absolute text-white'/> 
-      <Button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm border-blue-600'></Button>
+      <Button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm border-blue-600' ></Button>
       </div>
       
     </DialogTrigger>
@@ -342,12 +359,11 @@ export default function Teacher (){
         )}/>
         </div>
       </div>
-      <DialogFooter><Button className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold' type='submit'>Actualizar</Button>
+      <DialogFooter><Button className='bg-green-500 border-green-500 text-white hover:bg-green-500' type='submit'>Actualizar</Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
   </Dialog>
-    
     <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>
            
             <Popover >
@@ -365,17 +381,15 @@ export default function Teacher (){
               Inspecione os dados do professor
             </p>
           </div>
-          <div className="grid gap-2">
-            
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="maxWidth">Nome</Label>
-              <p>{nome}</p>
+          <div className="flex flex-col space-y-2">
+            <div className="w-full flex space-x-2">
+              <Label htmlFor="height">Telf:</Label>
+              <p className='text-sm lowercase'>{telefone}</p>
             </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="height">Data de Nasc.</Label>
-              <p>{nasc}</p>
+            <div className="w-full flex space-x-2">
+              <Label htmlFor="height">Email:</Label>
+              <p className='text-sm lowercase'>{email}</p>
             </div>
-            
           </div>
         </div>
       </PopoverContent>
@@ -399,26 +413,37 @@ export default function Teacher (){
               <form onSubmit={formConnect.handleSubmit(handleSubmitConnect)
               
               } >
-               
               <div className="flex flex-col w-full py-4 bg-white">              
               <div className="w-full">
-                <Label htmlFor="username" className="text-right">
-                  Procurar Disciplina
-                </Label>
-                <Input
-                    id="name"
-                    className="w-full italic"
-                    placeholder='search by...'
-                    onChange={handleFilterDisciplina}
-                  />
+              <FormField
+              control={formConnect.control}
+              name="disciplinas"
+              render={({field})=>(
+              <FormItem>
+                <Label htmlFor="disciplina" className="text-right">
+                Disciplinas
+              </Label>
+                  <FormControl>
+                  <Select
+                  name="disciplinas"
+                  isMulti
+                  options={disciplinaOptions}
+                  className="basic-multi-select"
+                  onChange={handleChange}
+                  classNamePrefix="select"
+                />
+                  </FormControl>
+                <FormMessage className='text-red-500 text-xs'/>
+              </FormItem>)
+              }
+              />
               </div>
              <div>
-              <p>{nomeDisciplina}</p>
              </div>
           </div>
       <DialogFooter>
         <Button type="submit" onClick={()=>{
-                formConnect.setValue('idDisciplina', idDisciplina);
+                formConnect.setValue('disciplinas', selectedValues)
                 formConnect.setValue('idProfessor', row.id);
               }}>Vincular</Button>
       </DialogFooter>
@@ -459,7 +484,7 @@ export default function Teacher (){
         
         const [dados, setDados] = React.useState([])
         const [dataApi, setDataApi] = React.useState([])
-        const URL = "http://localhost:8000/api/professores?page_size=7"
+        const URL = "http://localhost:8000/api/professores"
        
        useEffect( () => {
             const respFetch = async () => {
@@ -480,14 +505,6 @@ export default function Teacher (){
             setDados(newData)
         }
     
-        const handleRows = ({selectedRows}) => {
-            setTimeout(()=>{
-                changeResource(selectedRows[0].id)
-            },1000)
-            
-            
-        }
-          
        const handleSort = (column, sortDirection) => {
         console.log({column, sortDirection})
        }
@@ -500,13 +517,10 @@ export default function Teacher (){
     conditionalRowStyles={conditionalRowStyles}
     columns={columns}
     data={dados}
+    defaultSortFieldId={1}
     fixedHeader
     fixedHeaderScrollHeight='400px'
     pagination
-    defaultSortFieldId={1}
-    selectableRows
-    selectableRowsSingle
-    onSelectedRowsChange={handleRows}
     onSort={handleSort}
     subHeader
    subHeaderComponent={ 
@@ -516,7 +530,7 @@ export default function Teacher (){
            <PrinterIcon className='w-5 h-4 absolute text-white font-extrabold'/>
            <button className='py-4 px-5 bg-green-700 border-green-700 rounded-sm ' onClick={() => window.print()}></button>
        </div>
-    {!showModal &&   
+     
        <Dialog >
     <DialogTrigger asChild>
     <div title='cadastrar' className='relative flex justify-center items-center'>
@@ -606,32 +620,89 @@ export default function Teacher (){
           <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
-        <i>IMPLEMENTAR INSERÇÃO DE MULTIPLAS DISCIPLINAS</i>
         </div>
+        <div className='flex flex-col w-full'>
+        <FormField
+              control={form.control}
+              name="disciplinas"
+              render={({field})=>(
+              <FormItem>
+                <Label htmlFor="disciplina" className="text-right">
+                Leciona
+              </Label>
+                  <FormControl>
+                  <Select
+                  name="disciplinas"
+                  isMulti
+                  options={disciplinaOptions}
+                  className="basic-multi-select"
+                  onChange={handleChange}
+                  classNamePrefix="select"
+                />
+                  </FormControl>
+                <FormMessage className='text-red-500 text-xs'/>
+              </FormItem>)
+              }
+              />
+          </div>
       </div>
       <DialogFooter>
-      <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold' type='submit'>Cadastrar</Button>
+      <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold ' onClick={()=>{form.setValue('disciplinas', selectedValues)}}type='submit'>Cadastrar</Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
   </Dialog>
-  }
-  {showModal && 
-  <Dialog open={showModal} onOpenChange={setShowModal}>
-    <DialogTrigger asChild>
-    <div className='relative flex justify-center items-center'>
+  
+  {showModal &&
+  <MyDialog open={showModal} onOpenChange={setShowModal}>
+  
+    <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
+    {modalMessage == null &&
+        <div role="alert" className='w-full'>
+      <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+        <div>
+            <p>Sucesso</p>
+        </div>
+        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+            <p>X</p>
+          </div>
       </div>
-    </DialogTrigger>
-    <DialogContent className="sm:max-w-[425px] bg-white">
-      <DialogHeader>
-        <DialogTitle>Resposta</DialogTitle>
-        <DialogDescription>
-          {modalMessage}
-        </DialogDescription>
-      </DialogHeader>
-         </DialogContent>
-        </Dialog>
-    }
+      <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
+      <CheckCircleIcon className='w-28 h-20 text-green-400'/>
+      
+      <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
+      <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
+        <Button className='bg-green-400 hover:bg-green-500
+        hover:font-medium
+         font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+    </div>
+    </div>
+    
+      </div>
+  }
+   {modalMessage != null &&
+        <div role="alert" className='w-full'>
+      <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+        <div>
+            <p>Falhou</p>
+        </div>
+        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+            <p>X</p>
+          </div>
+      </div>
+      <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
+      <AlertCircleIcon className='w-28 h-20 text-red-400'/>
+      <p className='font-poppins uppercase'>{modalMessage}</p>
+      <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
+        <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+    </div>
+    </div>
+    
+      </div>
+  }
+         </MyDialogContent>
+        </MyDialog>
+   }
        </div>
       
    }

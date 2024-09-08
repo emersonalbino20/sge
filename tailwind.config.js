@@ -6,6 +6,7 @@ module.exports = {
     './components/**/*.{ts,ts, js}',
     './app/**/*.{ts,tsx,js}',
     './src/**/*.{astro, html, js, jsx, md, mdx, svelte, ts,tsx, vue}',
+    './node_modules/@omit/react-confirm-dialog/dist/index.js'
   ],
   prefix: "",
   theme: {

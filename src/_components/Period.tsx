@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { EditIcon, PrinterIcon, Trash} from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, Trash} from 'lucide-react'
 import { InfoIcon } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
 import DataTable from 'react-data-table-component'
@@ -27,6 +27,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm} from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { MyDialog, MyDialogContent } from './my_dialog'
 
 
 
@@ -51,6 +52,15 @@ const formCreate  = useForm<z.infer<typeof TFormCreate>>({
   resolver: zodResolver(TFormCreate)
 })
 
+const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
+  mode: 'all', 
+  resolver: zodResolver(TFormUpdate)
+  })
+
+   const [updateTable, setUpdateTable] = React.useState(false)
+   const[estado, setEstado] = React.useState(false);
+   const [showModal, setShowModal] = React.useState(false);
+   const [modalMessage, setModalMessage] = React.useState('');  
 const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>,e) => {
       
 await fetch(`http://localhost:8000/api/turnos/`,{
@@ -61,9 +71,16 @@ await fetch(`http://localhost:8000/api/turnos/`,{
     body: JSON.stringify(data)
   })
   .then((resp => resp.json()))
-  .then((resp) =>{ console.log(resp)})
+  .then((resp) =>{ 
+          setShowModal(true);  
+          if (resp.message != null) {
+            setModalMessage(resp.message);  
+          }else{
+            setModalMessage(resp.message);
+          }
+  })
   .catch((error) => console.log(`error: ${error}`))
-  console.log(data)
+  setUpdateTable(!updateTable);
 }
 
 const[buscar, setBuscar] = React.useState();
@@ -80,22 +97,11 @@ React.useEffect(()=>{
         setInicio(receve.inicio)
         setTermino(receve.termino)
         setId(receve.id)
-        //console.log(receve)
+        setEstado(true);
     }
     search()
 },[buscar])
 
-
-const changeResource = (id)=>{
-    setBuscar(id)
-}
-
-const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
-  mode: 'all', 
-  resolver: zodResolver(TFormUpdate)
-  })
-
-const [updateTable, setUpdateTable] = React.useState(false)
 const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
   await fetch(`http://localhost:8000/api/turnos/${data.id}`,{
         method: 'PUT',
@@ -105,10 +111,21 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
         body: JSON.stringify(data)
     })
     .then((resp => resp.json()))
-    .then((resp) =>{ console.log(resp)})
+    .then((resp) =>{ 
+          setShowModal(true);  
+          if (resp.message != null) {
+            setModalMessage(resp.message);  
+          }else{
+            setModalMessage(resp.message);
+          }
+    })
     .catch((error) => console.log(`error: ${error}`))
-    setUpdateTable(true)
+    setUpdateTable(!updateTable)
 }
+
+    const changeResource = (id)=>{
+      setBuscar(id)
+    }
     const columns = 
     [
         { 
@@ -133,15 +150,19 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
         },
         {
             name: 'Ação',
-            cell: (row) => (<div className='flex flex-row space-x-2'><EditIcon className='w-5 h-4 absolute text-white'/> 
-            <Dialog >
-          <DialogTrigger asChild onClick={()=>{
+            cell: (row) => (<div className='flex flex-row space-x-2' onClick={()=>{
               changeResource(row.id)
+              if (estado)
+              {
               formUpdate.setValue('nome', nome)
               formUpdate.setValue('inicio', inicio)
               formUpdate.setValue('termino', termino)
               formUpdate.setValue('id', row.id)
-            }}>
+              setEstado(false)
+              }
+            }}><EditIcon className='w-5 h-4 absolute text-white'/> 
+            <Dialog >
+          <DialogTrigger asChild >
           <div title='actualizar' className='relative flex justify-center items-center'>
           <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
             <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
@@ -270,8 +291,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
       </PopoverContent>
     </Popover>
             </div>
-            <div title='excluir' className='relative flex justify-center items-center cursor-pointer' ><Trash className='w-5 h-4 absolute text-white'/> <button className='py-3 px-5 rounded-sm bg-red-600  border-red-600'></button></div>
-            </div>),
+       </div>),
         }, 
     ];
     
@@ -328,12 +348,6 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
             setDados(newData)
         }
     
-        const handleRows = ({selectedRows}) => {
-            setTimeout(()=>{
-               changeResource(selectedRows[0].id)
-            },1000)  
-        }
-          
        const handleSort = (column, sortDirection) => {
         console.log({column, sortDirection})
        }
@@ -352,9 +366,6 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
    fixedHeaderScrollHeight='300px'
    pagination
    defaultSortFieldId={1}
-   selectableRows
-   selectableRowsSingle
-   onSelectedRowsChange={handleRows}
    onSort={handleSort}
    subHeader
    subHeaderComponent={
@@ -436,7 +447,56 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
       </form></Form>
     </DialogContent>
   </Dialog>
-
+  {showModal &&
+  <MyDialog open={showModal} onOpenChange={setShowModal}>
+  
+    <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
+    {modalMessage == null &&
+        <div role="alert" className='w-full'>
+      <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+        <div>
+            <p>Sucesso</p>
+        </div>
+        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+            <p>X</p>
+          </div>
+      </div>
+      <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
+      <CheckCircleIcon className='w-28 h-20 text-green-400'/>
+      
+      <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
+      <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
+        <Button className='bg-green-400 hover:bg-green-500
+        hover:font-medium
+         font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+    </div>
+    </div>
+    
+      </div>
+  }
+   {modalMessage != null &&
+        <div role="alert" className='w-full'>
+      <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+        <div>
+            <p>Falhou</p>
+        </div>
+        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+            <p>X</p>
+          </div>
+      </div>
+      <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
+      <AlertCircleIcon className='w-28 h-20 text-red-400'/>
+      <p className='font-poppins uppercase'>{modalMessage}</p>
+      <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
+        <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+    </div>
+    </div>
+    
+      </div>
+  }
+         </MyDialogContent>
+        </MyDialog>
+   }
         </div>
    }
 >

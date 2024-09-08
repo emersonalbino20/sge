@@ -31,8 +31,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 
 const TFormMethod =  z.object({
-  nome: methodPay,
-  id: z.number()
+  nome: methodPay
 })
 
 
@@ -271,7 +270,7 @@ React.useEffect(()=>{
         )}
            />
            <FormField
-          name={'id'}
+          name={''}
           render={({field})=>(
           <FormItem>
             <Label htmlFor="method" className="text-right">

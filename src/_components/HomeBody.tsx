@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import * as React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import IPPUImage from '../assets /_images/IPPU.jpg'
+import IPPUImage from '../assets /_images/IPPU.png'
 
 export default function HomeBody(){
    

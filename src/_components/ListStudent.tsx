@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useEffect } from 'react'
-import { EditIcon, Info } from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, EditIcon, Info } from 'lucide-react'
 import Table from './Table'
 import {
     Dialog,
@@ -31,7 +31,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver} from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import {nomeCompletoZod,  dataNascimentoZod, generoZod, numeroBiZod, bairroZod, ruaZod, numeroCasaZod, telefoneZod, emailZod} from '../_zodValidations/validations'
+import {nomeCompletoZod,  dataNascimentoZod, generoZod, numeroBiZod, bairroZod, ruaZod, numeroCasaZod, telefoneZod, emailZod, idZod} from '../_zodValidations/validations'
+import { MyDialog, MyDialogContent } from './my_dialog'
 
 const TForm =  z.object({
     nomeCompleto: nomeCompletoZod,
@@ -47,13 +48,31 @@ const TForm =  z.object({
     id: z.number()
   })
 
-  type FormProps =  z.infer<typeof TForm>;
+  const TFormEncarregado =  z.object({
+    nomeCompleto: nomeCompletoZod,
+    telefone: telefoneZod,
+    email: emailZod,
+    parentescoId: z.number(),
+    bairro: bairroZod,
+    rua: ruaZod,
+    numeroCasa: numeroCasaZod,
+    id: idZod
+  })
 
+  type FormProps =  z.infer<typeof TForm>;
+  type FormPropsEncarregado =  z.infer<typeof TFormEncarregado>;
 
 export default function ListStudent(){
     const form  = useForm<z.infer<typeof TForm>>({
         mode: 'all', 
         resolver: zodResolver(TForm)
+       })
+
+    const formEncarregado  = useForm<z.infer<typeof TFormEncarregado>>({
+        mode: 'all', 
+        resolver: zodResolver(TFormEncarregado),
+        defaultValues:{
+          numeroCasa: 1}
        })
 
        const [showModal, setShowModal] = React.useState(false);
@@ -87,12 +106,52 @@ export default function ListStudent(){
               .then((resp => resp.json()))
               .then((resp) =>{ 
                 setShowModal(true);
-                setModalMessage(resp.message);
-               console.log(resp);
+                if (resp.message != null) {
+                  setModalMessage(resp.message);  
+                }else{
+                  setModalMessage(resp.message);
+                }
+                console.log(resp);
               })
               .catch((error) => console.log(`error: ${error}`))
-              setUpdateTable(true)
+              setUpdateTable(!updateTable)
           }
+
+      const handleSubmitCreateEncarregado = async (data: z.infer<typeof TFormEncarregado>,e) => {
+      
+        const dados = 	{
+          nomeCompleto: data.nomeCompleto,
+          parentescoId: data.parentescoId,
+          endereco: {
+            bairro: data.bairro,
+            rua: data.rua,
+            numeroCasa: data.numeroCasa
+          },
+          contacto: {
+            telefone: data.telefone,
+            email: data.email
+          }
+        }
+
+        await fetch(`http://localhost:8000/api/alunos/${data.id}/responsaveis`,{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dados)
+            })
+            .then((resp => resp.json()))
+            .then((resp) =>{  
+                  setShowModal(true);  
+                  if (resp.message != null) {
+                  setModalMessage(resp.message);  
+                }else{
+                  setModalMessage(resp.message);
+                }
+            })
+            .catch((error) => console.log(`error: ${error}`))
+            setUpdateTable(!updateTable)
+        }
 
     const[buscar, setBuscar] = React.useState(2);
     const[nome, setNome] = React.useState();
@@ -106,7 +165,7 @@ export default function ListStudent(){
     const[casa,setCasa] = React.useState();
     const[telefone,setTelefone] = React.useState();
     const[email,setEmail] = React.useState();
-
+    const[estado, setEstado] = React.useState(false);
     React.useEffect(()=>{
         const search = async () => {
             const resp = await fetch(`http://localhost:8000/api/alunos/${buscar}`);
@@ -123,6 +182,7 @@ export default function ListStudent(){
             setCasa(receve.endereco.numeroCasa)
             setTelefone(receve.contacto.telefone)
             setEmail(receve.contacto.email)
+            setEstado(true)
             
         }
         search()
@@ -142,13 +202,46 @@ export default function ListStudent(){
       }
       search()
   },[buscar])
+
+  /*Buscar dados do parentetesco*/
+const[parentesco, setParentesco] = React.useState([]);
+React.useEffect(()=>{
+    const search = async () => {
+        const resp = await fetch(`http://localhost:8000/api/parentescos/`);
+        const respJson = await resp.json()
+        const conv1 = JSON.stringify(respJson.data)
+        const conv2 = JSON.parse(conv1)
+        setParentesco(conv2)
+    }
+    search()
+},[])
+
+//Buscar todos encarregados em funcao do id do aluno
+const[idAluno, setIdAluno] = React.useState([]);
+const[idEncarregado, setIdEncarregado] = React.useState(0);
+const[encarregadoAl, setEncarregadoAl] = React.useState([]);
+const[encarregado, setEncarregado] = React.useState([]);
+const[showEnc, setShowEnc] = React.useState(false);
+
+const URLENCARREGADO = `http://localhost:8000/api/responsaveis/${idEncarregado}`
+React.useEffect(()=>{
+    const search = async () => {
+        const resp = await fetch(`http://localhost:8000/api/alunos/${idAluno}/responsaveis`);
+        const respJson = await resp.json()
+        const conv1 = JSON.stringify(respJson.data)
+        const conv2 = JSON.parse(conv1)
+        setEncarregadoAl(conv2)
+        //console.log(conv2[0].nomeCompleto)
+        const respEnc = await fetch(URLENCARREGADO);
+        const respEncJson = await respEnc.json()
+        setEncarregado(respEncJson)
+        //console.log(respEncJson.contacto.telefone)
+    }
+    search()
+},[idAluno, idEncarregado])
+
     const changeResource=(id)=>{
         setBuscar(id)
-    }
-    const navigate = useNavigate()
-    const updatePage = () => {
-        
-        navigate('/StudentUpdatePage')
     }
     const columns = 
 [
@@ -176,24 +269,31 @@ export default function ListStudent(){
     },
     {
         name: 'Ação',
-        cell: (row) => (<div className='flex flex-row  cursor-pointer space-x-2'  >
+        cell: (row) => (<div  className='flex flex-row  cursor-pointer space-x-2' onClick={()=>{
+          changeResource(row.id)
+          if(estado){
+            form.setValue('nomeCompleto', nome)
+            form.setValue('genero', genero)
+            form.setValue('dataNascimento', nasc)
+            form.setValue('nomeCompletoPai', pai)
+            form.setValue('nomeCompletoMae', mae)
+            form.setValue('bairro', bairro)
+            form.setValue('rua', rua)
+            form.setValue('numeroCasa', parseInt(casa))
+            form.setValue('telefone', telefone)
+            form.setValue('email', email)
+            form.setValue('id', row.id)
+            setIdAluno(row.id)
+            formEncarregado.setValue('id', row.id)
+            setEstado(false)
+          }
+          
+          }}>
              <Dialog >
-    <DialogTrigger asChild onClick={()=>{
-        form.setValue('nomeCompleto', nome)
-        form.setValue('genero', genero)
-        form.setValue('dataNascimento', nasc)
-        form.setValue('nomeCompletoPai', pai)
-        form.setValue('nomeCompletoMae', mae)
-        form.setValue('bairro', bairro)
-        form.setValue('rua', rua)
-        form.setValue('numeroCasa', parseInt(casa))
-        form.setValue('telefone', telefone)
-        form.setValue('email', email)
-        form.setValue('id', row.id)
-      }}>
+    <DialogTrigger asChild >
     <div title='actualizar' className='relative flex justify-center items-center' >
     <EditIcon className='w-5 h-4 absolute text-white font-extrabold'/>
-      <button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm' ></button>
+      <Button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'  ></Button>
       </div>
       
     </DialogTrigger>
@@ -281,7 +381,7 @@ export default function ListStudent(){
           render={({field})=>(
            <FormControl>
           <FormItem>
-          <Input type='date' id="nasc" {...field} className="w-full"/>
+          <Input type='date' max="2010-01-01" min="1960-01-01" id="nasc" {...field} className="w-full"/>
           <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
           </FormControl>
@@ -420,7 +520,6 @@ export default function ListStudent(){
          </div></div></fieldset>
         </div>
       
-      
       <DialogFooter>
         <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500' type='submit'>Guardar Mudanças</Button>
       </DialogFooter>
@@ -524,48 +623,221 @@ export default function ListStudent(){
       </DialogFooter>
     </DialogContent>
   </Dialog>
-  <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>
-           
-           <Popover >
-     <PopoverTrigger asChild className='bg-white'>
+  {!showEnc && 
+  <Dialog >
+    <DialogTrigger asChild >
+    <div title='cadastrar' className='relative flex justify-center items-center' >
+    <UserPlus className='w-5 h-4 absolute text-white font-extrabold'/>
+      <button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm' onClick={()=>{setShowEnc(false)}}></button>
+      </div>
+      
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[625px] overflow-y-scroll h-[550px] bg-white">
+      <DialogHeader>
+        <DialogTitle>Cadastrar Registro</DialogTitle>
+        <DialogDescription>
+        <p>cadastre um novo novo encarregado para o aluno(a) <span className='font-bold'>{nome}</span>, preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
+        </p>
+        </DialogDescription>
+      </DialogHeader>
+     
+      <Form {...formEncarregado} >
+     <form onSubmit={formEncarregado.handleSubmit(handleSubmitCreateEncarregado)} >
+     <div className="w-full flex flex-col justify-between  ">
+        <fieldset>
+            <legend className='font-robotoSlab text-sm'>Dados Pessoal</legend>
+            <div className='w-full flex flex-col '>
+            <div className="w-full flex flex-row justify-between space-x-2 ">
+            <div className='w-full'>
+          <Label htmlFor="name" className="text-right">
+            Name 
+          </Label>
+          <FormField
+          control={formEncarregado.control}
+          name="nomeCompleto"
+          render={({field})=>(
+            <FormItem>
+            <FormControl>
+          <Input 
+            className="w-full py-5"
+            
+            {...field} 
+            
+          />
+          </FormControl>
+          <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+        )}
+           />
+        </div>
+        <div className='w-full'>
+          <Label htmlFor="genero" className="text-right">
+            Parentesco
+          </Label>
+          <FormField
+              control={formEncarregado.control}
+              name="parentescoId"
+              render={({field})=>(
+          <FormItem>
+          <FormControl>
+          <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                      <option value="">Selecione o grau</option>
+                      {
+                            parentesco.map((field)=>{
+                                return <option value={`${field.id}`}>{field.nome}</option>
+                            })
+                      }
+                  </select>
+                  </FormControl>
+                  <FormMessage className='text-red-500 text-xs'/>
+              </FormItem>)
+              }
+              />
+                       
+          </div>
+          </div>
+          <div className='w-full'>
+          <Label htmlFor="encarregado" className="text-right">
+            Encarregado
+          </Label>
+          <FormField
+              name=""
+              render={({field})=>(
+          <FormItem>
+          <FormControl>
+          <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value),
+          setIdEncarregado(parseInt(e.target.value, 10) || 0)
+          )}}>
+                      <option value="">ver os encarregados</option>
+                      {
+                            encarregadoAl.map((field)=>{
+                                return <option value={`${field.id}`}>{field.nomeCompleto}</option>
+                            })
+                      }
+                  </select>
+                  </FormControl>
+                  <FormMessage className='text-red-500 text-xs'/>
+              </FormItem>)
+              }
+              />
+              <p className='font-lato italic text-blue-600 text-xs cursor-pointer' >Todos os dados do encarregado<InfoIcon className='w-2 h-2'/>.</p>
+          </div>
+       </div>
+        </fieldset>
+        <fieldset>
+        <legend className='font-robotoSlab text-sm'>
+            Localização</legend>
+            <div className="w-full flex flex-row justify-between space-x-2">
+            <div className='w-full'>
+          <Label htmlFor="bairro" className="text-right">
+            Bairro
+          </Label>
+         
+            <FormField
+          control={formEncarregado.control}
+          name="bairro"
+          render={({field})=>(
+            <FormControl>
+                <FormItem>
+          <Input id="bairro" type='text' {...field} className="w-full"/>
+          <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+          </FormControl>
+        )}/></div>
+            <div className='w-full'>
+          <Label htmlFor="rua" className="text-right">
+            Rua
+          </Label>
+         
+            <FormField
+          control={formEncarregado.control}
+          name="rua"
+          render={({field})=>(
+            <FormControl>
+        <FormItem>
+          <Input id="rua" type='text' {...field} className="w-full"/>
+          <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+          </FormControl>
+        )}/>
+        </div>
+        <div className='w-full'>
+          <Label htmlFor="casa" className="text-right">
+            Número da Casa
+          </Label>
+         
+            <FormField
+          control={formEncarregado.control}
+          name="numeroCasa"
+          render={({field})=>(
+            <FormControl>
+            <FormItem>
+         
+          <Input id="casa" type='number' {...field} className="w-full"  min="1"  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
+          <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+          </FormControl>
+        )}/>
+        </div></div>
+        </fieldset>
+        <fieldset>
+        <legend className='font-robotoSlab text-sm'>
+            Contacto</legend>
+            <div className="w-full flex flex-row justify-between space-x-2">
+        <div className='w-full'>
+        <Label htmlFor="tel" className="text-right">
+            Telefone
+          </Label>
+      <FormField
+          control={formEncarregado.control}
+          name="telefone"
+          render={({field})=>(
+            <FormControl>
+                <FormItem>
+          <Input
+            id="tel"
+            className="w-full"
+          {...field}/>
+           <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+          </FormControl>
+        )}/></div>
+        <div className='w-full'>
+        <Label htmlFor="email" className="text-right">
+            @Email
+          </Label>
+      <FormField
+          control={formEncarregado.control}
+          name="email"
+          render={({field})=>(
+            <FormItem>
+            <FormControl>
+          <Input
+            id="email"
+            className="w-full"
+          {...field}/>
+          </FormControl>
+          <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+        )}/>
+         </div></div></fieldset>
+      </div>
+      
+      <DialogFooter>
+        <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold' type='submit'>Cadastrar</Button>
+      </DialogFooter>
+      </form>
+      </Form>
+    </DialogContent>
+  </Dialog> 
+}
 
-     <div className='relative flex justify-center items-center cursor-pointer'>  <Relatorios className='w-5 h-4 absolute text-white'/> 
-       <Button className='h-7 px-5 bg-gray-600 text-white font-semibold hover:bg-gray-600 rounded-sm border-gray-600'></Button>
-       </div>
-     </PopoverTrigger >
-     <PopoverContent className="w-80 bg-white">
-       <div className="grid gap-4">
-         <div className="space-y-2">
-           <h4 className="font-medium leading-none">Dados da Matrícula</h4>
-           <p className="text-sm text-muted-foreground">
-             Inspecione os dados da matrícula
-           </p>
-         </div>
-         <div className="grid gap-2">
-           
-           <div className="grid grid-cols-3 items-center gap-4">
-             <Label htmlFor="maxWidth">Classe</Label>
-             <p>{mClasse}</p>
-           </div>
-           <div className="grid grid-cols-3 items-center gap-4">
-             <Label htmlFor="maxWidth">Curso</Label>
-             <p>{mCurso}</p>
-           </div>
-           <div className="grid grid-cols-3 items-center gap-4">
-             <Label htmlFor="maxWidth">Turma</Label>
-             <p>{mTurma}</p>
-           </div>
-         </div>
-       </div>
-     </PopoverContent>
-   </Popover>
-           </div>
         </div>),
     }, 
 ];
     const [dados, setDados] = React.useState([])
     const [dataApi, setDataApi] = React.useState([])
-    const URL = "http://localhost:8000/api/alunos"
+    const URL = "http://localhost:8000/api/alunos/"
    
    useEffect( () => {
         const respFetch = async () => {
@@ -588,37 +860,113 @@ export default function ListStudent(){
 
     }
 
-    const handleRows = ({selectedRows}) => {
-        setTimeout(()=>{
-            changeResource(selectedRows[0].id)
-        },1000)
-        
-        
-    }
-      
-   const handleSort = (column, sortDirection) => {
-    console.log({column, sortDirection})
-   }
-
-
     return (
     <>
-    <Table title="Lista dos Estudantes" dados={dados} handleFilter={handleFilter} columns={columns}  handleRows={handleRows} handleSort={handleSort}/>
-    {showModal && 
-  <Dialog open={showModal} onOpenChange={setShowModal}>
-    <DialogTrigger asChild>
-    <div className='relative flex justify-center items-center'>
+    <Table title="Lista dos Estudantes" dados={dados} handleFilter={handleFilter} columns={columns}/>
+    {showModal &&
+  <MyDialog open={showModal} onOpenChange={setShowModal}>
+  
+    <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
+    {modalMessage == null &&
+        <div role="alert" className='w-full'>
+      <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+        <div>
+            <p>Sucesso</p>
+        </div>
+        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+            <p>X</p>
+          </div>
       </div>
+      <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
+      <CheckCircleIcon className='w-28 h-20 text-green-400'/>
+      
+      <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
+      <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
+        <Button className='bg-green-400 hover:bg-green-500
+        hover:font-medium font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+    </div>
+    </div>
+    
+      </div>
+  }
+   {modalMessage != null &&
+        <div role="alert" className='w-full'>
+      <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+        <div>
+            <p>Falhou</p>
+        </div>
+        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+            <p>X</p>
+          </div>
+      </div>
+      <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
+      <AlertCircleIcon className='w-28 h-20 text-red-400'/>
+      <p className='font-poppins uppercase'>{modalMessage}</p>
+      <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
+        <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+    </div>
+    </div>
+    
+      </div>
+  }
+         </MyDialogContent>
+        </MyDialog>
+   }
+    {showEnc && 
+  <Dialog open={showEnc} onOpenChange={setShowEnc}>
+    <DialogTrigger asChild>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
-        <DialogTitle>Resposta</DialogTitle>
-        <DialogDescription>
-          {modalMessage}
+        <DialogTitle>{encarregado.map((n)=>{return n.nomeCompleto})}, {encarregado.map((n)=>{return n.parentesco})}</DialogTitle>
+        <DialogDescription >
+        As informações relevantes do encarregado, são listadas aqui!
         </DialogDescription>
       </DialogHeader>
-         </DialogContent>
-        </Dialog>
-    }
+     
+      <div className="grid gap-4 py-4 bg-white">
+        <div className="flex flex-col w-full">
+            
+        <fieldset>
+            <legend className='font-robotoSlab text-sm'>Localização</legend>
+            <div className="w-full flex flex-row justify-between px-2">
+            <div className="w-full flex flex-row justify-between px-2">
+            <div>
+                <Label className='font-poppins'>número da casa</Label>
+                <p className='font-thin text-sm'>{casa}</p>
+            </div>
+            <div>
+                <Label className='font-poppins'>bairro</Label>
+                <p className='font-thin text-sm'>{bairro}</p>
+            </div>
+            <div>
+                <Label className='font-poppins'>rua</Label>
+                <p className='font-thin text-sm'>{rua}</p>
+            </div>
+            </div>
+            </div>
+        </fieldset>
+            <fieldset>
+                <legend className='font-robotoSlab text-sm'>Contacto</legend>
+            <div className="w-full flex flex-row justify-between px-2">
+            <div className="w-full flex flex-row justify-between px-2">
+            <div>
+                <Label className='font-poppins'>Telefone</Label>
+                <p className='font-thin text-sm'>{telefone}</p>
+            </div>
+            <div>
+                <Label className='font-poppins'>email</Label>
+                <p className='font-thin text-sm'>{email}</p>
+            </div>
+            </div>
+            </div>
+            </fieldset>
+        </div>
+      </div>
+      <DialogFooter>
+        <p className='font-lato italic text-blue-600 text-xs cursor-pointer'>Todos os dados do encarregado<InfoIcon className='w-2 h-2'/>.</p>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>}
     </>)
 }

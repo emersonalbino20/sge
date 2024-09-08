@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { EditIcon, PrinterIcon, Trash} from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, Trash} from 'lucide-react'
 import { InfoIcon } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
 import DataTable from 'react-data-table-component'
@@ -28,16 +28,16 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm} from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { MyDialog, MyDialogContent } from './my_dialog'
 
 
 
 const TFormCreate =  z.object(
 {
   nome: classe,
-  anoLectivoId: anoLectivoId,
+  anoLectivoId: z.number(),
   cursoId: cursoId,
   valorMatricula: custoMatricula
-
 })
 
 const TFormUpdate =  z.object({
@@ -48,13 +48,22 @@ const TFormUpdate =  z.object({
   id: z.number()
 })
 
-export default function Curse(){
+export default function Grade(){
 
 const formCreate  = useForm<z.infer<typeof TFormCreate>>({
   mode: 'all', 
   resolver: zodResolver(TFormCreate)
 })
 
+const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
+  mode: 'all', 
+  resolver: zodResolver(TFormUpdate)
+  })
+
+   const [updateTable, setUpdateTable] = React.useState(false)
+   const[estado, setEstado] = React.useState(false);
+   const [showModal, setShowModal] = React.useState(false);
+   const [modalMessage, setModalMessage] = React.useState(''); 
 const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>,e) => {
       
 await fetch(`http://localhost:8000/api/classes/`,{
@@ -65,12 +74,19 @@ await fetch(`http://localhost:8000/api/classes/`,{
     body: JSON.stringify(data)
   })
   .then((resp => resp.json()))
-  .then((resp) =>{ console.log(resp)})
+  .then((resp) =>{ 
+          setShowModal(true);  
+          if (resp.message != null) {
+            setModalMessage(resp.message);  
+          }else{
+            setModalMessage(resp.message);
+          }
+  })
   .catch((error) => console.log(`error: ${error}`))
-  //console.log(data)
+  setUpdateTable(!updateTable)
 }
 
-const[buscar, setBuscar] = React.useState();
+const[buscar, setBuscar] = React.useState(1);
 const[nome, setNome] = React.useState();
 const[anoLectivo, setanoLectivo] = React.useState();
 const[curso, setCurso] = React.useState();
@@ -79,29 +95,18 @@ const[id,setId] = React.useState();
 
 React.useEffect(()=>{
     const search = async () => {
-        const resp = await fetch(`http://localhost:8000/api/classes/${buscar}`);
+        const resp = await fetch("http://localhost:8000/api/classes/1");
         const receve = await resp.json()
         setNome(receve.nome)
         setanoLectivo(receve.anoLectivo)
         setCurso(receve.curso)
-        setValorMatricula(receve.valorMatricula)
         setId(receve.id)
+        setEstado(true);
         console.log(receve)
     }
     search()
 },[buscar])
 
-
-const changeResource = (id)=>{
-    setBuscar(id)
-}
-
-const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
-  mode: 'all', 
-  resolver: zodResolver(TFormUpdate)
-  })
-
-const [updateTable, setUpdateTable] = React.useState(false)
 const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
   await fetch(`http://localhost:8000/api/classes/${data.id}`,{
         method: 'PUT',
@@ -111,9 +116,16 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
         body: JSON.stringify(data)
     })
     .then((resp => resp.json()))
-    .then((resp) =>{ console.log(resp)})
+    .then((resp) =>{
+      setShowModal(true);  
+            if (resp.message != null) {
+              setModalMessage(resp.message);  
+            }else{
+              setModalMessage(resp.message);
+            }
+    })
     .catch((error) => console.log(`error: ${error}`))
-    setUpdateTable(true)
+    setUpdateTable(!updateTable)
 }
 /*Buscar dados do Ano Academico, Curso*/
 const[ano,setAno] = React.useState([]);
@@ -137,6 +149,10 @@ React.useEffect(()=>{
     search()
 },[])
 
+const changeResource = (id)=>{
+  setBuscar(id)
+}
+
     const columns = 
     [
         { 
@@ -150,14 +166,14 @@ React.useEffect(()=>{
           sortable:true
         },
         { 
-            name: 'Custo',
-            selector: row => row.valorMatricula,
-            sortable:true
-         },
-        { 
-            name: 'Ano',
+            name: 'Ano Académico',
             selector: row => row.anoLectivo,
             sortable:true
+        },
+        {
+          name: 'Curso',
+          selector: row => row.curso,
+          sortable:true
         },
         {
             name: 'Ação',
@@ -165,11 +181,15 @@ React.useEffect(()=>{
             <Dialog >
           <DialogTrigger asChild onClick={()=>{
               changeResource(row.id)
-              formUpdate.setValue('nome', nome)
-              formUpdate.setValue('valorMatricula', valorMatricula)
-              formUpdate.setValue('anoLectivoId', anoLectivo)
-              formUpdate.setValue('cursoId', curso)
-              formUpdate.setValue('id', row.id)
+              if(estado)
+              {
+                formUpdate.setValue('nome', nome)
+                formUpdate.setValue('valorMatricula', valorMatricula)
+                formUpdate.setValue('anoLectivoId', anoLectivo)
+                formUpdate.setValue('cursoId', curso)
+                formUpdate.setValue('id', row.id)
+              setEstado(false);
+              }
             }}>
           <div title='actualizar' className='relative flex justify-center items-center'>
           <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
@@ -366,7 +386,7 @@ React.useEffect(()=>{
 
         const [dados, setDados] = React.useState([])
         const [dataApi, setDataApi] = React.useState([])
-        const URL = `http://localhost:8000/api/classes/${buscar}?page_size=15`
+        const URL = "http://localhost:8000/api/classes/1";
        
        useEffect( () => {
             const respFetch = async () => {
@@ -508,12 +528,13 @@ React.useEffect(()=>{
             Ano Lectivo
           </Label>
               <FormControl>
-              <select id='lectivo' {...field} className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
-                        {
-                                    ano.map((field)=>{
-                                        return <option value={`${field.id}`}>{field.nome}</option>
-                                    })
-                         }
+              <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                      <option value="">Selecione o ano</option>
+                      {
+                            ano.map((field)=>{
+                                return <option value={`${field.id}`}>{field.nome}</option>
+                            })
+                      }
                   </select>
               </FormControl>
             <FormMessage className='text-red-500 text-xs'/>
@@ -528,6 +549,57 @@ React.useEffect(()=>{
       </form></Form>
     </DialogContent>
   </Dialog>
+
+  {showModal &&
+  <MyDialog open={showModal} onOpenChange={setShowModal}>
+  
+    <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
+    {modalMessage == null &&
+        <div role="alert" className='w-full'>
+      <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+        <div>
+            <p>Sucesso</p>
+        </div>
+        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+            <p>X</p>
+          </div>
+      </div>
+      <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
+      <CheckCircleIcon className='w-28 h-20 text-green-400'/>
+      
+      <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
+      <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
+        <Button className='bg-green-400 hover:bg-green-500
+        hover:font-medium
+         font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+    </div>
+    </div>
+    
+      </div>
+  }
+   {modalMessage != null &&
+        <div role="alert" className='w-full'>
+      <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+        <div>
+            <p>Falhou</p>
+        </div>
+        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+            <p>X</p>
+          </div>
+      </div>
+      <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
+      <AlertCircleIcon className='w-28 h-20 text-red-400'/>
+      <p className='font-poppins uppercase'>{modalMessage}</p>
+      <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
+        <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+    </div>
+    </div>
+    
+      </div>
+  }
+         </MyDialogContent>
+        </MyDialog>
+   }
 
         </div>
    }

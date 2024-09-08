@@ -17,12 +17,13 @@ const ClassRoomPage = lazy(()=>import('../_pages/ClassRoomPage'))
 const PeriodPage = lazy(()=>import('../_pages/PeriodPage'))
 const ClassPage = lazy(()=>import('../_pages/ClassPage'))
 const PaymentPage = lazy(()=>import('../_pages/PaymentPage'))
+const ParentsPage = lazy(()=>import('../_pages/ParentsPage'))
 
 export default function AppRoutes(){
     
     return(
         <BrowserRouter>
-        <Suspense fallback={<div className="text-black">Carregando...</div>}>
+        <Suspense fallback={<div className="w-10 h-10 border-4 border-blue-500 rounded-full animate-spin border-t-transparent"></div>}>
             <Routes>
                 <Route path="/" element={<HomePage/>}/>
                 <Route path="/StudentInsertPage" element={<StudentInsertPage/>}/>
@@ -37,6 +38,7 @@ export default function AppRoutes(){
                 <Route path="/PeriodPage" element={<PeriodPage/>}/>
                 <Route path="/ClassPage" element={<ClassPage/>}/>
                 <Route path="/PaymentPage" element={<PaymentPage/>}/>
+                <Route path="/ParentsPage" element={<ParentsPage/>}/>
             </Routes>
         </Suspense>
         </BrowserRouter>

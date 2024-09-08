@@ -10,13 +10,6 @@ import {
   } from "@/components/ui/dialog"
 
 import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-  } from "@/components/ui/accordion"
-  
-import {
     Popover,
     PopoverContent,
     PopoverTrigger,
@@ -25,117 +18,92 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { EditIcon, PrinterIcon, Trash, CombineIcon, CheckCircleIcon, AlertCircleIcon} from 'lucide-react'
-import { InfoIcon } from 'lucide-react'
-import { UserPlus } from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, EditIcon} from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
 import DataTable from 'react-data-table-component'
-import { Textarea } from '@/components/ui/textarea'
-import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, nomeCursoZod, descricaoZod, duracaoZod } from '@/_zodValidations/validations'
+import {nomeParentescos } from '@/_zodValidations/validations'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, useFieldArray } from 'react-hook-form'
+import { useForm} from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MyDialog, MyDialogContent } from './my_dialog'
 
-const TFormCreate =  z.object({
-  nome: nomeCursoZod,
-  descricao: descricaoZod
+
+
+const TFormCreate =  z.object(
+{
+  nome: nomeParentescos,
 })
 
 const TFormUpdate =  z.object({
-  nome: nomeCursoZod,
-  descricao: descricaoZod,
+  nome: nomeParentescos,
   id: z.number()
 })
 
-export default function Curse(){
+export default function Parents(){
 
-  const formCreate  = useForm<z.infer<typeof TFormCreate>>({
-    mode: 'all', 
-    resolver: zodResolver(TFormCreate)
-   })
+const formCreate  = useForm<z.infer<typeof TFormCreate>>({
+  mode: 'all', 
+  resolver: zodResolver(TFormCreate)
+})
 
-   
-  const [updateTable, setUpdateTable] = React.useState(false)
-  const [showModal, setShowModal] = React.useState(false);
-  const [modalMessage, setModalMessage] = React.useState('');
-   const[estado, setEstado] = React.useState(false);
-   const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>,e) => {
-          
-    await fetch(`http://localhost:8000/api/disciplinas`,{
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        .then((resp => resp.json()))
-        .then((resp) =>{ 
+const [updateTable, setUpdateTable] = React.useState(false)
+const [showModal, setShowModal] = React.useState(false);
+const [modalMessage, setModalMessage] = React.useState('');
+const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>,e) => {
+      
+await fetch(`http://localhost:8000/api/parentescos/`,{
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+  })
+  .then((resp => resp.json()))
+  .then((resp) =>{ 
+    setShowModal(true);  
+    if (resp.message != null) {
+      setModalMessage(resp.errors.nome[0]);  
+    }else{
+      setModalMessage(resp.message);
+    }
+  })
+  .catch((error) => console.log(`error: ${error}`))
+  setUpdateTable(!updateTable)
+}
+
+const[buscar, setBuscar] = React.useState();
+
+const changeResource = (id)=>{
+    setBuscar(id)
+}
+
+const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
+  mode: 'all', 
+  resolver: zodResolver(TFormUpdate)
+  })
+
+const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
+  await fetch(`http://localhost:8000/api/parentescos/${data.id}`,{
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then((resp => resp.json()))
+    .then((resp) =>{ 
           setShowModal(true);  
           if (resp.message != null) {
-            setModalMessage(resp.message);  
+            setModalMessage(resp.errors.nome[0]);  
           }else{
             setModalMessage(resp.message);
           }
-        })
-        .catch((error) => console.log(`error: ${error}`))
-        setUpdateTable(!updateTable)
-        
-    }
-
-    const[buscar, setBuscar] = React.useState();
-    const[nome, setNome] = React.useState();
-    const[descricao, setDescricao] = React.useState();
-    const[messageDisc, setMessageDisc] = React.useState();
-    const[id,setId] = React.useState();
-
-    React.useEffect(()=>{
-        const search = async () => {
-            const resp = await fetch(`http://localhost:8000/api/disciplinas/${buscar}`);
-            const receve = await resp.json()
-            setNome(receve.nome)
-            setDescricao(receve.descricao)
-            setId(receve.id)
-            setEstado(true);
-            if (receve.descricao)
-            {
-              setMessageDisc(receve.descricao)
-            }
-        }
-        search()
-    },[buscar])
-
-    const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
-      mode: 'all', 
-      resolver: zodResolver(TFormUpdate)
-     })
-
-   const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>) => {
-          
-    await fetch(`http://localhost:8000/api/disciplinas/${data.id}`,{
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        .then((resp => resp.json()))
-        .then((resp) =>{ 
-          setShowModal(true);  
-          if (resp.message != null) {
-            setModalMessage(resp.message);  
-          }else{
-            setModalMessage(resp.message);
-          }
-        })
-        .catch((error) => console.log(`error: ${error}`))
-        setUpdateTable(!updateTable);
-    }
-
-    const changeResource=(id)=>{
-      setBuscar(id)
-  }
+    })
+    .catch((error) => console.log(`error: ${error}`))
+    setUpdateTable(!updateTable)
+}
 
     const columns = 
     [
@@ -144,41 +112,53 @@ export default function Curse(){
             selector: row => row.id,
             sortable:true
          },
-        { 
-            name: 'Nome',
-            selector: row => row.nome,
-            sortable:true
-         },
+         { 
+          name: 'Nome',
+          selector: row => row.nome,
+          sortable:true
+        },
         {
             name: 'Ação',
             cell: (row) => (<div className='flex flex-row space-x-2' onClick={()=>{
               changeResource(row.id)
-              if(estado){
-              formUpdate.setValue('nome', nome)
-              formUpdate.setValue('descricao', descricao)
               formUpdate.setValue('id', row.id)
-            }
-            setEstado(false)
             }}><EditIcon className='w-5 h-4 absolute text-white'/> 
             <Dialog >
           <DialogTrigger asChild >
           <div title='actualizar' className='relative flex justify-center items-center'>
           <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-            <Button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
+            <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
             </div>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
                 <DialogHeader>
-                  <DialogTitle>Actualizar Disciplina</DialogTitle>
+                  <DialogTitle>Actualizar Parentescos</DialogTitle>
                   <DialogDescription>
                   <p>altere uma informação do registro click em <span className='font-bold text-green-500'>actualizar</span> quando terminar.</p>
                   </DialogDescription>
                 </DialogHeader>
                 <Form {...formUpdate} >
               <form onSubmit={formUpdate.handleSubmit(handleSubmitUpdate)} >
-              <div className="flex flex-col w-full py-4 bg-white">
-              <div className="w-full">
-                <Label htmlFor="name" className="text-right">
+              <FormField
+          control={formUpdate.control}
+          name="id"
+          render={({field})=>(
+            <FormControl>
+          <Input 
+          type='hidden'
+            className="w-full"
+            
+            {...field} 
+            
+            onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
+           
+          />
+          </FormControl>
+        )}
+           />
+           <div className="flex flex-col w-full py-4 bg-white">
+                <div className="w-full">
+                <Label htmlFor="nome" className="text-right">
                   Nome
                 </Label>
                 <FormField
@@ -187,30 +167,13 @@ export default function Curse(){
                 render={({field})=>(
                   <FormItem>
                   <Input
-                    id="name"
-                    className="w-full" {...field}
-                  />
+                    id="nome"
+                    type='text' {...field} className="w-full"
+                    />
                   <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
               )}/>
-                
               </div>
-              <div className="w-full">
-                <Label htmlFor="username" className="text-right">
-                  Descrição
-                </Label>
-                <FormField
-                control={formUpdate.control}
-                name="descricao"
-                render={({field})=>(
-                  <FormItem>
-                  <Textarea className='w-full border-gray-300 placeholder:text-gray-500' placeholder="Dê uma descrição ao curso." {...field}/>
-                  <FormMessage className='text-red-500 text-xs'/>
-                </FormItem>
-              )}/>
-                
-              </div>
-              
       </div>
       <DialogFooter>
       <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold' type='submit'>Actualizar</Button>
@@ -218,43 +181,11 @@ export default function Curse(){
       </form></Form>
     </DialogContent>
   </Dialog>
-
- 
-            <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>
-           
-            <Popover >
-      <PopoverTrigger asChild className='bg-white'>
-
-      <div className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
-        <Button className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
-        </div>
-      </PopoverTrigger >
-      <PopoverContent className="w-80 bg-white">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-medium leading-none">Dados da Disiciplina</h4>
-            <p className="text-sm text-muted-foreground">
-              Inspecione os dados da displina
-            </p>
-          </div>
-          <div className="grid gap-2">
-            <div className="w-full flex space-x-2">
-              <Label htmlFor="maxWidth" className='font-semibold'>Nome:</Label>
-              <p className='text-sm lowercase'>{descricao}</p>
-            </div>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
-    </div>
-      </div>),
+        </div>),
         }, 
     ];
     
-   
-
     const tableStyle = {
-        
         headCells: {
             style: {
                 backgroundColor: '#e8e9eb',
@@ -264,7 +195,8 @@ export default function Curse(){
             }
         },
         }
-           
+        
+        /*Estilizacao da linhas da tabela */
         const conditionalRowStyles = [
             {
                 when: row => row.id % 2 === 0,
@@ -283,7 +215,7 @@ export default function Curse(){
 
         const [dados, setDados] = React.useState([])
         const [dataApi, setDataApi] = React.useState([])
-        const URL = "http://localhost:8000/api/disciplinas"
+        const URL = `http://localhost:8000/api/parentescos/`
        
        useEffect( () => {
             const respFetch = async () => {
@@ -296,23 +228,15 @@ export default function Curse(){
             } 
              respFetch()
        },[updateTable])
-    
-        const handleFilter =  (event) => {
-            const newData = dataApi.filter( row => {
-                return row.nome.toLowerCase().includes(event.target.value.toLowerCase().trim())
-            })
-            setDados(newData)
-        }
-  
+              
        const handleSort = (column, sortDirection) => {
         console.log({column, sortDirection})
        }
     
 
     return (
-    
-         <div className='w-full h-72 '>
-         <br/><br/><br/>
+      <div className='w-full h-72 '>
+        <br/><br/><br/>
    <DataTable 
    customStyles={ tableStyle }
    conditionalRowStyles={conditionalRowStyles}
@@ -325,13 +249,9 @@ export default function Curse(){
    onSort={handleSort}
    subHeader
    subHeaderComponent={
-       <div className='flex flex-row space-x-2'><input className=' rounded-sm border-2 border-gray-400 placeholder:text-gray-400 placeholder:font-bold outline-none py-1 indent-2' type='text' placeholder='Pesquisar aqui...' onChange={handleFilter}/>
+       <div className='flex flex-row space-x-2'>
        
-       <div className='relative flex justify-center items-center'>
-           <PrinterIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-           <button className='py-4 px-5 bg-green-700 border-green-700 rounded-sm ' onClick={() => window.print()}></button>
-       </div>
-       <Dialog >
+       <Dialog>
     <DialogTrigger asChild>
     <div title='cadastrar' className='relative flex justify-center items-center'>
     <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
@@ -340,7 +260,7 @@ export default function Curse(){
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
-        <DialogTitle>Cadastrar Disciplina</DialogTitle>
+        <DialogTitle>Cadastrar Parentescos</DialogTitle>
         <DialogDescription>
         <p>preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
         </p>
@@ -350,7 +270,7 @@ export default function Curse(){
      <form onSubmit={formCreate.handleSubmit(handleSubmitCreate)} >
      <div className="flex flex-col w-full py-4 bg-white">
         <div className="w-full">
-          <Label htmlFor="name" className="text-right">
+          <Label htmlFor="nome" className="text-right">
             Nome
           </Label>
           <FormField
@@ -359,37 +279,20 @@ export default function Curse(){
           render={({field})=>(
             <FormItem>
             <Input
-              id="name"
-              className="w-full" {...field}
-            />
-            <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-        )}/>
-          
-        </div>
-        <div className="w-full">
-          <Label htmlFor="username" className="text-right">
-            Descrição
-          </Label>
-          <FormField
-          control={formCreate.control}
-          name="descricao"
-          render={({field})=>(
-            <FormItem>
-             <Textarea className='w-full border-gray-300 placeholder:text-gray-500' placeholder="Dê uma descrição ao curso." {...field}/>
+              id="nome"
+              type='text' {...field} className="w-full"
+              />
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
         </div>
       </div>
       <DialogFooter>
-        
       <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold' type='submit'>Cadastrar</Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
   </Dialog>
-
   {showModal &&
   <MyDialog open={showModal} onOpenChange={setShowModal}>
   
@@ -410,8 +313,7 @@ export default function Curse(){
       <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
       <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
         <Button className='bg-green-400 hover:bg-green-500
-        hover:font-medium
-         font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+        hover:font-medium font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
     </div>
     </div>
     
@@ -441,8 +343,7 @@ export default function Curse(){
         </MyDialog>
    }
         </div>
-   }
->
+   }>
 </DataTable>
 </div>
 )

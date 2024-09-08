@@ -43,8 +43,6 @@ export default function Table(props){
         fixedHeaderScrollHeight='400px'
         pagination
         defaultSortFieldId={1}
-        selectableRows
-        selectableRowsSingle
         onSelectedRowsChange={props.handleRows}
         onSort={props.handleSort}
         subHeader
