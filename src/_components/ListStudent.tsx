@@ -33,6 +33,7 @@ import { zodResolver} from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {nomeCompletoZod,  dataNascimentoZod, generoZod, numeroBiZod, bairroZod, ruaZod, numeroCasaZod, telefoneZod, emailZod, idZod} from '../_zodValidations/validations'
 import { MyDialog, MyDialogContent } from './my_dialog'
+import InputMask from 'react-input-mask'
 
 const TForm =  z.object({
     nomeCompleto: nomeCompletoZod,
@@ -491,10 +492,21 @@ React.useEffect(()=>{
           render={({field})=>(
             <FormControl>
                 <FormItem>
-          <Input
-            id="tel"
-            className="w-full"
-          {...field}/>
+                <InputMask
+                mask="999999999"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+            >
+                {(inputProps) => (
+                    <Input
+                        {...inputProps}
+                        className={'placeholder-gray-200 placeholder-opacity-55'
+                        }
+                        type="text"
+                    />
+                )}
+            </InputMask>
            <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
           </FormControl>
@@ -794,10 +806,21 @@ React.useEffect(()=>{
           render={({field})=>(
             <FormControl>
                 <FormItem>
-          <Input
-            id="tel"
-            className="w-full"
-          {...field}/>
+                <InputMask
+                mask="999999999"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+            >
+                {(inputProps) => (
+                    <Input
+                        {...inputProps}
+                        className={'placeholder-gray-200 placeholder-opacity-55'
+                        }
+                        type="text"
+                    />
+                )}
+            </InputMask>
            <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
           </FormControl>
