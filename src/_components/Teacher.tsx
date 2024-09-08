@@ -30,7 +30,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Select from 'react-select';
 import { MyDialog, MyDialogContent } from './my_dialog'
-
+import InputMask from 'react-input-mask'
 
 const TForm =  z.object({
   nomeCompleto: nomeCompletoZod,
@@ -104,6 +104,7 @@ export default function Teacher (){
           }else{
             setModalMessage(resp.message);
           }
+          console.log(resp)
         })
         .catch((error) => console.log(`error: ${error}`))
         setUpdateTable(!updateTable) 
@@ -159,6 +160,7 @@ export default function Teacher (){
             }else{
               setModalMessage(resp.message);
             }
+            console.log(resp)
           })
         .catch((error) => console.log(`error: ${error}`))
         
@@ -317,7 +319,7 @@ export default function Teacher (){
           render={({field})=>(
             <FormItem>
             <FormControl>
-          <Input id="date" type='date' {...field} className="w-full"/>
+          <Input id="date" type='date' {...field} className="w-full" max="2002-12-31" min="1960-01-01"/>
           </FormControl>
           <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
@@ -333,7 +335,7 @@ export default function Teacher (){
             <FormItem>
             <FormControl>
           <Input
-            id="email"
+            id="email" type='text'
             className="w-full"
           {...field}/>
           </FormControl>
@@ -349,10 +351,21 @@ export default function Teacher (){
           render={({field})=>(
             <FormItem>
             <FormControl>
-          <Input
-            id="tel"
-            className="w-full"
-          {...field}/>
+            <InputMask
+                mask="999999999"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+            >
+                {(inputProps) => (
+                    <Input
+                        {...inputProps}
+                        className={'placeholder-gray-200 placeholder-opacity-55'
+                        }
+                        type="text"
+                    />
+                )}
+            </InputMask>
           </FormControl>
           <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
@@ -580,7 +593,7 @@ export default function Teacher (){
           render={({field})=>(
             <FormItem>
             <FormControl>
-          <Input id="date" type='date' {...field} className="w-full"/>
+          <Input id="date" type='date' {...field} className="w-full" max="2002-12-31" min="1960-01-01"/>
           </FormControl>
           <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
@@ -612,11 +625,21 @@ export default function Teacher (){
           render={({field})=>(
             <FormItem>
             <FormControl>
-          <Input
-            id="tel"
-            className="w-full"
-          {...field}/>
-          </FormControl>
+            <InputMask
+                mask="999999999"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+            >
+                {(inputProps) => (
+                    <Input
+                        {...inputProps}
+                        className={'placeholder-gray-200 placeholder-opacity-55'
+                        }
+                        type="text"
+                    />
+                )}
+            </InputMask></FormControl>
           <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
