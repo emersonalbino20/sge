@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { EditIcon, PrinterIcon, CreditCard } from 'lucide-react'
+import { EditIcon, PrinterIcon, CreditCard, SaveIcon } from 'lucide-react'
 import { InfoIcon } from 'lucide-react'
 import { UserPlus, Trash, SendIcon } from 'lucide-react'
 import DataTable from 'react-data-table-component'
@@ -242,7 +242,7 @@ React.useEffect(()=>{
       <DialogHeader>
         <DialogTitle>Registrar</DialogTitle>
         <DialogDescription>
-        registre a forma de pagamento aceitãvel pelainstituição, click em registrar quando terminar.
+        registre a forma de pagamento aceitavel pela instituição, click em registrar quando terminar.
         </DialogDescription>
       
       <Form {...formMethod} >
@@ -292,7 +292,7 @@ React.useEffect(()=>{
           />
            <div className='flex flex-row space-x-2 mt-2'>
            <div className='relative flex justify-center items-center' >
-                 <SendIcon className='w-4 h-3 absolute text-white font-extrabold'/>
+                 <SaveIcon className='w-4 h-5 absolute text-white font-extrabold'/>
                  <button type='submit' title='registrar' className='py-3 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 border-green-600 rounded-sm' ></button>
           </div>
           <div className='relative flex justify-center items-center' >

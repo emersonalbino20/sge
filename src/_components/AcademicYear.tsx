@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { AlertCircleIcon, EditIcon, PrinterIcon, Trash} from 'lucide-react'
+import { AlertCircleIcon, EditIcon, PrinterIcon, SaveIcon, Trash} from 'lucide-react'
 import { InfoIcon } from 'lucide-react'
 import { UserPlus } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
@@ -41,7 +41,6 @@ const TFormCreate =  z.object({
 })
 
 const TFormUpdate =  z.object({
-  nome: anoLectivo,
   inicio: inicio,
   termino: termino,
   id: z.number()
@@ -88,6 +87,7 @@ const[nome, setNome] = React.useState();
 const[inicio, setInicio] = React.useState();
 const[termino, setTermino] = React.useState();
 const[estado, setEstado] = React.useState(false);
+const[activo, setActivo] = React.useState(false);
 React.useEffect(()=>{
     const search = async () => {
         const resp = await fetch(`http://localhost:8000/api/ano-lectivos/${buscar}`);
@@ -110,9 +110,7 @@ const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
   mode: 'all', 
   resolver: zodResolver(TFormUpdate)
   })
-
  
-
 const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
   await fetch(`http://localhost:8000/api/ano-lectivos/${data.id}`,{
         method: 'PUT',
@@ -130,16 +128,17 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
           }else{
             setModalMessage(resp.message);
           }
+          console.log(resp)
     })
     .catch((error) => console.log(`error: ${error}`))
     setUpdateTable(!updateTable)
 }
 
 const[idAno, setIdAno] = React.useState();
-const[activo, setActivo] = React.useState(false);
-const handleSubmitState = async (id) => {
+
+const handleSubmitState = async (id, values) => {
   const dado = {
-    activo: true
+    activo: values
   }
   await fetch(`http://localhost:8000/api/ano-lectivos/${id}`,{
         method: 'PATCH',
@@ -195,7 +194,6 @@ const handleSubmitState = async (id) => {
             cell: (row) => (<div className='flex flex-row space-x-2' onClick={()=>{
               changeResource(row.id)
             if(estado){
-              formUpdate.setValue('nome', nome)
               formUpdate.setValue('inicio', inicio)
               formUpdate.setValue('termino', termino)
               formUpdate.setValue('id', row.id)
@@ -238,23 +236,6 @@ const handleSubmitState = async (id) => {
            />
   
               <div className="flex flex-col w-full py-4 bg-white">
-                <div className="w-full">
-                <Label htmlFor="nome" className="text-right">
-                  Nome
-                </Label>
-                <FormField
-                control={formUpdate.control}
-                name="nome"
-                render={({field})=>(
-                  <FormItem>
-                  <Input
-                    id="nome"
-                    type='text' {...field} className="w-full"
-                    />
-                  <FormMessage className='text-red-500 text-xs'/>
-                </FormItem>
-              )}/>
-              </div>
               <div className="w-full">
                 <Label htmlFor="inicio" className="text-right">
                   Ínicio
@@ -292,7 +273,7 @@ const handleSubmitState = async (id) => {
               </div>
       </div>
       <DialogFooter>
-      <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold' type='submit' >Actualizar</Button>
+      <Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold w-12' type='submit' ><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -337,8 +318,13 @@ const handleSubmitState = async (id) => {
             </div>
             
             <Button title='activar' className='h-7 px-5 bg-green-300 text-white font-semibold hover:bg-green-300 rounded-sm border-green-300' onClick={()=>{
-              handleSubmitState(row.id)
-            }}></Button>
+                  setActivo(true)
+                  handleSubmitState(row.id, true)
+            }}>Yes</Button>
+            <Button title='desactivar' className='h-7 px-5 bg-red-300 text-white font-semibold hover:bg-red-300 rounded-sm border-red-300' onClick={()=>{
+                  setActivo(false)
+                  handleSubmitState(row.id, false)
+            }}>No</Button>
             
             </div>),
         }, 
@@ -476,7 +462,7 @@ const handleSubmitState = async (id) => {
         </div>
       </div>
       <DialogFooter>
-      <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold' type='submit'>Cadastrar</Button>
+      <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>

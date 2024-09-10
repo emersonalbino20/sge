@@ -9,6 +9,13 @@ import { z } from "zod";
     message: 'Limite de caracteres excedeu.',
   }).regex(FULL_NAME_REGEX, {message:'o campo só pode conter letras'})
 
+  export  const nomeCompletoEncarregadoZod = z.string({
+    required_error: 'campo obrigatório',
+    invalid_type_error: 'O nome deve ser uma string.',}
+ ).trim().min(10, {message:'o campo não pode conter menos de 10 letras'}).max(100, {
+    message: 'Limite de caracteres excedeu.',
+  }).regex(FULL_NAME_REGEX, {message:'o campo só pode conter letras'})
+
  export const dataNascimentoZod = z
       .string({
         required_error: 'campo obrigatório',
@@ -276,6 +283,26 @@ export const  numeroCasaZod = z
       {
         invalid_type_error:
           'As disciplinas devem ser  enviadas no formato de array.',
+      }
+    )
+    .optional()
+
+    export const cursos = z.array(
+      z
+        .number({
+          message: 'O array de cursos deve conter apenas números.',
+        })
+        .int({
+          message:
+            'O array de cursos deve conter apenas números inteiros.',
+        })
+        .positive({
+          message:
+            'O array de cursos deve conter apenas números inteiros positivos.',
+        }),
+      {
+        invalid_type_error:
+          'As cursos devem ser  enviadas no formato de array.',
       }
     )
     .optional()

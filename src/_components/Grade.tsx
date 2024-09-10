@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, Trash} from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, SaveIcon, Trash} from 'lucide-react'
 import { InfoIcon } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
 import DataTable from 'react-data-table-component'
@@ -35,7 +35,6 @@ import { MyDialog, MyDialogContent } from './my_dialog'
 const TFormCreate =  z.object(
 {
   nome: classe,
-  anoLectivoId: z.number(),
   cursoId: cursoId,
   valorMatricula: custoMatricula
 })
@@ -81,31 +80,13 @@ await fetch(`http://localhost:8000/api/classes/`,{
           }else{
             setModalMessage(resp.message);
           }
+          console.log(resp)
   })
   .catch((error) => console.log(`error: ${error}`))
   setUpdateTable(!updateTable)
 }
 
-const[buscar, setBuscar] = React.useState(1);
-const[nome, setNome] = React.useState();
-const[anoLectivo, setanoLectivo] = React.useState();
-const[curso, setCurso] = React.useState();
-const[valorMatricula, setValorMatricula] = React.useState();
-const[id,setId] = React.useState();
 
-React.useEffect(()=>{
-    const search = async () => {
-        const resp = await fetch("http://localhost:8000/api/classes/1");
-        const receve = await resp.json()
-        setNome(receve.nome)
-        setanoLectivo(receve.anoLectivo)
-        setCurso(receve.curso)
-        setId(receve.id)
-        setEstado(true);
-        console.log(receve)
-    }
-    search()
-},[buscar])
 
 const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
   await fetch(`http://localhost:8000/api/classes/${data.id}`,{
@@ -128,18 +109,21 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
     setUpdateTable(!updateTable)
 }
 /*Buscar dados do Ano Academico, Curso*/
-const[ano,setAno] = React.useState([]);
+const[idAno,setIdAno] = React.useState();
 const[bNomeCurso, setBNomeCurso] = React.useState([]);
 const URLLECTIVO = "http://localhost:8000/api/ano-lectivos"
 const URLCURSO = "http://localhost:8000/api/cursos"
+
 React.useEffect(()=>{
     const search = async () => {
         const resp = await fetch(URLLECTIVO);
         const receve = await resp.json()
         const convlectivo1 = JSON.stringify(receve.data)
         const convlectivo2 = JSON.parse(convlectivo1)
-        setAno(convlectivo2)
-
+        var meuarray = convlectivo2.filter((c)=>{
+          return c.activo == true
+        })
+        setIdAno(meuarray[parseInt(String(Object.keys(meuarray)))].id)
         const respC = await fetch(URLCURSO);
         const receveC = await respC.json()
         const convC = JSON.stringify(receveC.data)
@@ -148,6 +132,28 @@ React.useEffect(()=>{
     }
     search()
 },[])
+
+const[buscar, setBuscar] = React.useState();
+const [dados, setDados] = React.useState([])
+const [dataApi, setDataApi] = React.useState([])
+const URLCLASSE = `http://localhost:8000/api/ano-lectivos/${idAno}/classes`
+React.useEffect(()=>{
+  const search = async () => {
+      const resp = await fetch(URLCLASSE);
+      const receve = await resp.json()
+      const conv1 = JSON.stringify(receve.data)
+      const conv2 = JSON.parse(conv1)
+      
+      let nArray = Object.values(conv2.cursos)
+      //console.log(conv2)
+      let iterabel =Object.values(conv2).map((n)=>{return n})
+      console.log(iterabel)
+
+      
+      //for (let i = 0; i < nArray.length; i++){ console.log(nArray[i])}
+  }
+  search()
+},[idAno])
 
 const changeResource = (id)=>{
   setBuscar(id)
@@ -162,18 +168,13 @@ const changeResource = (id)=>{
          },
          { 
           name: 'Nome',
-          selector: row => row.nome,
+          selector: row => row.cursos,
           sortable:true
         },
         { 
             name: 'Ano Académico',
-            selector: row => row.anoLectivo,
+            selector: row => row.classe,
             sortable:true
-        },
-        {
-          name: 'Curso',
-          selector: row => row.curso,
-          sortable:true
         },
         {
             name: 'Ação',
@@ -183,10 +184,6 @@ const changeResource = (id)=>{
               changeResource(row.id)
               if(estado)
               {
-                formUpdate.setValue('nome', nome)
-                formUpdate.setValue('valorMatricula', valorMatricula)
-                formUpdate.setValue('anoLectivoId', anoLectivo)
-                formUpdate.setValue('cursoId', curso)
                 formUpdate.setValue('id', row.id)
               setEstado(false);
               }
@@ -284,33 +281,9 @@ const changeResource = (id)=>{
           }
           />
         </div>
-        <div className="w-full">
-        <FormField
-          control={formUpdate.control}
-          name={'anoLectivoId'}
-          render={({field})=>(
-          <FormItem>
-            <Label htmlFor="lectivo" className="text-right">
-            Ano Lectivo
-          </Label>
-              <FormControl>
-              <select id='lectivo' {...field} className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
-                        <option>Selecione o gênero</option>
-                        {
-                                    ano.map((field)=>{
-                                        return <option value={`${field.id}`}>{field.nome}</option>
-                                    })
-                         }
-                  </select>
-              </FormControl>
-            <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>)
-          }
-          />
-        </div>
       </div>
       <DialogFooter>
-      <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold' type='submit'>Actualizar</Button>
+      <Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -333,16 +306,6 @@ const changeResource = (id)=>{
             <p className="text-sm text-muted-foreground">
               Inspecione os dados
             </p>
-          </div>
-          <div className="grid gap-2">
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="maxWidth">Classe</Label>
-              <p>{nome}</p>
-            </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="height">Curso</Label>
-              <p className='text-xs'>{curso}</p>
-            </div>
           </div>
         </div>
       </PopoverContent>
@@ -384,22 +347,6 @@ const changeResource = (id)=>{
             },
         ];
 
-        const [dados, setDados] = React.useState([])
-        const [dataApi, setDataApi] = React.useState([])
-        const URL = "http://localhost:8000/api/classes/1";
-       
-       useEffect( () => {
-            const respFetch = async () => {
-                  const resp = await fetch (URL);
-                  const respJson = await resp.json();
-                  const conv1 = JSON.stringify(respJson.data)
-                  const conv2 = JSON.parse(conv1)
-                  setDados(conv2)
-                  setDataApi(conv2)
-            } 
-             respFetch()
-       },[updateTable])
-    
         const handleFilter =  (event) => {
             const newData = dataApi.filter( row => {
                 return row.id.includes(event.target.value.trim())
@@ -518,33 +465,9 @@ const changeResource = (id)=>{
           }
           />
         </div>
-        <div className="w-full">
-        <FormField
-          control={formCreate.control}
-          name={'anoLectivoId'}
-          render={({field})=>(
-          <FormItem>
-            <Label htmlFor="lectivo" className="text-right">
-            Ano Lectivo
-          </Label>
-              <FormControl>
-              <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
-                      <option value="">Selecione o ano</option>
-                      {
-                            ano.map((field)=>{
-                                return <option value={`${field.id}`}>{field.nome}</option>
-                            })
-                      }
-                  </select>
-              </FormControl>
-            <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>)
-          }
-          />
-        </div>
       </div>
       <DialogFooter>
-      <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold' type='submit'>Cadastrar</Button>
+      <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>

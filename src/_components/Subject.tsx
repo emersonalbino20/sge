@@ -25,17 +25,18 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { EditIcon, PrinterIcon, Trash, CombineIcon, CheckCircleIcon, AlertCircleIcon} from 'lucide-react'
+import { EditIcon, PrinterIcon, Trash, CombineIcon, CheckCircleIcon, AlertCircleIcon, SaveIcon} from 'lucide-react'
 import { InfoIcon } from 'lucide-react'
 import { UserPlus } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
 import DataTable from 'react-data-table-component'
 import { Textarea } from '@/components/ui/textarea'
-import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, nomeCursoZod, descricaoZod, duracaoZod } from '@/_zodValidations/validations'
+import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, nomeCursoZod, descricaoZod, duracaoZod, cursos } from '@/_zodValidations/validations'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import Select from 'react-select';
 import { MyDialog, MyDialogContent } from './my_dialog'
 
 const TFormCreate =  z.object({
@@ -49,14 +50,24 @@ const TFormUpdate =  z.object({
   id: z.number()
 })
 
-export default function Curse(){
+/*Vinculo de disciplina e curso*/
+const TFormConnect =  z.object({
+  idDisciplinas: z.number(),
+  cursos: cursos
+})
+
+export default function Subject(){
 
   const formCreate  = useForm<z.infer<typeof TFormCreate>>({
     mode: 'all', 
     resolver: zodResolver(TFormCreate)
    })
 
-   
+   const formConnect  = useForm<z.infer<typeof TFormConnect>>({
+    mode: 'all', 
+    resolver: zodResolver(TFormConnect)
+   })
+  
   const [updateTable, setUpdateTable] = React.useState(false)
   const [showModal, setShowModal] = React.useState(false);
   const [modalMessage, setModalMessage] = React.useState('');
@@ -124,7 +135,7 @@ export default function Curse(){
         .then((resp) =>{ 
           setShowModal(true);  
           if (resp.message != null) {
-            setModalMessage(resp.message);  
+            setModalMessage("Disciplina já associado ao curso");  
           }else{
             setModalMessage(resp.message);
           }
@@ -132,6 +143,58 @@ export default function Curse(){
         .catch((error) => console.log(`error: ${error}`))
         setUpdateTable(!updateTable);
     }
+
+    /*Área q implementa o código pra pesquisar cursos*/
+    const [curso, setCurso] = React.useState([]);
+    const URLCURSO = "http://localhost:8000/api/cursos"
+   
+    useEffect( () => {
+      const respFetch = async () => {
+            const resp = await fetch (URLCURSO);
+            const respJson = await resp.json();
+            const conv1 = JSON.stringify(respJson.data)
+            const conv2 = JSON.parse(conv1)
+            setCurso(conv2)
+      } 
+      respFetch()
+   },[])
+
+   const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
+    /*vincular curso à classe*/       
+    const cursos = 
+    {
+      cursos: data.cursos
+    }
+  
+    await fetch(`http://localhost:8000/api/disciplinas/${data.idDisciplinas}/cursos`,{
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(cursos)
+          })
+          .then((resp => resp.json()))
+          .then((resp) =>{ 
+            setShowModal(true);  
+            if (resp.message != null) {
+              setModalMessage("Disciplina já associada ao curso.");  
+            }else{
+              setModalMessage(resp.message);
+            }
+            console.log(resp)
+          })
+          .catch((error) => console.log(`error: ${error}`))
+      }
+
+       //Vincular um curso a multiplas disciplina
+       const[selectedValues, setSelectedValues] = React.useState([]);
+       const cursoOptions = curso.map((c)=>{return {value: c.id, label: c.nome}});
+       const handleChange = (selectedOptions) => {
+         // Extrair valores e labels
+         const values = selectedOptions.map(option => option.value);
+         setSelectedValues(values);
+       };
+
 
     const changeResource=(id)=>{
       setBuscar(id)
@@ -213,7 +276,7 @@ export default function Curse(){
               
       </div>
       <DialogFooter>
-      <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold' type='submit'>Actualizar</Button>
+      <Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -247,6 +310,61 @@ export default function Curse(){
       </PopoverContent>
     </Popover>
     </div>
+            <Dialog>
+            <DialogTrigger asChild >
+            <div title='vincular' className='relative flex justify-center items-center'>
+            <CombineIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
+              <Button className='h-7 px-5 bg-yellow-600 text-white font-semibold hover:bg-yellow-600 rounded-sm border-yellow-600'></Button>
+              </div>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px] bg-white">
+                  <DialogHeader>
+                    <DialogTitle>Vincular Disciplina</DialogTitle>
+                    <DialogDescription>
+                      Vincula a disciplina de <span className='text-blue-500 font-medium'>{row.nome}</span> em multiplos cursos.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Form {...formConnect} >
+                <form onSubmit={formConnect.handleSubmit(handleSubmitConnect)
+                
+                } >
+                <div className="flex flex-col w-full py-4 bg-white">              
+                <div className="w-full">
+                <FormField
+                control={formConnect.control}
+                name="cursos"
+                render={({field})=>(
+                <FormItem>
+                  <Label htmlFor="disciplina" className="text-right">
+                  Cursos
+                </Label>
+                    <FormControl>
+                    <Select
+                    name="curso"
+                    isMulti
+                    options={cursoOptions}
+                    className="basic-multi-select"
+                    onChange={handleChange}
+                    classNamePrefix="select"
+                  />
+                    </FormControl>
+                  <FormMessage className='text-red-500 text-xs'/>
+                </FormItem>)
+                }
+                />
+                </div>
+               <div>
+               </div>
+            </div>
+        <DialogFooter>
+          <Button title='vincular' type="submit" className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 hover:text-white w-12'  onClick={()=>{
+                  formConnect.setValue('cursos', selectedValues)
+                  formConnect.setValue('idDisciplinas', row.id);
+                }}><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+        </DialogFooter>
+        </form></Form>
+      </DialogContent>
+    </Dialog>
       </div>),
         }, 
     ];
@@ -384,7 +502,7 @@ export default function Curse(){
       </div>
       <DialogFooter>
         
-      <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold' type='submit'>Cadastrar</Button>
+      <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>

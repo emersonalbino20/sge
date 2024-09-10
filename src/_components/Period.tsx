@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, Trash} from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, SaveIcon, Trash} from 'lucide-react'
 import { InfoIcon } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
 import DataTable from 'react-data-table-component'
@@ -250,7 +250,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
               </div>
       </div>
       <DialogFooter>
-      <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold' type='submit'>Actualizar</Button>
+      <Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -442,7 +442,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
         </div>
       </div>
       <DialogFooter>
-      <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold' type='submit'>Cadastrar</Button>
+      <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>

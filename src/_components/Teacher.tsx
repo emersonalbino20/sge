@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { AlertCircleIcon, CheckCircleIcon, Check, CombineIcon, EditIcon, PlusIcon, PrinterIcon } from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, Check, CombineIcon, EditIcon, PlusIcon, PrinterIcon, SaveIcon, Trash } from 'lucide-react'
 import { InfoIcon } from 'lucide-react'
 import { UserPlus } from 'lucide-react'
 import DataTable from 'react-data-table-component'
@@ -52,8 +52,17 @@ const TFormUpdate =  z.object({
 /*Vinculo de professor e disciplina*/
 const TFormConnect =  z.object({
   idProfessor: z.number(),
-  disciplinas: disciplinas
+  disciplinas: disciplinas,
+  nomeDisciplinas: z.array(z.string())
 })
+
+/*Desvinculo de professor e disciplina*/
+const TFormUnConnect =  z.object({
+  idProfessor: z.number(),
+  disciplinas: disciplinas,
+  nomeDisciplinas: z.array(z.string())
+})
+
 type FormProps =  z.infer<typeof TForm>;
 type FormPropsUpdate =  z.infer<typeof TFormUpdate>;
 export default function Teacher (){
@@ -71,6 +80,11 @@ export default function Teacher (){
    const formConnect  = useForm<z.infer<typeof TFormConnect>>({
     mode: 'all', 
     resolver: zodResolver(TFormConnect)
+   })
+
+   const formUnConnect  = useForm<z.infer<typeof TFormUnConnect>>({
+    mode: 'all', 
+    resolver: zodResolver(TFormUnConnect)
    })
 
    const [updateTable, setUpdateTable] = React.useState(false)
@@ -187,7 +201,7 @@ export default function Teacher (){
     
   
   
-  const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
+const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
     /*vincular professor à disciplina*/       
     const disciplinas = 
     {
@@ -206,21 +220,53 @@ export default function Teacher (){
           .then((resp) =>{ 
             setShowModal(true);  
             if (resp.message != null) {
-              setModalMessage(resp.errors.disciplinas[0]);  
+              let index = parseInt(Object.keys(resp.errors.disciplinas)[0]);
+              setModalMessage(resp.errors.disciplinas[index]+"\n Disciplina: "+data.nomeDisciplinas[index]);
             }else{
               setModalMessage(resp.message);
             }
+            console.log(resp)
+            //resp.errors.forEach((v)=> { return console.log(v)})
           })
           .catch((error) => console.log(`error: ${error}`))
       }
+const handleSubmitUnConnect = async (data: z.infer<typeof TFormUnConnect>,e) => {
+        /*desvincular professor à disciplina*/       
+        const disciplinas = 
+        {
+          disciplinas: data.disciplinas
+        }
+        await fetch(`http://localhost:8000/api/professores/${data.idProfessor}/disciplinas`,{
+                  method: 'DELETE',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(disciplinas)
+              })
+              .then((resp => resp.json()))
+              .then((resp) =>{ 
+                setShowModal(true);  
+                if (resp.message != null) {
+                  let index = parseInt(Object.keys(resp.errors.disciplinas)[0]);
+                  setModalMessage(resp.errors.disciplinas[index]+"\n Disciplina: "+data.nomeDisciplinas[index]);
+                }else{
+                  setModalMessage(resp.message);
+                }
+                console.log(resp)
+              })
+             .catch((error) => console.log(`error: ${error}`))
+     }
 
       //Vincular um professor a multiplas disciplinas
       const[selectedValues, setSelectedValues] = React.useState([]);
+      const[selectedLabels, setSelectedLabels] = React.useState([]);
       const disciplinaOptions = disciplina.map((c)=>{return {value: c.id, label: c.nome}});
       const handleChange = (selectedOptions) => {
         // Extrair valores e labels
         const values = selectedOptions.map(option => option.value);
         setSelectedValues(values);
+        const labels = selectedOptions.map(option => option.label);
+         setSelectedLabels(labels);
       };
       
     const columns = 
@@ -372,7 +418,7 @@ export default function Teacher (){
         )}/>
         </div>
       </div>
-      <DialogFooter><Button className='bg-green-500 border-green-500 text-white hover:bg-green-500' type='submit'>Actualizar</Button>
+      <DialogFooter><Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -408,6 +454,62 @@ export default function Teacher (){
       </PopoverContent>
     </Popover>
             </div>
+            <Dialog >
+          <DialogTrigger asChild >
+          <div title='desvincular' className='relative flex justify-center items-center'>
+          <Trash className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
+            <Button className='h-7 px-5 bg-red-600 text-white font-semibold hover:bg-red-600 rounded-sm border-red-600'></Button>
+            </div>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px] bg-white">
+                <DialogHeader>
+                  <DialogTitle>Desvincular Professor</DialogTitle>
+                  <DialogDescription>
+                  Essa secção tem como objectivo desvicular relação já existente entre professores e algumas disciplinas especifícas.
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...formUnConnect} >
+              <form onSubmit={formUnConnect.handleSubmit(handleSubmitUnConnect)
+              
+              } >
+              <div className="flex flex-col w-full py-4 bg-white">              
+              <div className="w-full">
+              <FormField
+              control={formUnConnect.control}
+              name="disciplinas"
+              render={({field})=>(
+              <FormItem>
+                <Label htmlFor="disciplina" className="text-right">
+                Disciplinas
+              </Label>
+                  <FormControl>
+                  <Select
+                  name="disciplinas"
+                  isMulti
+                  options={disciplinaOptions}
+                  className="basic-multi-select"
+                  onChange={handleChange}
+                  classNamePrefix="select"
+                />
+                  </FormControl>
+                <FormMessage className='text-red-500 text-xs'/>
+              </FormItem>)
+              }
+              />
+              </div>
+             <div>
+             </div>
+          </div>
+      <DialogFooter>
+        <Button type="submit" title='desvincular' className='bg-red-500 border-red-500 text-white hover:bg-red-500 hover:text-white w-12' onClick={()=>{
+                formUnConnect.setValue('disciplinas', selectedValues)
+                formUnConnect.setValue('nomeDisciplinas', selectedLabels)
+                formUnConnect.setValue('idProfessor', row.id);
+              }}><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+      </DialogFooter>
+      </form></Form>
+    </DialogContent>
+  </Dialog>
             <Dialog >
           <DialogTrigger asChild >
           <div title='vincular' className='relative flex justify-center items-center'>
@@ -455,10 +557,11 @@ export default function Teacher (){
              </div>
           </div>
       <DialogFooter>
-        <Button type="submit" onClick={()=>{
+        <Button type="submit" title='vincular' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 hover:text-white w-12' onClick={()=>{
                 formConnect.setValue('disciplinas', selectedValues)
+                formConnect.setValue('nomeDisciplinas', selectedLabels)
                 formConnect.setValue('idProfessor', row.id);
-              }}>Vincular</Button>
+              }}><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -532,7 +635,7 @@ export default function Teacher (){
     data={dados}
     defaultSortFieldId={1}
     fixedHeader
-    fixedHeaderScrollHeight='400px'
+    fixedHeaderScrollHeight='300px'
     pagination
     onSort={handleSort}
     subHeader
@@ -670,7 +773,9 @@ export default function Teacher (){
           </div>
       </div>
       <DialogFooter>
-      <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold ' onClick={()=>{form.setValue('disciplinas', selectedValues)}}type='submit'>Cadastrar</Button>
+      <div className='relative flex justify-center items-center' >
+      <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' title='cadastrar' onClick={()=>{form.setValue('disciplinas', selectedValues)}}type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+      </div>
       </DialogFooter>
       </form></Form>
     </DialogContent>

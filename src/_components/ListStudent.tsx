@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useEffect } from 'react'
-import { AlertCircleIcon, CheckCircleIcon, EditIcon, Info } from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, EditIcon, Info, SaveIcon } from 'lucide-react'
 import Table from './Table'
 import {
     Dialog,
@@ -533,7 +533,7 @@ React.useEffect(()=>{
         </div>
       
       <DialogFooter>
-        <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500' type='submit'>Guardar Mudanças</Button>
+        <Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form>
       </Form>
@@ -847,7 +847,7 @@ React.useEffect(()=>{
       </div>
       
       <DialogFooter>
-        <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold' type='submit'>Cadastrar</Button>
+        <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form>
       </Form>
@@ -860,7 +860,7 @@ React.useEffect(()=>{
 ];
     const [dados, setDados] = React.useState([])
     const [dataApi, setDataApi] = React.useState([])
-    const URL = "http://localhost:8000/api/alunos/"
+    const URL = "http://localhost:8000/api/alunos?page_size=21"
    
    useEffect( () => {
         const respFetch = async () => {

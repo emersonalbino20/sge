@@ -40,7 +40,7 @@ export default function Table(props){
         columns={props.columns}
         data={props.dados}
         fixedHeader
-        fixedHeaderScrollHeight='400px'
+        fixedHeaderScrollHeight='300px'
         pagination
         defaultSortFieldId={1}
         onSelectedRowsChange={props.handleRows}

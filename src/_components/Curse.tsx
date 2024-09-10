@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, Trash} from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, SaveIcon, Trash} from 'lucide-react'
 import { InfoIcon, CombineIcon } from 'lucide-react'
 import { UserPlus } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
@@ -49,9 +49,16 @@ const TFormUpdate =  z.object({
 /*Vinculo de curso e disciplina*/
 const TFormConnect =  z.object({
   idCursos: z.number(),
-  disciplinas: disciplinas
+  disciplinas: disciplinas,
+  nomeDisciplinas: z.array(z.string())
 })
 
+/*Desvinculo de curso e disciplina*/
+const TFormUnConnect =  z.object({
+  idCursos: z.number(),
+  disciplinas: disciplinas,
+  nomeDisciplinas: z.array(z.string())
+})
 export default function Curse(){
 
 const formCreate  = useForm<z.infer<typeof TFormCreate>>({
@@ -67,6 +74,11 @@ const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
 const formConnect  = useForm<z.infer<typeof TFormConnect>>({
   mode: 'all', 
   resolver: zodResolver(TFormConnect)
+ })
+
+ const formUnConnect  = useForm<z.infer<typeof TFormUnConnect>>({
+  mode: 'all', 
+  resolver: zodResolver(TFormUnConnect)
  })
 
 const [updateTable, setUpdateTable] = React.useState(false)
@@ -174,7 +186,8 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
           .then((resp) =>{ 
             setShowModal(true);  
             if (resp.message != null) {
-              setModalMessage(resp.errors.disciplinas[0]);  
+              let index = parseInt(Object.keys(resp.errors.disciplinas)[0]);
+              setModalMessage(resp.errors.disciplinas[index]+"\n Disciplina: "+data.nomeDisciplinas[index]);  
             }else{
               setModalMessage(resp.message);
             }
@@ -182,13 +195,43 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
           .catch((error) => console.log(`error: ${error}`))
       }
 
+      const handleSubmitUnConnect = async (data: z.infer<typeof TFormUnConnect>,e) => {
+        /*desvincular curso à classe*/       
+        const disciplinas = 
+        {
+          disciplinas: data.disciplinas
+        }
+      
+        await fetch(`http://localhost:8000/api/cursos/${data.idCursos}/disciplinas`,{
+                  method: 'DELETE',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(disciplinas)
+              })
+              .then((resp => resp.json()))
+              .then((resp) =>{ 
+                setShowModal(true);  
+                if (resp.message != null) {
+                  let index = parseInt(Object.keys(resp.errors.disciplinas)[0]);
+                  setModalMessage(resp.errors.disciplinas[index]+"\n Disciplina: "+data.nomeDisciplinas[index]);  
+                }else{
+                  setModalMessage(resp.message);
+                }
+              })
+              .catch((error) => console.log(`error: ${error}`))
+          }
+
        //Vincular um curso a multiplas disciplina
        const[selectedValues, setSelectedValues] = React.useState([]);
+       const[selectedLabels, setSelectedLabels] = React.useState([]);
        const disciplinaOptions = disciplina.map((c)=>{return {value: c.id, label: c.nome}});
        const handleChange = (selectedOptions) => {
          // Extrair valores e labels
          const values = selectedOptions.map(option => option.value);
          setSelectedValues(values);
+         const labels = selectedOptions.map(option => option.label);
+         setSelectedLabels(labels);
        };
 
     const columns = 
@@ -301,7 +344,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
               </div>
       </div>
       <DialogFooter>
-      <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold' type='submit'>Actualizar</Button>
+      <Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -340,8 +383,64 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
       </PopoverContent>
     </Popover>
             </div>
-            <div title='excluir' className='relative flex justify-center items-center cursor-pointer' ><Trash className='w-5 h-4 absolute text-white'/> <button className='py-3 px-5 rounded-sm bg-red-600  border-red-600'></button></div>
             
+            <Dialog>
+            <DialogTrigger asChild >
+            <div title='desvincular' className='relative flex justify-center items-center'>
+            <Trash className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
+              <Button className='h-7 px-5 bg-red-600 text-white font-semibold hover:bg-red-600 rounded-sm border-red-600'></Button>
+              </div>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px] bg-white">
+                  <DialogHeader>
+                    <DialogTitle>Desvincular Curso</DialogTitle>
+                    <DialogDescription>
+                    Essa secção tem como objectivo desvincular a relação existente entre cursos e algumas disciplinas especifícas.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Form {...formConnect} >
+                <form onSubmit={formUnConnect.handleSubmit(handleSubmitUnConnect)
+                
+                } >
+                <div className="flex flex-col w-full py-4 bg-white">              
+                <div className="w-full">
+                <FormField
+                control={formUnConnect.control}
+                name="disciplinas"
+                render={({field})=>(
+                <FormItem>
+                  <Label htmlFor="disciplina" className="text-right">
+                  Disciplinas
+                </Label>
+                    <FormControl>
+                    <Select
+                    name="disciplina"
+                    isMulti
+                    options={disciplinaOptions}
+                    className="basic-multi-select"
+                    onChange={handleChange}
+                    classNamePrefix="select"
+                  />
+                    </FormControl>
+                  <FormMessage className='text-red-500 text-xs'/>
+                </FormItem>)
+                }
+                />
+                </div>
+               <div>
+               </div>
+            </div>
+        <DialogFooter>
+          <Button title='desvincular' type="submit" className='bg-red-500 border-red-500 text-white hover:bg-red-500 hover:text-white w-12' onClick={()=>{
+                  formUnConnect.setValue('disciplinas', selectedValues)
+                  formUnConnect.setValue('nomeDisciplinas', selectedLabels)
+                  formUnConnect.setValue('idCursos', row.id);
+                }}><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+        </DialogFooter>
+        </form></Form>
+      </DialogContent>
+    </Dialog>
+
             <Dialog>
             <DialogTrigger asChild >
             <div title='vincular' className='relative flex justify-center items-center'>
@@ -389,10 +488,11 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
                </div>
             </div>
         <DialogFooter>
-          <Button type="submit" onClick={()=>{
+          <Button type="submit" title='vincular' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 hover:text-white w-12'  onClick={()=>{
                   formConnect.setValue('disciplinas', selectedValues)
+                  formConnect.setValue('nomeDisciplinas', selectedLabels)
                   formConnect.setValue('idCursos', row.id);
-                }}>Vincular</Button>
+                }}><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
         </DialogFooter>
         </form></Form>
       </DialogContent>
@@ -551,7 +651,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
         </div>
       </div>
       <DialogFooter>
-        <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold' type='submit'>Cadastrar</Button>
+        <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>

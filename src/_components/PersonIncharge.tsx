@@ -8,31 +8,21 @@ import {
     DialogTitle,
     DialogTrigger,
   } from "@/components/ui/dialog"
-
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-  } from "@/components/ui/popover"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
-import { useEffect, useState } from 'react'
-import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon } from 'lucide-react'
-import { InfoIcon } from 'lucide-react'
-import { UserPlus, Trash } from 'lucide-react'
+import { UserPlus, Trash, InfoIcon, AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, SaveIcon } from 'lucide-react'
 import DataTable from 'react-data-table-component'
-import { useForm, useFieldArray } from 'react-hook-form'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, ruaZod, bairroZod, numeroCasaZod, idZod } from '@/_zodValidations/validations'
+import { useForm } from 'react-hook-form'
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
+import { emailZod, telefoneZod, ruaZod, bairroZod, numeroCasaZod, idZod, nomeCompletoEncarregadoZod } from '@/_zodValidations/validations'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MyDialog, MyDialogContent } from './my_dialog'
 
 
 const TForm =  z.object({
-  nomeCompleto: nomeCompletoZod,
+  nomeCompleto: nomeCompletoEncarregadoZod,
   telefone: telefoneZod,
   email: emailZod,
   parentescoId: z.number(),
@@ -44,7 +34,7 @@ const TForm =  z.object({
 
 
 const TFormUpdate =  z.object({
-  nomeCompleto: nomeCompletoZod,
+  nomeCompleto: nomeCompletoEncarregadoZod,
   telefone: telefoneZod,
   email: emailZod,
   parentescoId: z.number(),
@@ -52,7 +42,6 @@ const TFormUpdate =  z.object({
   rua: ruaZod,
   numeroCasa: numeroCasaZod,
   responsavelId: idZod,
-  alunoId: idZod
 })
 
 const TFormDelete = z.object({
@@ -153,7 +142,7 @@ export default function PersonIncharge (){
           }else{
             setModalMessage(resp.message);
           }
-            console.log(resp)
+            //console.log(resp)
         })
         .catch((error) => console.log(`error: ${error}`))
         setUpdateTable(!updateTable)
@@ -178,6 +167,7 @@ export default function PersonIncharge (){
             }else{
               setModalMessage(resp.message);
             }
+            //console.log(resp)
         })
           .catch((error) => console.log(`error: ${error}`))
           setUpdateTable(!updateTable)
@@ -195,44 +185,52 @@ React.useEffect(()=>{
     }
     search()
 },[])
-    const[nome, setNome] = React.useState();
-    const[bairro, setBairro] = React.useState();
-    const[rua, setRua] = React.useState();
-    const[casa, setCasa] = React.useState();
-    const[telefone,setTelefone] = React.useState();
-    const[email,setEmail] = React.useState();
-    const[eoq, setEoq] = React.useState();
-    const [dados, setDados] = React.useState([])
-    const [dataApi, setDataApi] = React.useState([])
+    
     const[buscar, setBuscar] = React.useState(0);
-    const URL = `http://localhost:8000/api/responsaveis/${buscar}`
+    const URLRESPONSAVEIS = `http://localhost:8000/api/alunos/${buscar}/responsaveis`
+    const[idResponsavel, setIdEncarregado] = React.useState();
     React.useEffect(()=>{
-        const search = async () => {
-          const resp = await fetch (URL);
-          const respJson = await resp.json();
-          
-          console.log(respJson)
-          setEoq(respJson.parentesco)
-          setNome(respJson.nomeCompleto)
-          setBairro(respJson.endereco.bairro)
-          setRua(respJson.endereco.rua)
-          setCasa(respJson.endereco.numeroCasa)
-          setTelefone(respJson.contacto.telefone)
-          setEmail(respJson.contacto.email)
-          const obj = [{
-            id: respJson.id,
-            nomeCompleto: respJson.nomeCompleto,
-            parentesco: respJson.parentesco
-          }]
-          setDados(obj)
-          setDataApi(obj)
-          setEstado(true)
-        }
-        search()
-    },[buscar])
+      const search = async () => {
+        const resp = await fetch (URLRESPONSAVEIS);
+        const respJson = await resp.json();
+        const conv1 = JSON.stringify(respJson.data)
+        const conv2 = JSON.parse(conv1)
+        setDados(conv2)
+        setDataApi(conv2)
+      
+      }
+      search()
+  },[buscar])
 
+  const[nome, setNome] = React.useState();
+  const[bairro, setBairro] = React.useState();
+  const[rua, setRua] = React.useState();
+  const[casa, setCasa] = React.useState();
+  const[telefone,setTelefone] = React.useState();
+  const[email,setEmail] = React.useState();
+  const[eoq, setEoq] = React.useState();
+  const [dados, setDados] = React.useState([])
+  const [dataApi, setDataApi] = React.useState([])
+  const URL = `http://localhost:8000/api/responsaveis/${idResponsavel}`
+  React.useEffect(()=>{
+      const search = async () => {
+        const resp = await fetch (URL);
+        const respJson = await resp.json();
+        //console.log(respJson)
+        setEoq(respJson.parentesco)
+        setNome(respJson.nomeCompleto)
+        setBairro(respJson.endereco.bairro)
+        setRua(respJson.endereco.rua)
+        setCasa(respJson.endereco.numeroCasa)
+        setTelefone(respJson.contacto.telefone)
+        setEmail(respJson.contacto.email)
+        setEstado(true)
+      }
+      search()
+  },[idResponsavel])
+  
     const changeResource = (id)=>{
-      setBuscar(id)
+      setIdEncarregado(id)
     }
 
     const columns = 
@@ -247,12 +245,7 @@ React.useEffect(()=>{
             name: 'Nome',
             selector: row => row.nomeCompleto,
             sortable:true
-         }, 
-         { 
-          name: 'Parentesco',
-          selector: row => row.parentesco,
-          sortable:true
-       },
+         },
         {
             name: 'Ação',
             cell: (row) => (<div className='flex flex-row space-x-2'onClick={()=>{
@@ -379,7 +372,7 @@ React.useEffect(()=>{
         </div>
         <div className='w-full'>
           <Label htmlFor="casa" className="text-right">
-            Número da Casa
+            N. da Casa
           </Label>
          
             <FormField
@@ -389,7 +382,7 @@ React.useEffect(()=>{
             <FormControl>
             <FormItem>
          
-          <Input id="casa" type='number' {...field} className="w-full"  min="1"  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
+          <Input id="casa" type='number' {...field} className="w-full"  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
           <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
           </FormControl>
@@ -441,7 +434,7 @@ React.useEffect(()=>{
       </div>
       
       <DialogFooter>
-        <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold ' type='submit'>Actualizar</Button>
+        <Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold w-12' onClick={()=>{formUpdate.setValue('responsavelId', row.id)}} type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -800,7 +793,7 @@ React.useEffect(()=>{
       </div>
       
       <DialogFooter>
-        <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold' type='submit'>Cadastrar</Button>
+        <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form>
       </Form>

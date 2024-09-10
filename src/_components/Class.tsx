@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, Trash} from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, SaveIcon, Trash} from 'lucide-react'
 import { InfoIcon } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
 import DataTable from 'react-data-table-component'
@@ -28,6 +28,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm} from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { MyDialog, MyDialogContent } from './my_dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 
 
@@ -121,25 +122,18 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
     setUpdateTable(!updateTable)
 }
 
-/*Buscar dados da Classe*/
-const[nomeClasse,setNomeClasse] = React.useState();
-const[idClasse,setIdClasse] = React.useState();
-React.useEffect(()=>{
-    const search = async () => {
-        const resp = await fetch(`http://localhost:8000/api/clases/1`);
-        const receve = await resp.json()
-        setNomeClasse(receve.data[0].nome)
-        setIdClasse(receve.data[0].id)
-        //console.log(receve.data[0].nome)
-    }
-    search()
-},[])
+
 
 /*Buscar dados da sala, turno*/
 const[salas,setSalas] = React.useState([]);
 const[turnos, setTurnos] = React.useState([]);
+const[curso, setCurso] = React.useState([]);
+const[anoId, setAnoId] = React.useState();
+const[cursoId, setCursoId] = React.useState(0);
 const URLSALA = "http://localhost:8000/api/salas"
 const URLTURNO = "http://localhost:8000/api/turnos"
+const URLANO = "http://localhost:8000/api/ano-lectivos"
+const URLCURSO = "http://localhost:8000/api/cursos"
 React.useEffect(()=>{
     const search = async () => {
         const respSala = await fetch(URLSALA);
@@ -152,9 +146,48 @@ React.useEffect(()=>{
         const convTurno = JSON.stringify(receveTurno.data)
         const convTurno2 = JSON.parse(convTurno)
         setTurnos(convTurno2)
+        const respAno = await fetch(URLANO);
+        const receveAno = await respAno.json()
+        const convAno = JSON.stringify(receveAno.data)
+        const convAno2 = JSON.parse(convAno)
+        convAno2.filter((a) => {if (a.activo == true )return setAnoId(a.id) })
+        const respCurso = await fetch(URLCURSO);
+        const receveCurso = await respCurso.json()
+        const convCurso = JSON.stringify(receveCurso.data)
+        const convCurso2 = JSON.parse(convCurso)
+        setCurso(convCurso2)
     }
     search()
 },[])
+
+/*Buscar dados da Classe*/
+const[cAll,setCAll] = React.useState([]);
+React.useEffect(()=>{
+    const search = async () => {
+        const resp = await fetch(`http://localhost:8000/api/ano-lectivos/${anoId}/classes`);
+        const receveClasse = await resp.json()
+        const convClasse = JSON.stringify(receveClasse.data)
+        const convClasse2 = JSON.parse(convClasse)
+        setCAll(convClasse2.cursos[cursoId].classes)
+        /*
+        let tamanho = 1;
+        for(var propriedade in obj){
+          if (obj.hasOwnProperty(propriedade))
+            {
+              tamanho++;
+            }
+          }
+        console.log(tamanho);
+        */
+        //console.log(Object.keys(obj).length)
+        /*for (let i = 1; i <= Object.keys(obj).length; i++)
+        {
+          convClasse2.cursos[i].classes.map((a)=>{return "id: "+ a.id +" classe: "+ a.nome})
+        }
+        convClasse2.cursos[1].classes.map((a)=>{return console.log("id: "+ a.id +" classe: "+ a.nome)})*/
+    }
+    search()
+},[cursoId])
 
 const changeResource = (id)=>{
   setBuscar(id)
@@ -305,7 +338,7 @@ const changeResource = (id)=>{
               </div>
       </div>
       <DialogFooter>
-      <Button className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold' type='submit'>Actualizar</Button>
+      <Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -476,20 +509,37 @@ const changeResource = (id)=>{
         )}/>
         </div>
         <div className="w-full">
+         <label htmlFor="curso" className="text-right">
+                Cursos
+              </label>
+              <select className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3'  onChange={(e)=>{setCursoId(parseInt(e.target.value))}}>
+                      <option value="">Selecione o curso</option>
+                      {
+                            curso.map((field)=>{
+                                return <option value={`${field.id}`}>{field.nome}</option>
+                            })
+                      }
+                  </select>
+        </div>
+        <div className="w-full">
             <FormField
               control={formCreate.control}
               name={'classeId'}
               render={({field})=>(
               <FormItem>
-                <Label htmlFor="classe" className="text-right">
-                Classe
-              </Label>
+                <label htmlFor="classe" className="text-right">
+                Classes
+              </label>
                   <FormControl>
-                  <select id='classe' {...field} className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
-                            <option>Selecione a classe</option>
-                            <option value={1}>"Nao existe endpoint"</option>
-                      </select>
-                  </FormControl>
+                  <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                      <option value="">Seleciona a classe</option>
+                      {
+                            cAll.map((field)=>{
+                                return <option value={`${field.id}`}>{field.nome}</option>
+                            })
+                      }
+                  </select>
+                     </FormControl>
                 <FormMessage className='text-red-500 text-xs'/>
               </FormItem>)
               }
@@ -547,7 +597,7 @@ const changeResource = (id)=>{
               </div>
       </div>
       <DialogFooter>
-      <Button className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold' type='submit'>Cadastrar</Button>
+      <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>

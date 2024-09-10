@@ -1,9 +1,13 @@
 import { Button } from "./components/ui/button";
 import * as React from "react"
 import {useEffect, useState } from "react";
-import axios from 'axios'
 export default function Fetch(){
     const data = {
+        "classeId": 1,
+        "cursoId": 1,
+        "turmaId": 1,
+        "turnoId": 1,
+        "metodoPagamentoId": 1,
         "aluno": {
           "nomeCompleto": "Mateus Vale Celestino Nelito",
           "nomeCompletoPai": "Nelito Cassule Toquessa",
@@ -48,12 +52,7 @@ export default function Fetch(){
               }
             }
           ]
-        },
-        "classeId": 1,
-        "cursoId": 1,
-        "turmaId": 1,
-        "metodoPagamentoId": 1,
-        "anoLectivoId": 1
+        }
       }
     async function teste()  {
     const resp = await fetch('http://localhost:8000/api/matriculas',{

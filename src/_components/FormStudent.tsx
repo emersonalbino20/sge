@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { AlertCircleIcon, CheckCircleIcon, PlusIcon } from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, PlusIcon, SaveIcon } from 'lucide-react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver} from '@hookform/resolvers/zod'
@@ -192,7 +192,7 @@ const handleSubmitCreate = async (dados: z.infer<typeof TFormCreate>) => {
           responsaveis: dados.responsaveis
         }
       }
-    await fetch('http://localhost:8000/api/matriculas',{
+    await fetch('http://localhost:8000/api/matriculas/',{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -203,17 +203,32 @@ const handleSubmitCreate = async (dados: z.infer<typeof TFormCreate>) => {
         .then((resp) =>{ 
             setShowModal(true);
             if (resp.message != null) {
+             
+                let index = Object.values(resp.errors.aluno)
+                let conv = parseInt(String(Object.keys(index)))
+                if (Object.keys(resp.errors.aluno)[0] == "numeroBi")
+                {
+                    setModalMessage("Erro Nos dados do Aluno, "+Object.values(resp.errors.aluno)[0][0])
+                }
+                if (Object.keys(resp.errors.aluno)[0] == "contacto")
+                {
+                    setModalMessage("Erro Nos dados do Aluno, "+Object.values(Object.values(resp.errors.aluno)[0])[0][0])
+                }
+                if (Object.keys(resp.errors.aluno)[0] == "responsaveis")
+                {
+                    setModalMessage("Erro Nos dados do Responsavel, "+Object.values(Object.values(Object.values(Object.values(resp.errors.aluno)[0])[0])[0])[0][0])
+                }
+                if (Object.values(Object.values(resp.errors.aluno)[0])[0] == "responsaveis não podem conter contactos duplicados.")
+                {
+                    setModalMessage("responsaveis não podem conter contactos duplicados.")
+                }
+                /*console.log(Object.values(Object.values(resp.errors.aluno)[0])[0][0])//show contacto
+                */
+                let responsaveis = Object.keys(resp.errors.aluno)[0]
+                console.log(responsaveis+": "+Object.values(Object.values(resp.errors.aluno)[0])[0])
                 console.log(resp)
-                /*setModalMessage("Aluno:"+resp.errors.aluno.nomeCompleto);
-                setModalMessage("Aluno:"+resp.errors.aluno.nomeCompletoPai);
-                setModalMessage("Aluno:"+resp.errors.aluno.nomeCompletoMae);
-                setModalMessage("Aluno:"+resp.errors.aluno.numeroBi);
-                setModalMessage("Aluno:"+resp.errors.aluno.contacto.telefone);  
-                setModalMessage("Aluno:"+resp.errors.aluno.contacto.email); 
-                setModalMessage("Encarregado:"+resp.errors.aluno.responsaveis[0].nomeCompleto); 
-                setModalMessage("Encarregado:"+resp.errors.aluno.responsaveis[0].contacto.telefone);  
-                setModalMessage("Encarregado:"+resp.errors.aluno.responsaveis[0].contacto.email);*/ 
-                setModalMessage(resp.message)
+               
+                //setModalMessage(resp.message)
                 
             }else{
                 setModalMessage(resp.message);
@@ -818,7 +833,7 @@ return(
          </TabsContent>
         </Tabs>
         <div className='w-full flex items-center justify-center'>
-            <button type='submit' className='w-28 py-1 mb-4 bg-blue-700 text-white ' >Cadastrar</button>  
+            <Button title='matricular' type='submit' className='w-28 py-1 mb-4 bg-blue-700 text-white  hover:bg-blue-700' ><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
         </div>
         </form>
       </Form>
