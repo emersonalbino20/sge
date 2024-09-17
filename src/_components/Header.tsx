@@ -2,7 +2,7 @@ import * as React from 'react'
 import IPPUImage from '../assets /_images/IPPU.png'
 import { useState, useEffect } from 'react';
 import { HomeIcon as Home } from 'lucide-react';
-import {UsersIcon as Alunos} from '@heroicons/react/24/outline'
+import {UsersIcon as Alunos, HomeIcon, HomeModernIcon} from '@heroicons/react/24/outline'
 import { Eye, LayoutDashboard } from 'lucide-react';
 import { CreditCard as Pagamentos } from 'lucide-react';
 import { UserCheck as Professor } from 'lucide-react';
@@ -91,33 +91,36 @@ export default function Header(props){
         
     <div className='absolute top-0 w-full'>
         
-        <div className='flex flex-row space-x-3 py-4 pr-3 items-end justify-end  bg-gradient-to-r from-slate-800 via-slate-400 to-white font-playfair' style={{backgroundImage: ''}}>
+        <div className='flex flex-row space-x-3 py-4 pr-3 items-end justify-end  bg-gradient-to-r from-slate-800 via-slate-400 to-white font-playfair text-[20px]' style={{backgroundImage: ''}}>
         
             <p>Bem-Vindo Hora:{formatDate()}</ p>
-            <img src={IPPUImage} title='Instituto Politécnico Privado Ulumbo' alt="None" className='w-[50px] '/>
+            <img src={IPPUImage} title='Ulumbo LOGO' alt="None" className='w-[50px] '/>
             
         </div>
-        <div className='sticky top-0 flex py-5 bg-slate-800 items-center justify-center'>
-            <ul className='flex flex-row space-x-5 text-white shadow-2xl mr-10'>
-            <Link to={'/'}><li className='relative flex flex-col items-center justify-center  cursor-pointer pr-3 pl-3'> <span>   
-                      <Home className='w-5 h-5 '/>
+        <div className='bg-gray-900 sticky top-0 flex py-5 dark:bg-gray-900 items-center justify-center text-white
+        text-[20px]'>
+            <ul className='flex flex-row space-x-5  shadow-2xl mr-10'>
+            <Link to={'/Home'}><li className='relative flex flex-col items-center justify-center  cursor-pointer pr-3 pl-3'> <span>   
+                      <HomeIcon className='w-7 h-6 font'/>
                 </span>
                 Home</li></Link>
             <li className='relative flex flex-col items-center justify-center  cursor-pointer pr-3 pl-3' onClick={handleVisivel}> <span>   
-                 <Alunos className='h-5 w-5'/>
+                 <Alunos className='w-7 h-6'/>
             </span>
-                        Estudantes
+                        Pessoal
             {visivel &&
-                <ul className="absolute flex-col bg-slate-800 cursor-pointer z-50 top-[52px]">
-                    <Link to={'/StudentInsertPage'}><li  className="px-4 py-2 hover:bg-slate-400">Matricular</li></Link>
+                <ul className="absolute flex-col  bg-gray-900 dark:bg-gray-900  cursor-pointer z-50 top-[52px]">
                     <Link to={'/StudentListPage'}><li  className=" px-4 py-2 hover:bg-slate-400">Estudantes
                     </li>
                     </Link>
                     <Link to={'/PersonInchargePage'}><li  className=" px-4 py-2 hover:bg-slate-400" onMouseEnter={handleVisivelSub}>Encarregado
-                    {visivelSub && <ul className="absolute flex-col bg-slate-800 cursor-pointer top-[80px] left-[132px] h-10 items-center text-center">
+                    {visivelSub && <ul className="absolute flex-col bg-gray-900 cursor-pointer top-[47px] left-[147px] h-10 items-center text-center">
                     <Link to={'/ParentsPage'}><li  className=" px-4 py-2 hover:bg-slate-400">Parentescos</li></Link>
                       </ul>
                       }
+                    </li>
+                    </Link>
+                    <Link to={'/TeacherPage'}><li  className=" px-4 py-2 hover:bg-slate-400">Professores
                     </li>
                     </Link>
                 </ul>
@@ -125,11 +128,11 @@ export default function Header(props){
             </li>
             <li className='relative flex flex-col items-center justify-center  cursor-pointer pr-3 pl-3' onClick={handleVGaca}>
             <span>   
-                 <Cursos className='h-5 w-5'/>
+                 <Cursos className='w-7 h-6'/>
             </span>
                   Gestão Acadêmica
                   {vGaca &&
-                    <ul className="absolute flex-col bg-slate-800 cursor-pointer z-50 top-[52px] w-36">
+                    <ul className="absolute flex-col bg-gray-900 dark:bg-gray-900  cursor-pointer z-50 top-[52px] w-36">
                         <Link to="/CursePage">
                           <li className='className="px-4 py-2 hover:bg-slate-400 pl-2'>
                           Cursos</li>
@@ -141,7 +144,12 @@ export default function Header(props){
                         </Link>
                         <Link to="/AcademicYearPage">
                           <li className='className="px-4 py-2 hover:bg-slate-400 pl-2'> 
-                         Ano Académico
+                         Ano Acadé.
+                          </li>
+                        </Link>
+                        <Link to="/StudentInsertPage">
+                          <li className='className="px-4 py-2 hover:bg-slate-400 pl-2'> 
+                         Matrícular
                           </li>
                         </Link>
                     </ul>
@@ -149,11 +157,11 @@ export default function Header(props){
             </li>
             <li className='relative flex flex-col items-center justify-center  cursor-pointer pr-3 pl-3' onClick={handleVTurma}>
             <span>   
-                 <Turma className='h-5 w-5'/>
+                 <Turma className='w-7 h-6'/>
             </span>
                   Gestão de Turmas
                   {vGTurma &&
-                    <ul className="absolute flex-col bg-slate-800 cursor-pointer z-50 top-[52px] w-28">
+                    <ul className="absolute flex-col bg-gray-900 dark:bg-gray-900  cursor-pointer z-50 top-[52px] w-28">
                         <Link to="/GradePage">
                           <li className='className="px-4 py-2 hover:bg-slate-400 pl-2'>
                           Classe</li>
@@ -183,16 +191,8 @@ export default function Header(props){
                 </span>
                 Pagamentos</li>
               </Link>
-            <Link to="/TeacherPage"><li className='relative flex flex-col items-center justify-center  cursor-pointer pr-3 pl-3'>
-                <span>
-                    <Professor className="w-5 h-5"/>
-                </span>
-                Professores</li>
-                </Link>
-            
-                
             <li className='relative flex flex-col items-center justify-center  cursor-pointer pr-3 pl-3'><span>
-                <Relatorios className='w-5 h-5'/>
+                <Relatorios className='w-7 h-6'/>
             </span>
                 Relatórios Financeiro</li>
             </ul>

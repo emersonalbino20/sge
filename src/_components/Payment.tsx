@@ -308,8 +308,7 @@ React.useEffect(()=>{
            </DialogHeader>
        </DialogContent>
   </Dialog>
-  </div>
-      
+  </div>      
    }
 >
 </DataTable>

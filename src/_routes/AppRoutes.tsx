@@ -2,6 +2,7 @@ import * as React from "react"
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 
+const Index = lazy(()=>import('../_pages/Index'))
 const HomePage = lazy(()=>import('../_pages/HomePage'))
 const StudentInsertPage = lazy(()=>import('../_pages/StudentInsertPage'))
 const StudentListPage = lazy(()=>import('../_pages/StudentListPage'))
@@ -25,7 +26,8 @@ export default function AppRoutes(){
         <BrowserRouter>
         <Suspense fallback={<div className="w-10 h-10 border-4 border-blue-500 rounded-full animate-spin border-t-transparent"></div>}>
             <Routes>
-                <Route path="/" element={<HomePage/>}/>
+                <Route path="/" element={<Index/>}/>
+                <Route path="/Home" element={<HomePage/>}/>
                 <Route path="/StudentInsertPage" element={<StudentInsertPage/>}/>
                 <Route path="/StudentListPage" element={<StudentListPage/>}/>
                 <Route path="/TeacherPage" element={<TeacherPage/>}/>

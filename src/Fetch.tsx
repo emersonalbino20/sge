@@ -79,6 +79,8 @@ export default function Fetch(){
              respFetch()
        },[])
     
-    return <><button onClick={()=>teste()}>Render</button></>
+    return <><button onClick={()=>teste()}>Render</button>
+    
+    </>
     
 }

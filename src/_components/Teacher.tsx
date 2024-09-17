@@ -423,93 +423,7 @@ const handleSubmitUnConnect = async (data: z.infer<typeof TFormUnConnect>,e) => 
       </form></Form>
     </DialogContent>
   </Dialog>
-    <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>
-           
-            <Popover >
-      <PopoverTrigger asChild className='bg-white'>
-
-      <div className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
-        <Button className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
-        </div>
-      </PopoverTrigger >
-      <PopoverContent className="w-80 bg-white">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-medium leading-none">Dados Pessoal</h4>
-            <p className="text-sm text-muted-foreground">
-              Inspecione os dados do professor
-            </p>
-          </div>
-          <div className="flex flex-col space-y-2">
-            <div className="w-full flex space-x-2">
-              <Label htmlFor="height">Telf:</Label>
-              <p className='text-sm lowercase'>{telefone}</p>
-            </div>
-            <div className="w-full flex space-x-2">
-              <Label htmlFor="height">Email:</Label>
-              <p className='text-sm lowercase'>{email}</p>
-            </div>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
-            </div>
-            <Dialog >
-          <DialogTrigger asChild >
-          <div title='desvincular' className='relative flex justify-center items-center'>
-          <Trash className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-            <Button className='h-7 px-5 bg-red-600 text-white font-semibold hover:bg-red-600 rounded-sm border-red-600'></Button>
-            </div>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] bg-white">
-                <DialogHeader>
-                  <DialogTitle>Desvincular Professor</DialogTitle>
-                  <DialogDescription>
-                  Essa secção tem como objectivo desvicular relação já existente entre professores e algumas disciplinas especifícas.
-                  </DialogDescription>
-                </DialogHeader>
-                <Form {...formUnConnect} >
-              <form onSubmit={formUnConnect.handleSubmit(handleSubmitUnConnect)
-              
-              } >
-              <div className="flex flex-col w-full py-4 bg-white">              
-              <div className="w-full">
-              <FormField
-              control={formUnConnect.control}
-              name="disciplinas"
-              render={({field})=>(
-              <FormItem>
-                <Label htmlFor="disciplina" className="text-right">
-                Disciplinas
-              </Label>
-                  <FormControl>
-                  <Select
-                  name="disciplinas"
-                  isMulti
-                  options={disciplinaOptions}
-                  className="basic-multi-select"
-                  onChange={handleChange}
-                  classNamePrefix="select"
-                />
-                  </FormControl>
-                <FormMessage className='text-red-500 text-xs'/>
-              </FormItem>)
-              }
-              />
-              </div>
-             <div>
-             </div>
-          </div>
-      <DialogFooter>
-        <Button type="submit" title='desvincular' className='bg-red-500 border-red-500 text-white hover:bg-red-500 hover:text-white w-12' onClick={()=>{
-                formUnConnect.setValue('disciplinas', selectedValues)
-                formUnConnect.setValue('nomeDisciplinas', selectedLabels)
-                formUnConnect.setValue('idProfessor', row.id);
-              }}><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
-      </DialogFooter>
-      </form></Form>
-    </DialogContent>
-  </Dialog>
+    
             <Dialog >
           <DialogTrigger asChild >
           <div title='vincular' className='relative flex justify-center items-center'>
@@ -519,7 +433,7 @@ const handleSubmitUnConnect = async (data: z.infer<typeof TFormUnConnect>,e) => 
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
                 <DialogHeader>
-                  <DialogTitle>Vincular Professor</DialogTitle>
+                  <DialogTitle>Vincular Professor(a) {row.nomeCompleto}</DialogTitle>
                   <DialogDescription>
                   Essa secção tem como objectivo relacionar professores em alguma disciplina especifíca.
                   </DialogDescription>
@@ -566,6 +480,94 @@ const handleSubmitUnConnect = async (data: z.infer<typeof TFormUnConnect>,e) => 
       </form></Form>
     </DialogContent>
   </Dialog>
+            <Dialog >
+          <DialogTrigger asChild >
+          <div title='desvincular' className='relative flex justify-center items-center'>
+          <Trash className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
+            <Button className='h-7 px-5 bg-red-600 text-white font-semibold hover:bg-red-600 rounded-sm border-red-600'></Button>
+            </div>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px] bg-white">
+                <DialogHeader>
+                  <DialogTitle>Desvincular Professor(a) {row.nomeCompleto}</DialogTitle>
+                  <DialogDescription>
+                  Essa secção tem como objectivo desvicular relação já existente entre professores e algumas disciplinas especifícas.
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...formUnConnect} >
+              <form onSubmit={formUnConnect.handleSubmit(handleSubmitUnConnect)
+              
+              } >
+              <div className="flex flex-col w-full py-4 bg-white">              
+              <div className="w-full">
+              <FormField
+              control={formUnConnect.control}
+              name="disciplinas"
+              render={({field})=>(
+              <FormItem>
+                <Label htmlFor="disciplina" className="text-right">
+                Disciplinas
+              </Label>
+                  <FormControl>
+                  <Select
+                  name="disciplinas"
+                  isMulti
+                  options={disciplinaOptions}
+                  className="basic-multi-select"
+                  onChange={handleChange}
+                  classNamePrefix="select"
+                />
+                  </FormControl>
+                <FormMessage className='text-red-500 text-xs'/>
+              </FormItem>)
+              }
+              />
+              </div>
+             <div>
+             </div>
+          </div>
+      <DialogFooter>
+        <Button type="submit" title='desvincular' className='bg-red-500 border-red-500 text-white hover:bg-red-500 hover:text-white w-12' onClick={()=>{
+                formUnConnect.setValue('disciplinas', selectedValues)
+                formUnConnect.setValue('nomeDisciplinas', selectedLabels)
+                formUnConnect.setValue('idProfessor', row.id);
+              }}><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+      </DialogFooter>
+      </form></Form>
+    </DialogContent>
+  </Dialog>
+  <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>
+           
+            <Popover >
+      <PopoverTrigger asChild className='bg-white'>
+
+      <div className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
+        <Button className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
+        </div>
+      </PopoverTrigger >
+      <PopoverContent className="w-80 bg-white">
+        <div className="grid gap-4">
+          <div className="space-y-2">
+            <h4 className="font-medium leading-none">Dados Pessoal</h4>
+            <p className="text-sm text-muted-foreground">
+              Inspecione os dados do professor
+            </p>
+          </div>
+          <div className="flex flex-col space-y-2">
+            <div className="w-full flex space-x-2">
+              <Label htmlFor="height">Telf:</Label>
+              <p className='text-sm lowercase'>{telefone}</p>
+            </div>
+            <div className="w-full flex space-x-2">
+              <Label htmlFor="height">Email:</Label>
+              <p className='text-sm lowercase'>{email}</p>
+            </div>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+            </div>
+            
             </div>),
         }, 
     ];

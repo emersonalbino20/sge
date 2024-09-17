@@ -350,40 +350,64 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
     </DialogContent>
   </Dialog>
 
- 
-            <div className='relative flex justify-center items-center cursor-pointer'>
-           
-            <Popover >
-      <PopoverTrigger asChild className='bg-white'>
+     
+            <Dialog>
+            <DialogTrigger asChild >
+            <div title='vincular' className='relative flex justify-center items-center'>
+            <CombineIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
+              <Button className='h-7 px-5 bg-yellow-600 text-white font-semibold hover:bg-yellow-600 rounded-sm border-yellow-600'></Button>
+              </div>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px] bg-white">
+                  <DialogHeader>
+                    <DialogTitle>Vincular Curso de {row.nome}</DialogTitle>
+                    <DialogDescription>
+                    Essa secção tem como objectivo relacionar cursos em alguma disciplina especifíca.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Form {...formConnect} >
+                <form onSubmit={formConnect.handleSubmit(handleSubmitConnect)
+                
+                } >
+                <div className="flex flex-col w-full py-4 bg-white">              
+                <div className="w-full">
+                <FormField
+                control={formConnect.control}
+                name="disciplinas"
+                render={({field})=>(
+                <FormItem>
+                  <Label htmlFor="disciplina" className="text-right">
+                  Disciplinas
+                </Label>
+                    <FormControl>
+                    <Select
+                    name="disciplina"
+                    isMulti
+                    options={disciplinaOptions}
+                    className="basic-multi-select"
+                    onChange={handleChange}
+                    classNamePrefix="select"
+                  />
+                    </FormControl>
+                  <FormMessage className='text-red-500 text-xs'/>
+                </FormItem>)
+                }
+                />
+                </div>
+               <div>
+               </div>
+            </div>
+        <DialogFooter>
+          <Button type="submit" title='vincular' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 hover:text-white w-12'  onClick={()=>{
+                  formConnect.setValue('disciplinas', selectedValues)
+                  formConnect.setValue('nomeDisciplinas', selectedLabels)
+                  formConnect.setValue('idCursos', row.id);
+                }}><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+        </DialogFooter>
+        </form></Form>
+      </DialogContent>
+    </Dialog>
 
-      <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
-        <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
-        </div>
-      </PopoverTrigger >
-      <PopoverContent className="w-80 bg-white">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-medium leading-none">Dados do Curso</h4>
-            <p className="text-sm text-muted-foreground">
-              Inspecione os dados do curso
-            </p>
-          </div>
-          <div className="grid gap-2">
-            
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="height">Descrição</Label>
-              <p className='text-xs'>{descricao}</p>
-            </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="height">Duração</Label>
-              <p className='text-xs'>{duracao} Anos</p>
-            </div>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
-            </div>
-            
             <Dialog>
             <DialogTrigger asChild >
             <div title='desvincular' className='relative flex justify-center items-center'>
@@ -393,7 +417,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] bg-white">
                   <DialogHeader>
-                    <DialogTitle>Desvincular Curso</DialogTitle>
+                    <DialogTitle>Desvincular Curso de {row.nome}</DialogTitle>
                     <DialogDescription>
                     Essa secção tem como objectivo desvincular a relação existente entre cursos e algumas disciplinas especifícas.
                     </DialogDescription>
@@ -441,62 +465,39 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
       </DialogContent>
     </Dialog>
 
-            <Dialog>
-            <DialogTrigger asChild >
-            <div title='vincular' className='relative flex justify-center items-center'>
-            <CombineIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-              <Button className='h-7 px-5 bg-yellow-600 text-white font-semibold hover:bg-yellow-600 rounded-sm border-yellow-600'></Button>
-              </div>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] bg-white">
-                  <DialogHeader>
-                    <DialogTitle>Vincular Curso</DialogTitle>
-                    <DialogDescription>
-                    Essa secção tem como objectivo relacionar cursos em alguma disciplina especifíca.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <Form {...formConnect} >
-                <form onSubmit={formConnect.handleSubmit(handleSubmitConnect)
-                
-                } >
-                <div className="flex flex-col w-full py-4 bg-white">              
-                <div className="w-full">
-                <FormField
-                control={formConnect.control}
-                name="disciplinas"
-                render={({field})=>(
-                <FormItem>
-                  <Label htmlFor="disciplina" className="text-right">
-                  Disciplinas
-                </Label>
-                    <FormControl>
-                    <Select
-                    name="disciplina"
-                    isMulti
-                    options={disciplinaOptions}
-                    className="basic-multi-select"
-                    onChange={handleChange}
-                    classNamePrefix="select"
-                  />
-                    </FormControl>
-                  <FormMessage className='text-red-500 text-xs'/>
-                </FormItem>)
-                }
-                />
-                </div>
-               <div>
-               </div>
-            </div>
-        <DialogFooter>
-          <Button type="submit" title='vincular' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 hover:text-white w-12'  onClick={()=>{
-                  formConnect.setValue('disciplinas', selectedValues)
-                  formConnect.setValue('nomeDisciplinas', selectedLabels)
-                  formConnect.setValue('idCursos', row.id);
-                }}><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
-        </DialogFooter>
-        </form></Form>
-      </DialogContent>
-    </Dialog>
+    <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>
+           
+           <Popover >
+     <PopoverTrigger asChild className='bg-white'>
+
+     <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
+       <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
+       </div>
+     </PopoverTrigger >
+     <PopoverContent className="w-80 bg-white">
+       <div className="grid gap-4">
+         <div className="space-y-2">
+           <h4 className="font-medium leading-none">Dados do Curso</h4>
+           <p className="text-sm text-muted-foreground">
+             Inspecione os dados do curso
+           </p>
+         </div>
+         <div className="grid gap-2">
+           
+           <div className="grid grid-cols-3 items-center gap-4">
+             <Label htmlFor="height">Descrição</Label>
+             <p className='text-xs'>{descricao}</p>
+           </div>
+           <div className="grid grid-cols-3 items-center gap-4">
+             <Label htmlFor="height">Duração</Label>
+             <p className='text-xs'>{duracao} Anos</p>
+           </div>
+         </div>
+       </div>
+     </PopoverContent>
+   </Popover>
+           </div>
+           
     </div>
             ),
         }, 

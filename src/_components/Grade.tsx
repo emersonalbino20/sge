@@ -29,6 +29,7 @@ import { useForm} from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MyDialog, MyDialogContent } from './my_dialog'
+import { table } from 'console'
 
 
 
@@ -41,7 +42,7 @@ const TFormCreate =  z.object(
 
 const TFormUpdate =  z.object({
   nome: classe,
-  anoLectivoId: anoLectivoId,
+  //anoLectivoId: anoLectivoId, O id do anoLectivo é actualizado de forma automático por mei dum algoritmo
   cursoId: cursoId,
   valorMatricula: custoMatricula,
   id: z.number()
@@ -89,12 +90,18 @@ await fetch(`http://localhost:8000/api/classes/`,{
 
 
 const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
+
+  const dados = {
+    nome: data.nome,
+    cursoId: data.cursoId,
+    valorMatricula: data.valorMatricula 
+  }
   await fetch(`http://localhost:8000/api/classes/${data.id}`,{
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(dados)
     })
     .then((resp => resp.json()))
     .then((resp) =>{
@@ -104,6 +111,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
             }else{
               setModalMessage(resp.message);
             }
+            console.log(resp)
     })
     .catch((error) => console.log(`error: ${error}`))
     setUpdateTable(!updateTable)
@@ -111,24 +119,29 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
 /*Buscar dados do Ano Academico, Curso*/
 const[idAno,setIdAno] = React.useState();
 const[bNomeCurso, setBNomeCurso] = React.useState([]);
-const URLLECTIVO = "http://localhost:8000/api/ano-lectivos"
-const URLCURSO = "http://localhost:8000/api/cursos"
+const URLCURSO = `http://localhost:8000/api/cursos/`
 
 React.useEffect(()=>{
     const search = async () => {
-        const resp = await fetch(URLLECTIVO);
+        const resp = await fetch(`http://localhost:8000/api/ano-lectivos/`);//Pelo facto de nao colocar a bara no final todos estados sao retornados como false "STRANGE"
         const receve = await resp.json()
         const convlectivo1 = JSON.stringify(receve.data)
         const convlectivo2 = JSON.parse(convlectivo1)
+        
+        
         var meuarray = convlectivo2.filter((c)=>{
-          return c.activo == true
+          return c.activo === true
         })
+        
         setIdAno(meuarray[parseInt(String(Object.keys(meuarray)))].id)
+        console.log(idAno)
         const respC = await fetch(URLCURSO);
         const receveC = await respC.json()
         const convC = JSON.stringify(receveC.data)
         const convC2 = JSON.parse(convC)
         setBNomeCurso(convC2)
+        setEstado(true)
+        
     }
     search()
 },[])
@@ -143,14 +156,8 @@ React.useEffect(()=>{
       const receve = await resp.json()
       const conv1 = JSON.stringify(receve.data)
       const conv2 = JSON.parse(conv1)
-      
       let nArray = Object.values(conv2.cursos)
-      //console.log(conv2)
-      let iterabel =Object.values(conv2).map((n)=>{return n})
-      console.log(iterabel)
-
-      
-      //for (let i = 0; i < nArray.length; i++){ console.log(nArray[i])}
+      setDataApi(nArray);
   }
   search()
 },[idAno])
@@ -167,27 +174,21 @@ const changeResource = (id)=>{
             sortable:true
          },
          { 
-          name: 'Nome',
-          selector: row => row.cursos,
+          name: 'Classes',
+          selector: row => row.nome,
           sortable:true
-        },
-        { 
-            name: 'Ano Académico',
-            selector: row => row.classe,
-            sortable:true
         },
         {
             name: 'Ação',
-            cell: (row) => (<div className='flex flex-row space-x-2'><EditIcon className='w-5 h-4 absolute text-white'/> 
-            <Dialog >
-          <DialogTrigger asChild onClick={()=>{
+            cell: (row) => (<div className='flex flex-row space-x-2'  onClick={()=>{
               changeResource(row.id)
-              if(estado)
-              {
-                formUpdate.setValue('id', row.id)
-              setEstado(false);
-              }
-            }}>
+              if(estado){
+              formUpdate.setValue('id', row.id)
+            }
+            setEstado(false)
+            }}><EditIcon className='w-5 h-4 absolute text-white'/> 
+            <Dialog >
+          <DialogTrigger asChild>
           <div title='actualizar' className='relative flex justify-center items-center'>
           <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
             <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
@@ -202,24 +203,7 @@ const changeResource = (id)=>{
                 </DialogHeader>
                 <Form {...formUpdate} >
               <form onSubmit={formUpdate.handleSubmit(handleSubmitUpdate)} >
-              <FormField
-          control={formUpdate.control}
-          name="id"
-          render={({field})=>(
-            <FormControl>
-          <Input 
-          type='hidden'
-            className="w-full"
             
-            {...field} 
-            
-            onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
-           
-          />
-          </FormControl>
-        )}
-           />
-  
               <div className="flex flex-col w-full py-4 bg-white">
                 <div className="w-full">
                 <Label htmlFor="nome" className="text-right">
@@ -239,24 +223,21 @@ const changeResource = (id)=>{
               )}/>
               </div>
               <div className="w-full">
-                <Label htmlFor="valorMatricula" className="text-right">
-                  Custo
-                </Label>
-                <FormField
-                control={formUpdate.control}
-                name="valorMatricula"
-                render={({field})=>(
-                  <FormItem>
-                  <Input
-                    id="valorMatricula"
-                    type='number' {...field} className="w-full"
-                    min="0"
-                    onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
-                    />
-                  <FormMessage className='text-red-500 text-xs'/>
-                </FormItem>
-              )}/>
-              </div>
+        <Label htmlFor="valorMatricula" className="text-right">
+            Custo
+          </Label>
+          <FormField
+          control={formUpdate.control}
+          name="valorMatricula"
+          render={({field})=>(
+            <FormItem>
+            <Input id="valorMAtricula" type='number' {...field} className="w-full"
+            min="0"
+            onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
+            <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+        )}/>
+        </div>
               <div className="w-full">
         <FormField
           control={formUpdate.control}
@@ -289,29 +270,6 @@ const changeResource = (id)=>{
     </DialogContent>
   </Dialog>
 
- 
-            <div className='relative flex justify-center items-center cursor-pointer'>
-           
-            <Popover >
-      <PopoverTrigger asChild className='bg-white'>
-
-      <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
-        <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
-        </div>
-      </PopoverTrigger >
-      <PopoverContent className="w-80 bg-white">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-medium leading-none">Dados da Classe</h4>
-            <p className="text-sm text-muted-foreground">
-              Inspecione os dados
-            </p>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
-            </div>
-            <div title='excluir' className='relative flex justify-center items-center cursor-pointer' ><Trash className='w-5 h-4 absolute text-white'/> <button className='py-3 px-5 rounded-sm bg-red-600  border-red-600'></button></div>
             </div>),
         }, 
     ];
@@ -319,7 +277,6 @@ const changeResource = (id)=>{
    
 
     const tableStyle = {
-        
         headCells: {
             style: {
                 backgroundColor: '#e8e9eb',
@@ -348,18 +305,18 @@ const changeResource = (id)=>{
         ];
 
         const handleFilter =  (event) => {
-            const newData = dataApi.filter( row => {
-                return row.id.includes(event.target.value.trim())
-            })
-            setDados(newData)
-        }
-    
-        const handleRows = ({selectedRows}) => {
-            setTimeout(()=>{
-               changeResource(selectedRows[0].id)
-            },1000)  
-        }
           
+            const curso = Object.values(dataApi).find(curso => curso.nome === event.target.value);
+            if(curso)
+            {
+              let i = curso.classes.map( classe =>
+                {
+                  return classe;
+                })
+                setDados(i)
+            }
+        }
+
        const handleSort = (column, sortDirection) => {
         console.log({column, sortDirection})
        }
@@ -367,9 +324,9 @@ const changeResource = (id)=>{
 
     return (
     
-         <div className='w-full h-72 '>
+         <div className='w-full h-72'>
          <br/><br/><br/>
-   <DataTable 
+   <DataTable
    customStyles={ tableStyle }
    conditionalRowStyles={conditionalRowStyles}
    columns={columns}
@@ -378,14 +335,19 @@ const changeResource = (id)=>{
    fixedHeaderScrollHeight='300px'
    pagination
    defaultSortFieldId={1}
-   selectableRows
-   selectableRowsSingle
-   onSelectedRowsChange={handleRows}
    onSort={handleSort}
    subHeader
    subHeaderComponent={
-       <div className='flex flex-row space-x-2'><input className=' rounded-sm border-2 border-gray-400 placeholder:text-gray-400 placeholder:font-bold outline-none py-1 indent-2' type='text' placeholder='Pesquisar aqui...' onChange={handleFilter}/>
+       <div className='flex flex-row space-x-2'>
        
+       <select className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3'  onChange={handleFilter} >
+          <option>Selecione o curso</option>
+          {
+              dataApi.map((field)=>{
+                  return <option>{field.nome}</option>
+              })
+          }
+    </select>
        <div className='relative flex justify-center items-center'>
            <PrinterIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
            <button className='py-4 px-5 bg-green-700 border-green-700 rounded-sm ' onClick={() => window.print()}></button>
@@ -491,6 +453,7 @@ const changeResource = (id)=>{
       <CheckCircleIcon className='w-28 h-20 text-green-400'/>
       
       <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
+      <p className='font-poppins lowercase'>Actualize a página (F5) e pesquise pelo curso!</p>
       <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
         <Button className='bg-green-400 hover:bg-green-500
         hover:font-medium

@@ -19,7 +19,7 @@ import { emailZod, telefoneZod, ruaZod, bairroZod, numeroCasaZod, idZod, nomeCom
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { MyDialog, MyDialogContent } from './my_dialog'
-
+import InputMask from 'react-input-mask'
 
 const TForm =  z.object({
   nomeCompleto: nomeCompletoEncarregadoZod,
@@ -31,7 +31,6 @@ const TForm =  z.object({
   numeroCasa: numeroCasaZod,
   id: idZod
 })
-
 
 const TFormUpdate =  z.object({
   nomeCompleto: nomeCompletoEncarregadoZod,
@@ -316,7 +315,7 @@ React.useEffect(()=>{
           <FormItem>
           <FormControl>
           <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
-                      <option value="">Selecione o grau</option>
+                      <option >Selecione o grau</option>
                       {
                             parentesco.map((field)=>{
                                 return <option value={`${field.id}`}>{field.nome}</option>
@@ -397,20 +396,32 @@ React.useEffect(()=>{
         <Label htmlFor="tel" className="text-right">
             Telefone
           </Label>
-      <FormField
+        <FormField
           control={formUpdate.control}
           name="telefone"
           render={({field})=>(
+            <FormItem>
             <FormControl>
-                <FormItem>
-          <Input
-            id="tel"
-            className="w-full"
-          {...field}/>
-           <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
+            <InputMask
+                mask="999999999"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+            >
+                {(inputProps) => (
+                    <Input
+                        {...inputProps}
+                        className={'placeholder-gray-200 placeholder-opacity-55'
+                        }
+                        type="text"
+                    />
+                )}
+            </InputMask>
           </FormControl>
-        )}/></div>
+          <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+        )}/>
+        </div>
         <div className='w-full'>
         <Label htmlFor="email" className="text-right">
             @Email
@@ -440,7 +451,47 @@ React.useEffect(()=>{
     </DialogContent>
   </Dialog>
  
-         <Dialog >
+        
+
+  <Dialog >
+      <DialogTrigger asChild onClick={()=>{
+              formDelete.setValue('responsavelId', row.id)
+            }}>
+    <div title='excluir' className='relative flex justify-center items-center' >
+    <Trash className='w-5 h-4 absolute text-white'/> 
+    <Button className='h-7 px-5 rounded-sm bg-red-600  border-red-600 hover:bg-red-600'></Button>
+      </div>
+      
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[425px] bg-white">
+      <DialogHeader>
+        <DialogTitle>Excluir Registro</DialogTitle>
+        <DialogDescription>
+        <p>Caso queira exluir o registro, basta confirmar em excluir.</p>
+        </DialogDescription>
+        <hr/>
+      </DialogHeader>
+      <Form {...formDelete} >
+     <form onSubmit={formDelete.handleSubmit(handleSubmitDelete)} >
+            <FormField
+          control={formDelete.control}
+          name="responsavelId"
+          render={({field})=>(
+            <FormControl>
+            <FormItem>
+          <Input id="id" type='hidden' {...field} className="w-full" min={0} onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
+          <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+          </FormControl>
+        )}/>
+ <DialogFooter>
+      <Button className='h-8 bg-red-500 border-red-500 text-white hover:bg-red-500 font-semibold' type='submit'>Excluir</Button>
+      </DialogFooter>
+      </form></Form>
+    </DialogContent>
+  </Dialog>  
+
+  <Dialog >
     <DialogTrigger asChild>
     <div title='ver dados' className='relative flex justify-center items-center'>
     <InfoIcon className='w-5 h-4 absolute text-white font-extrabold'/>
@@ -496,49 +547,8 @@ React.useEffect(()=>{
             
         </div>
       </div>
-      <DialogFooter>
-        <p className='font-lato italic text-blue-600 text-xs cursor-pointer'>Todos os dados do encarregado<InfoIcon className='w-2 h-2'/>.</p>
-      </DialogFooter>
     </DialogContent>
   </Dialog>
-
-  <Dialog >
-      <DialogTrigger asChild onClick={()=>{
-              formDelete.setValue('responsavelId', row.id)
-            }}>
-    <div title='excluir' className='relative flex justify-center items-center' >
-    <Trash className='w-5 h-4 absolute text-white'/> 
-    <Button className='h-7 px-5 rounded-sm bg-red-600  border-red-600 hover:bg-red-600'></Button>
-      </div>
-      
-    </DialogTrigger>
-    <DialogContent className="sm:max-w-[425px] bg-white">
-      <DialogHeader>
-        <DialogTitle>Excluir Registro</DialogTitle>
-        <DialogDescription>
-        <p>Caso queira exluir o registro, basta confirmar em excluir.</p>
-        </DialogDescription>
-        <hr/>
-      </DialogHeader>
-      <Form {...formDelete} >
-     <form onSubmit={formDelete.handleSubmit(handleSubmitDelete)} >
-            <FormField
-          control={formDelete.control}
-          name="responsavelId"
-          render={({field})=>(
-            <FormControl>
-            <FormItem>
-          <Input id="id" type='hidden' {...field} className="w-full" min={0} onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
-          <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-          </FormControl>
-        )}/>
- <DialogFooter>
-      <Button className='h-8 bg-red-500 border-red-500 text-white hover:bg-red-500 font-semibold' type='submit'>Excluir</Button>
-      </DialogFooter>
-      </form></Form>
-    </DialogContent>
-  </Dialog>  
             </div>),
         }, 
     ];
@@ -610,7 +620,7 @@ React.useEffect(()=>{
       </div>
       
     </DialogTrigger>
-    <DialogContent className="sm:max-w-[625px] overflow-y-scroll h-[550px] bg-white">
+    <DialogContent className="sm:max-w-[645px] overflow-y-scroll h-[605px] bg-white">
       <DialogHeader>
         <DialogTitle>Cadastrar Registro</DialogTitle>
         <DialogDescription>
@@ -659,7 +669,7 @@ React.useEffect(()=>{
           <FormItem>
           <FormControl>
           <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
-                      <option value="">Selecione o grau</option>
+                      <option >Selecione o grau</option>
                       {
                             parentesco.map((field)=>{
                                 return <option value={`${field.id}`}>{field.nome}</option>
@@ -740,20 +750,32 @@ React.useEffect(()=>{
         <Label htmlFor="tel" className="text-right">
             Telefone
           </Label>
-      <FormField
+                <FormField
           control={form.control}
           name="telefone"
           render={({field})=>(
+            <FormItem>
             <FormControl>
-                <FormItem>
-          <Input
-            id="tel"
-            className="w-full"
-          {...field}/>
-           <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
+            <InputMask
+                mask="999999999"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+            >
+                {(inputProps) => (
+                    <Input
+                        {...inputProps}
+                        className={'placeholder-gray-200 placeholder-opacity-55'
+                        }
+                        type="text"
+                    />
+                )}
+            </InputMask>
           </FormControl>
-        )}/></div>
+          <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+        )}/>
+        </div>
         <div className='w-full'>
         <Label htmlFor="email" className="text-right">
             @Email

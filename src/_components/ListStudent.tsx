@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useEffect } from 'react'
 import { AlertCircleIcon, CheckCircleIcon, EditIcon, Info, SaveIcon } from 'lucide-react'
+import { FolderOpenIcon } from '@heroicons/react/24/outline'
 import Table from './Table'
 import {
     Dialog,
@@ -25,9 +26,7 @@ import { UserPlus } from 'lucide-react'
 import { Form, FormControl, FormField, FormItem, 
 FormLabel, 
 FormMessage} from '@/components/ui/form'
-import { useDispatch, useSelector } from 'react-redux'
-import { selectStudent, selectStudentId, updateStudent } from '@/_redux/studentUpdateSlice'
-import { Link, useNavigate } from 'react-router-dom'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useForm } from 'react-hook-form'
 import { zodResolver} from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -49,19 +48,16 @@ const TForm =  z.object({
     id: z.number()
   })
 
-  const TFormEncarregado =  z.object({
-    nomeCompleto: nomeCompletoZod,
-    telefone: telefoneZod,
-    email: emailZod,
-    parentescoId: z.number(),
-    bairro: bairroZod,
-    rua: ruaZod,
-    numeroCasa: numeroCasaZod,
-    id: idZod
+  const TFormConfirmacao =  z.object({
+    classeId: idZod,
+    cursoId: idZod,
+    turmaId: idZod,
+    turnoId: idZod,
+    metodoPagamentoId: idZod
   })
 
   type FormProps =  z.infer<typeof TForm>;
-  type FormPropsEncarregado =  z.infer<typeof TFormEncarregado>;
+  type FormPropsConfirmacao =  z.infer<typeof TFormConfirmacao>;
 
 export default function ListStudent(){
     const form  = useForm<z.infer<typeof TForm>>({
@@ -69,11 +65,9 @@ export default function ListStudent(){
         resolver: zodResolver(TForm)
        })
 
-    const formEncarregado  = useForm<z.infer<typeof TFormEncarregado>>({
+    const formConfirmacao  = useForm<z.infer<typeof TFormConfirmacao>>({
         mode: 'all', 
-        resolver: zodResolver(TFormEncarregado),
-        defaultValues:{
-          numeroCasa: 1}
+        resolver: zodResolver(TFormConfirmacao),
        })
 
        const [showModal, setShowModal] = React.useState(false);
@@ -112,34 +106,20 @@ export default function ListStudent(){
                 }else{
                   setModalMessage(resp.message);
                 }
-                console.log(resp);
+                //console.log(resp);
               })
               .catch((error) => console.log(`error: ${error}`))
               setUpdateTable(!updateTable)
           }
 
-      const handleSubmitCreateEncarregado = async (data: z.infer<typeof TFormEncarregado>,e) => {
-      
-        const dados = 	{
-          nomeCompleto: data.nomeCompleto,
-          parentescoId: data.parentescoId,
-          endereco: {
-            bairro: data.bairro,
-            rua: data.rua,
-            numeroCasa: data.numeroCasa
-          },
-          contacto: {
-            telefone: data.telefone,
-            email: data.email
-          }
-        }
-
-        await fetch(`http://localhost:8000/api/alunos/${data.id}/responsaveis`,{
+      const[idAluno, setIdAluno] = React.useState([]);
+      const handleSubmitCreateConfirmacao = async (data: z.infer<typeof TFormConfirmacao>,e) => {
+        await fetch(`http://localhost:8000/api/alunos/${idAluno}/matriculas`,{
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(dados)
+                body: JSON.stringify(data)
             })
             .then((resp => resp.json()))
             .then((resp) =>{  
@@ -149,6 +129,7 @@ export default function ListStudent(){
                 }else{
                   setModalMessage(resp.message);
                 }
+               // console.log(resp)
             })
             .catch((error) => console.log(`error: ${error}`))
             setUpdateTable(!updateTable)
@@ -167,11 +148,16 @@ export default function ListStudent(){
     const[telefone,setTelefone] = React.useState();
     const[email,setEmail] = React.useState();
     const[estado, setEstado] = React.useState(false);
+    const[aluno, setAluno] = React.useState([])
     React.useEffect(()=>{
         const search = async () => {
             const resp = await fetch(`http://localhost:8000/api/alunos/${buscar}`);
             const receve = await resp.json()
-            //console.log(receve)
+            const conv = JSON.stringify(receve)
+            const conv1 = JSON.parse(conv)
+            setAluno(conv1)
+            console.log(Object.values(Object.values(aluno)[7])[0])
+            console.log(aluno)
             setNome(receve.nomeCompleto)
             setPai(receve.nomeCompletoPai)
             setMae(receve.nomeCompletoMae)
@@ -189,63 +175,72 @@ export default function ListStudent(){
         search()
     },[buscar])
 
-    const[mClasse, setMClasse] = React.useState([]);
-    const[mCurso, setMCurso] = React.useState([]);
-    const[mTurma, setMTurma] = React.useState([]);
-    React.useEffect(()=>{
-      const search = async () => {
-          const resp = await fetch(`http://localhost:8000/api/alunos/${buscar}/matriculas`);
-          const receve = await resp.json()
-          console.log(receve.data[0])
-          setMClasse(receve.data[0].classe)
-          setMCurso(receve.data[0].curso)
-          setMTurma(receve.data[0].turma)
-      }
-      search()
-  },[buscar])
 
-  /*Buscar dados do parentetesco*/
-const[parentesco, setParentesco] = React.useState([]);
-React.useEffect(()=>{
-    const search = async () => {
-        const resp = await fetch(`http://localhost:8000/api/parentescos/`);
-        const respJson = await resp.json()
-        const conv1 = JSON.stringify(respJson.data)
-        const conv2 = JSON.parse(conv1)
-        setParentesco(conv2)
-    }
-    search()
-},[])
+  /*Área q implementa o código pra pesquisar cursos*/
+const [metodo, setMetodo] = React.useState([]);
+const [ano, setAno] = React.useState([]);
+const [classe, setClasse] = React.useState([]);
+const [turma, setTurma] = React.useState([]);
+const [turno, setTurno] = React.useState([]);
+const [idCurso, setIdCurso] = React.useState(0);
+const [idClasse, setIdClasse] = React.useState(0);
+const [dataApiCursos, setDataApiCursos] = React.useState([]);
+const URLCURSO = "http://localhost:8000/api/cursos"
+const URLPAGAMENTO = "http://localhost:8000/api/metodos-pagamento"
+const URLLECTIVO = "http://localhost:8000/api/ano-lectivos"
+const URLCLASSE = `http://localhost:8000/api/cursos/${idCurso}/classes`
+const URLTURMA = `http://localhost:8000/api/classes/${idClasse}/turmas`
+const URLTURNO = `http://localhost:8000/api/turnos/`
+React.useEffect( () => {
+    const respFetchCursos = async () => {
+          const resp = await fetch (URLCURSO);
+          const respJson = await resp.json();
+          const conv1 = JSON.stringify(respJson.data)
+          const conv2 = JSON.parse(conv1)
+          setDataApiCursos(conv2)
+          //Buscar Métodos de pagamento
+          const resppay = await fetch (URLPAGAMENTO);
+          const resppayJson = await resppay.json();
+          const convpay1 = JSON.stringify(resppayJson.data)
+          const convpay2 = JSON.parse(convpay1)
+          setMetodo(convpay2);
+          //Buscar Ano Lectivos
+          const resplectivo = await fetch (URLLECTIVO);
+          const resplectivoJson = await resplectivo.json();
+          const convlectivo1 = JSON.stringify(resplectivoJson.data)
+          const convlectivo2 = JSON.parse(convlectivo1)
+          setAno(convlectivo2);
+          //Buscar Classes
+          const respclasse = await fetch (URLCLASSE);
+          const respclasseJson = await respclasse.json();
+          const convclasse1 = JSON.stringify(respclasseJson.data)
+          const convclasse2 = JSON.parse(convclasse1)
+          setClasse(convclasse2)
+          //Buscar Turmas
+          const respturma = await fetch (URLTURMA);
+          const respturmaJson = await respturma.json();
+          const convturma1 = JSON.stringify(respturmaJson.data)
+          const convturma2 = JSON.parse(convturma1)
+          setTurma(convturma2)
+         // console.log(convturma2)
+          //Buscar Turnos
+          const respturno = await fetch (URLTURNO);
+          const respturnoJson = await respturno.json();
+          const convturno1 = JSON.stringify(respturnoJson.data)
+          const convturno2 = JSON.parse(convturno1)
+          setTurno(convturno2)
+         // console.log(convturno2)
+          
+    } 
+     respFetchCursos()
+},[idCurso, idClasse])
 
-//Buscar todos encarregados em funcao do id do aluno
-const[idAluno, setIdAluno] = React.useState([]);
-const[idEncarregado, setIdEncarregado] = React.useState(0);
-const[encarregadoAl, setEncarregadoAl] = React.useState([]);
-const[encarregado, setEncarregado] = React.useState([]);
-const[showEnc, setShowEnc] = React.useState(false);
-
-const URLENCARREGADO = `http://localhost:8000/api/responsaveis/${idEncarregado}`
-React.useEffect(()=>{
-    const search = async () => {
-        const resp = await fetch(`http://localhost:8000/api/alunos/${idAluno}/responsaveis`);
-        const respJson = await resp.json()
-        const conv1 = JSON.stringify(respJson.data)
-        const conv2 = JSON.parse(conv1)
-        setEncarregadoAl(conv2)
-        //console.log(conv2[0].nomeCompleto)
-        const respEnc = await fetch(URLENCARREGADO);
-        const respEncJson = await respEnc.json()
-        setEncarregado(respEncJson)
-        //console.log(respEncJson.contacto.telefone)
-    }
-    search()
-},[idAluno, idEncarregado])
-
-    const changeResource=(id)=>{
+  const changeResource=(id)=>{
         setBuscar(id)
     }
+
     const columns = 
-[
+    [
     { 
         name: 'Id',
         selector: row => row.id,
@@ -285,7 +280,6 @@ React.useEffect(()=>{
             form.setValue('email', email)
             form.setValue('id', row.id)
             setIdAluno(row.id)
-            formEncarregado.setValue('id', row.id)
             setEstado(false)
           }
           
@@ -298,11 +292,11 @@ React.useEffect(()=>{
       </div>
       
     </DialogTrigger>
-    <DialogContent className="sm:max-w-[625px] overflow-y-scroll h-[550px] bg-white">
+    <DialogContent className="sm:max-w-[645px] overflow-y-scroll h-[640px] bg-white">
       <DialogHeader>
-        <DialogTitle>Actualizar Aluno</DialogTitle>
+        <DialogTitle>Actualização do Registro</DialogTitle>
         <DialogDescription>
-        Actualiza o registro do aluno aqui.
+        Actualiza o registro {genero == 'M' ? 'do aluno' : 'da aluna' } aqui.
         </DialogDescription>
       </DialogHeader>
      
@@ -332,7 +326,7 @@ React.useEffect(()=>{
             <div className="w-full flex flex-row justify-between space-x-2 ">
             <div className='w-full'>
           <Label htmlFor="name" className="text-right">
-            Name 
+            Nome 
           </Label>
           <FormField
           control={form.control}
@@ -539,6 +533,155 @@ React.useEffect(()=>{
       </Form>
     </DialogContent>
   </Dialog>
+
+  <Dialog >
+    <DialogTrigger asChild >
+    <div title='confirmação' className='relative flex justify-center items-center' >
+    <FolderOpenIcon className='w-5 h-4 absolute text-white font-extrabold'/>
+      <button className='h-7 px-5 bg-amber-400 text-white font-semibold hover:bg-amber-400 border-amber-400 rounded-sm' ></button>
+      </div>
+      
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[645px] overflow-y-scroll h-[690px] bg-white">
+      <DialogHeader>
+        <DialogTitle>Confirmação de Matrícula</DialogTitle>
+        <DialogDescription>
+        <p>confirma a matrícula {genero == 'M' ? 'do aluno' : 'da aluna'} <span className='font-bold uppercase'>{Object.values(aluno)[1]}</span> n. bi: <span className='font-bold'>{Object.values(aluno)[4]}</span> para o ano corrente, após terminar o preenchimento do formulário click em <span className='font-bold text-blue-500'>nova matrícula</span>.
+        </p>
+        </DialogDescription>
+      </DialogHeader>
+     
+      <Form {...formConfirmacao} >
+     <form onSubmit={formConfirmacao.handleSubmit(handleSubmitCreateConfirmacao)} >
+     <fieldset>
+            <legend className='bg-blue-600 w-full h-9 pl-2 mr-2 text-white flex items-center'><p>Informações Essenciais</p></legend>
+            <div className='flex flex-col space-y-3 mb-5'>
+                <div className='flex flex-col'>
+                    <FormField
+                    control={formConfirmacao.control}
+                    name='cursoId'
+                    render={({field})=>(
+                    <FormItem>
+                        <FormLabel>Cursos*</FormLabel>
+                        <FormControl>
+                        <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                          setIdCurso(parseInt(e.target.value, 10) || 0)
+                        }}>
+                      <option >Selecione o curso</option>
+                      {
+                            dataApiCursos.map((field)=>{
+                                return <option value={`${field.id}`}>{field.nome}</option>
+                            })
+                      }
+                  </select>
+                        </FormControl>
+                        <FormMessage className='text-red-500 text-xs'/>
+                    </FormItem>)
+                    }
+                    />
+                </div>
+                <div className='flex flex-col w-full'>
+                    <FormField
+                    control={formConfirmacao.control}
+                    name='classeId'
+                    render={({field})=>(
+                    <FormItem>
+                        <FormLabel>Classes*</FormLabel>
+                        <FormControl>
+                          <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                            setIdClasse(parseInt(e.target.value, 10) || 0)
+                          }}>
+                        <option >Selecione a classe</option>
+                        {
+                              classe.map((field)=>{
+                                  return <option value={`${field.id}`}>{field.nome}</option>
+                              })
+                        }
+                    </select>
+                        </FormControl>
+                        <FormMessage className='text-red-500 text-xs'/>
+                    </FormItem>)
+                    }
+                    />
+                    </div>
+                    <div className='flex flex-col w-full'>
+                    <FormField
+                    control={formConfirmacao.control}
+                    name='turmaId'
+                    render={({field})=>(
+                    <FormItem>
+                        <FormLabel>Turmas*</FormLabel>
+                        <FormControl>
+                        <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                        <option >Selecione a turma</option>
+                        {
+                              turma.map((field)=>{
+                                  return <option value={`${field.id}`}>{field.nome}</option>
+                              })
+                        }
+                    </select>
+                        </FormControl>
+                        <FormMessage className='text-red-500 text-xs'/>
+                    </FormItem>)
+                    }
+                    />
+                    </div>
+                    <div className='flex flex-col w-full'>
+                    <FormField
+                    control={formConfirmacao.control}
+                    name='turnoId'
+                    render={({field})=>(
+                    <FormItem>
+                        <FormLabel>Turno*</FormLabel>
+                        <FormControl>
+                        <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                        <option >Selecione a turma</option>
+                        {
+                              turno.map((field)=>{
+                                  return <option value={`${field.id}`}>{field.nome}</option>
+                              })
+                        }
+                    </select>
+                        </FormControl>
+                        <FormMessage className='text-red-500 text-xs'/>
+                    </FormItem>)
+                    }
+                    />
+                    </div>
+                <div className='flex flex-col w-full'>
+                    <FormField
+                    control={formConfirmacao.control}
+                    name='metodoPagamentoId'
+                    render={({field})=>(
+                    <FormItem>
+                        <FormLabel>Pagamento em*</FormLabel>
+                        <FormControl>
+                         <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                        <option >Selecione o método</option>
+                        {
+                              metodo.map((field)=>{
+                                  return <option value={`${field.id}`}>{field.nome}</option>
+                              })
+                        }
+                    </select>
+                        </FormControl>
+                        <FormMessage className='text-red-500 text-xs'/>
+                    </FormItem>)
+                    }
+                    />
+                    </div>
+                   
+                </div>
+                </fieldset>
+      
+      <DialogFooter>
+        <Button title='nova matrícula' className='bg-blue-600 border-blue-600 text-white hover:bg-blue-600 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+      </DialogFooter>
+      </form>
+      </Form>
+    </DialogContent>
+  </Dialog> 
+  
          <Dialog >
     <DialogTrigger asChild>
     <div title='ver dados' className='relative flex justify-center items-center'>
@@ -562,32 +705,31 @@ React.useEffect(()=>{
             <div className="w-full flex flex-row justify-between px-2">
             <div>
                 <Label className='font-poppins'>nome completo</Label>
-                <p className='font-thin text-sm'>{nome}</p>
+                <p className='font-thin text-sm'>{Object.values(aluno)[1]}</p>
             </div>
             <div>
                  <Label className='font-poppins'>número do bi</Label>		
-                  <p className='font-thin text-sm'>{bi}</p>
+                  <p className='font-thin text-sm'>{Object.values(aluno)[4]}</p>
             </div>
             </div>
             <div className="w-full flex flex-row justify-between px-2">
             <div>
                 <Label className='font-poppins'>nome do pai</Label>	
-                <p className='font-thin text-sm'>{pai}</p>
+                <p className='font-thin text-sm'>{Object.values(aluno)[2]}</p>
             </div>
             <div>
                 <Label className='font-poppins'>nome da mãe</Label>
-                <p className='font-thin text-sm'>{mae}</p>
+                <p className='font-thin text-sm'>{Object.values(aluno)[3]}</p>
             </div>
             </div>
             <div className="w-full flex flex-row justify-between px-2">
             <div>
-                
                 <Label className='font-poppins'>gênero</Label>
-                <p className='font-thin text-sm'>{genero}</p>
+                <p className='font-thin text-sm'>{Object.values(aluno)[6]}</p>
             </div>
             <div>
                 <Label className='font-poppins'>data de nascimento</Label>
-                <p className='font-thin text-sm'>{nasc}</p>
+                <p className='font-thin text-sm'>{Object.values(aluno)[5]}</p>
             </div>
             </div>
             </div>
@@ -627,234 +769,26 @@ React.useEffect(()=>{
             </div>
             </div>
             </fieldset>
+            <fieldset>
+                <legend className='font-robotoSlab text-sm'>Histórico de matrículas</legend>
+            <div className="w-full flex flex-row justify-between px-2">
+            <div className="w-full flex flex-row justify-between px-2">
+            <div>
+                <Label className='font-poppins'>Classe</Label>
+                <p className='font-thin text-sm'>10ª</p>
+            </div>
+            </div>
+            </div>
+            </fieldset>
             
         </div>
       </div>
       <DialogFooter>
-        <p className='font-lato italic text-blue-600 text-xs cursor-pointer'>Todos os dados do aluno<InfoIcon className='w-2 h-2'/>.</p>
       </DialogFooter>
     </DialogContent>
   </Dialog>
-  {!showEnc && 
-  <Dialog >
-    <DialogTrigger asChild >
-    <div title='cadastrar' className='relative flex justify-center items-center' >
-    <UserPlus className='w-5 h-4 absolute text-white font-extrabold'/>
-      <button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm' onClick={()=>{setShowEnc(false)}}></button>
-      </div>
-      
-    </DialogTrigger>
-    <DialogContent className="sm:max-w-[625px] overflow-y-scroll h-[550px] bg-white">
-      <DialogHeader>
-        <DialogTitle>Cadastrar Registro</DialogTitle>
-        <DialogDescription>
-        <p>cadastre um novo novo encarregado para o aluno(a) <span className='font-bold'>{nome}</span>, preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
-        </p>
-        </DialogDescription>
-      </DialogHeader>
-     
-      <Form {...formEncarregado} >
-     <form onSubmit={formEncarregado.handleSubmit(handleSubmitCreateEncarregado)} >
-     <div className="w-full flex flex-col justify-between  ">
-        <fieldset>
-            <legend className='font-robotoSlab text-sm'>Dados Pessoal</legend>
-            <div className='w-full flex flex-col '>
-            <div className="w-full flex flex-row justify-between space-x-2 ">
-            <div className='w-full'>
-          <Label htmlFor="name" className="text-right">
-            Name 
-          </Label>
-          <FormField
-          control={formEncarregado.control}
-          name="nomeCompleto"
-          render={({field})=>(
-            <FormItem>
-            <FormControl>
-          <Input 
-            className="w-full py-5"
-            
-            {...field} 
-            
-          />
-          </FormControl>
-          <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-        )}
-           />
-        </div>
-        <div className='w-full'>
-          <Label htmlFor="genero" className="text-right">
-            Parentesco
-          </Label>
-          <FormField
-              control={formEncarregado.control}
-              name="parentescoId"
-              render={({field})=>(
-          <FormItem>
-          <FormControl>
-          <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
-                      <option value="">Selecione o grau</option>
-                      {
-                            parentesco.map((field)=>{
-                                return <option value={`${field.id}`}>{field.nome}</option>
-                            })
-                      }
-                  </select>
-                  </FormControl>
-                  <FormMessage className='text-red-500 text-xs'/>
-              </FormItem>)
-              }
-              />
-                       
-          </div>
-          </div>
-          <div className='w-full'>
-          <Label htmlFor="encarregado" className="text-right">
-            Encarregado
-          </Label>
-          <FormField
-              name=""
-              render={({field})=>(
-          <FormItem>
-          <FormControl>
-          <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value),
-          setIdEncarregado(parseInt(e.target.value, 10) || 0)
-          )}}>
-                      <option value="">ver os encarregados</option>
-                      {
-                            encarregadoAl.map((field)=>{
-                                return <option value={`${field.id}`}>{field.nomeCompleto}</option>
-                            })
-                      }
-                  </select>
-                  </FormControl>
-                  <FormMessage className='text-red-500 text-xs'/>
-              </FormItem>)
-              }
-              />
-              <p className='font-lato italic text-blue-600 text-xs cursor-pointer' >Todos os dados do encarregado<InfoIcon className='w-2 h-2'/>.</p>
-          </div>
-       </div>
-        </fieldset>
-        <fieldset>
-        <legend className='font-robotoSlab text-sm'>
-            Localização</legend>
-            <div className="w-full flex flex-row justify-between space-x-2">
-            <div className='w-full'>
-          <Label htmlFor="bairro" className="text-right">
-            Bairro
-          </Label>
-         
-            <FormField
-          control={formEncarregado.control}
-          name="bairro"
-          render={({field})=>(
-            <FormControl>
-                <FormItem>
-          <Input id="bairro" type='text' {...field} className="w-full"/>
-          <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-          </FormControl>
-        )}/></div>
-            <div className='w-full'>
-          <Label htmlFor="rua" className="text-right">
-            Rua
-          </Label>
-         
-            <FormField
-          control={formEncarregado.control}
-          name="rua"
-          render={({field})=>(
-            <FormControl>
-        <FormItem>
-          <Input id="rua" type='text' {...field} className="w-full"/>
-          <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-          </FormControl>
-        )}/>
-        </div>
-        <div className='w-full'>
-          <Label htmlFor="casa" className="text-right">
-            Número da Casa
-          </Label>
-         
-            <FormField
-          control={formEncarregado.control}
-          name="numeroCasa"
-          render={({field})=>(
-            <FormControl>
-            <FormItem>
-         
-          <Input id="casa" type='number' {...field} className="w-full"  min="1"  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
-          <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-          </FormControl>
-        )}/>
-        </div></div>
-        </fieldset>
-        <fieldset>
-        <legend className='font-robotoSlab text-sm'>
-            Contacto</legend>
-            <div className="w-full flex flex-row justify-between space-x-2">
-        <div className='w-full'>
-        <Label htmlFor="tel" className="text-right">
-            Telefone
-          </Label>
-      <FormField
-          control={formEncarregado.control}
-          name="telefone"
-          render={({field})=>(
-            <FormControl>
-                <FormItem>
-                <InputMask
-                mask="999999999"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-            >
-                {(inputProps) => (
-                    <Input
-                        {...inputProps}
-                        className={'placeholder-gray-200 placeholder-opacity-55'
-                        }
-                        type="text"
-                    />
-                )}
-            </InputMask>
-           <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-          </FormControl>
-        )}/></div>
-        <div className='w-full'>
-        <Label htmlFor="email" className="text-right">
-            @Email
-          </Label>
-      <FormField
-          control={formEncarregado.control}
-          name="email"
-          render={({field})=>(
-            <FormItem>
-            <FormControl>
-          <Input
-            id="email"
-            className="w-full"
-          {...field}/>
-          </FormControl>
-          <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-        )}/>
-         </div></div></fieldset>
-      </div>
-      
-      <DialogFooter>
-        <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
-      </DialogFooter>
-      </form>
-      </Form>
-    </DialogContent>
-  </Dialog> 
-}
 
+  
         </div>),
     }, 
 ];
@@ -935,61 +869,5 @@ React.useEffect(()=>{
          </MyDialogContent>
         </MyDialog>
    }
-    {showEnc && 
-  <Dialog open={showEnc} onOpenChange={setShowEnc}>
-    <DialogTrigger asChild>
-    </DialogTrigger>
-    <DialogContent className="sm:max-w-[425px] bg-white">
-      <DialogHeader>
-        <DialogTitle>{encarregado.map((n)=>{return n.nomeCompleto})}, {encarregado.map((n)=>{return n.parentesco})}</DialogTitle>
-        <DialogDescription >
-        As informações relevantes do encarregado, são listadas aqui!
-        </DialogDescription>
-      </DialogHeader>
-     
-      <div className="grid gap-4 py-4 bg-white">
-        <div className="flex flex-col w-full">
-            
-        <fieldset>
-            <legend className='font-robotoSlab text-sm'>Localização</legend>
-            <div className="w-full flex flex-row justify-between px-2">
-            <div className="w-full flex flex-row justify-between px-2">
-            <div>
-                <Label className='font-poppins'>número da casa</Label>
-                <p className='font-thin text-sm'>{casa}</p>
-            </div>
-            <div>
-                <Label className='font-poppins'>bairro</Label>
-                <p className='font-thin text-sm'>{bairro}</p>
-            </div>
-            <div>
-                <Label className='font-poppins'>rua</Label>
-                <p className='font-thin text-sm'>{rua}</p>
-            </div>
-            </div>
-            </div>
-        </fieldset>
-            <fieldset>
-                <legend className='font-robotoSlab text-sm'>Contacto</legend>
-            <div className="w-full flex flex-row justify-between px-2">
-            <div className="w-full flex flex-row justify-between px-2">
-            <div>
-                <Label className='font-poppins'>Telefone</Label>
-                <p className='font-thin text-sm'>{telefone}</p>
-            </div>
-            <div>
-                <Label className='font-poppins'>email</Label>
-                <p className='font-thin text-sm'>{email}</p>
-            </div>
-            </div>
-            </div>
-            </fieldset>
-        </div>
-      </div>
-      <DialogFooter>
-        <p className='font-lato italic text-blue-600 text-xs cursor-pointer'>Todos os dados do encarregado<InfoIcon className='w-2 h-2'/>.</p>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>}
     </>)
 }

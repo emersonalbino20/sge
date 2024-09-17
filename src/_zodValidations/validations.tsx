@@ -241,13 +241,13 @@ export const  numeroCasaZod = z
     export const idZod = z
     .number({
       required_error: 'campo obrigatória.',
-      invalid_type_error: 'o ID do aluno deve ser um número.',
+      invalid_type_error: 'valor inválido.',
     })
     .int({
-      message: 'o ID do aluno deve ser um número inteiro.',
+      message: 'o ID deve ser um número inteiro.',
     })
     .min(1, {
-      message: 'o ID do aluno deve ser maior do que 1 e deve ser válido.',
+      message: 'o ID deve ser maior do que 1 e deve ser válido.',
     })
 
     export const nomeParentescos = z

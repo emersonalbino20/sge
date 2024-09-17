@@ -88,7 +88,6 @@ const { fields, append, remove } =
     })
 
 /*Área q implementa o código pra pesquisar cursos*/
-
 const [metodo, setMetodo] = React.useState([]);
 const [ano, setAno] = React.useState([]);
 const [classe, setClasse] = React.useState([]);

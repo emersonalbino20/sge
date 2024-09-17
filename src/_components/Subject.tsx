@@ -281,35 +281,6 @@ export default function Subject(){
       </form></Form>
     </DialogContent>
   </Dialog>
-
- 
-            <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>
-           
-            <Popover >
-      <PopoverTrigger asChild className='bg-white'>
-
-      <div className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
-        <Button className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
-        </div>
-      </PopoverTrigger >
-      <PopoverContent className="w-80 bg-white">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-medium leading-none">Dados da Disiciplina</h4>
-            <p className="text-sm text-muted-foreground">
-              Inspecione os dados da displina
-            </p>
-          </div>
-          <div className="grid gap-2">
-            <div className="w-full flex space-x-2">
-              <Label htmlFor="maxWidth" className='font-semibold'>Nome:</Label>
-              <p className='text-sm lowercase'>{descricao}</p>
-            </div>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
-    </div>
             <Dialog>
             <DialogTrigger asChild >
             <div title='vincular' className='relative flex justify-center items-center'>
@@ -319,7 +290,7 @@ export default function Subject(){
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] bg-white">
                   <DialogHeader>
-                    <DialogTitle>Vincular Disciplina</DialogTitle>
+                    <DialogTitle>Vincular Disciplina {row.nome}</DialogTitle>
                     <DialogDescription>
                       Vincula a disciplina de <span className='text-blue-500 font-medium'>{row.nome}</span> em multiplos cursos.
                     </DialogDescription>
@@ -365,6 +336,35 @@ export default function Subject(){
         </form></Form>
       </DialogContent>
     </Dialog>
+
+    <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>
+           
+           <Popover >
+     <PopoverTrigger asChild className='bg-white'>
+
+     <div className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
+       <Button className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
+       </div>
+     </PopoverTrigger >
+     <PopoverContent className="w-80 bg-white">
+       <div className="grid gap-4">
+         <div className="space-y-2">
+           <h4 className="font-medium leading-none">Dados da Disiciplina</h4>
+           <p className="text-sm text-muted-foreground">
+             Inspecione os dados da displina
+           </p>
+         </div>
+         <div className="grid gap-2">
+           <div className="w-full flex space-x-2">
+             <Label htmlFor="maxWidth" className='font-semibold'>Descrição:</Label>
+             <p className='text-sm lowercase'>{descricao}</p>
+           </div>
+         </div>
+       </div>
+     </PopoverContent>
+   </Popover>
+   </div>
+
       </div>),
         }, 
     ];
@@ -471,6 +471,7 @@ export default function Subject(){
           <Label htmlFor="name" className="text-right">
             Nome
           </Label>
+		
           <FormField
           control={formCreate.control}
           name="nome"
