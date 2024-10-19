@@ -130,6 +130,8 @@
 
 ###
 
-<img src="https://raw.githubusercontent.com/emersonalbino20/emersonalbino20/output/snake.svg" alt="Snake animation" />
+<div align="left">
+  <img height="200" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNnNoN21mMDZyeXk4bHJtZ2VqMnE5OWhveWs5Zm9pOXZ0anJ4OWplYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/gAXtUkBVd8OCbFjauC/giphy.gif"  />
+</div>
 
 ###
