@@ -1,60 +1,135 @@
-# Sistema de Gestão Escolar - Front-End  
+<h1 align="left">Sistema de Gestão Escolar - Frontend</h1>
 
-Este é o front-end do Sistema de Gestão Escolar. Para obter uma visão completa do sistema, você precisará também do back-end, que está disponível em um repositório separado.
+###
 
-## Tecnologias Utilizadas  
+<h2 align="left">📚 Sobre o Projecto</h2>
 
-### React  
+###
 
-React é uma biblioteca para construir interfaces de usuário. Utilizamos o React para criar componentes reutilizáveis e gerenciar o estado da aplicação de forma eficiente.  
+<p align="left">Este projeto é o frontend de um sistema de gestão escolar desenvolvido em React com integração de APIs para gerenciamento de dados escolares. Ele foi criado para facilitar a gestão de alunos, turmas, professores, notas e mais.</p>
 
-### ShadcnUI  
+###
 
-ShadcnUI é uma biblioteca de componentes UI para React que proporciona uma estética moderna e estilizada, facilitando a construção de interfaces atraentes e funcionais.  
+<h2 align="left">🚀 Funcionalidades</h2>
 
-### Redux/Toolkit  
+###
 
-Redux é uma biblioteca para gerenciar o estado global da aplicação. O Redux Toolkit é uma versão simplificada do Redux que facilita a configuração e a gestão do estado com menos boilerplate.  
+<p align="left">* Cadastro de alunos, professores e encarregados<br>* Gerenciamento de turmas e disciplinas<br>* Registro de notas escolar<br>* Relatórios financeiros e acadêmicos<br>* Autenticação e autorização de usuários</p>
 
-### React-Data-Table  
+###
 
-React-Data-Table é uma biblioteca para criar tabelas interativas e dinâmicas no React, permitindo fácil visualização e manipulação de dados tabulares.  
+<h2 align="left">🛠 Tecnologias Utilizadas</h2>
 
-### TailwindCSS  
+###
 
-TailwindCSS é um framework de CSS utilitário que permite uma estilização rápida e eficiente das interfaces, proporcionando flexibilidade e consistência no design.  
+<h4 align="left">Linguagens e Bibliotecas</h4>
 
-## Como Começar  
+###
 
-### Clonando o Repositório
+<p align="left">* React<br>* Tailwind CSS<br>* Zod (validação de dados)<br>* ShadcnUI (Componentização)</p>
 
-1. Clone este repositório usando o comando:  
-   ```bash
-        git clone https://github.com/emersonalbino20/sge.git  
+###
 
-2. Navegue até o diretório do projeto:  
-    ```bash
-         cd sge  
+<h4 align="left">Ferramentas e Utilitários</h4>
 
-### Instalando Dependências  
+###
 
-Instale as dependências do projeto com npm:  
-    ```bash
-         npm install  
+<p align="left">* React Router para navegação<br>* Lucide-react para ícones<br>* Vite para empacotamento e desenvolvimento<br>* Integração com APIs RESTful</p>
 
-### Executando o Projeto  
+###
 
-Inicie o servidor de desenvolvimento com o comando:  
-   ```bash
-         npm run dev     
+<h2 align="left">🎨 Tema e UI</h2>
 
-O projeto será iniciado e você poderá acessá-lo em **http://localhost:3000** (ou outra porta, se configurada).
+###
 
-**Nota:** Este repositório contém apenas o *front-end* do sistema de gestão escolar. Para ver o sistema completo em funcionamento, você precisará clonar e configurar o repositório do *back-end*, que pode ser encontrado aqui.  
+<p align="left">O sistema utiliza um tema moderno com cores neutras e suaves:<br><br>Gradiente: bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300</p>
 
-#### Contribuições  
+###
 
-Se você deseja contribuir para este projeto, sinta-se à vontade para fazer um fork, criar uma branch e submeter um pull request. Verifique as diretrizes de contribuição para mais detalhes.
-Licença  
+<h2 align="left">📂 Estrutura de Pastas</h2>
 
-Este projeto está licenciado sob a Licença **MIT**.  
+###
+
+<p align="left">├── public/<br>├── src/<br>│   ├── components/<br>│   ├── pages/<br>│   ├── services/<br>│   ├── utils/<br>│   └── assets/<br>└── package.json</p>
+
+###
+
+<h2 align="left">🚀 Instalação e Configuração</h2>
+
+###
+
+<h4 align="left">1. Clone o repositório:</h4>
+
+###
+
+<p align="left">git clone https://github.com/emersonalbino20/sge.git</p>
+
+###
+
+<h4 align="left">2. Instale as dependências:</h4>
+
+###
+
+<p align="left">npm install</p>
+
+###
+
+<h4 align="left">3. Inicie o servidor de desenvolvimento:</h4>
+
+###
+
+<p align="left">npm run dev</p>
+
+###
+
+<h4 align="left">4. Acesse em seu navegador:</h4>
+
+###
+
+<p align="left">http://localhost:5731</p>
+
+###
+
+<h2 align="left">🧪 Testes</h2>
+
+###
+
+<p align="left">Este projeto ainda não contém testes automatizados. No entanto, recomendamos o uso de Jest e React Testing Library para testes de componentes.</p>
+
+###
+
+<h2 align="left">🤝 Contribuição</h2>
+
+###
+
+<p align="left">* Faça um fork do projeto<br>* Crie uma nova branch: git checkout -b minha-nova-feature<br>* Faça suas modificações e comite: git commit -m 'Adicionar nova feature'<br>* Envie sua branch: git push origin minha-nova-feature<br>* Abra um Pull Request</p>
+
+###
+
+<h2 align="left">📄 Licença</h2>
+
+###
+
+<p align="left">Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.</p>
+
+###
+
+<h2 align="left">Icones Das Tecnológias</h2>
+
+###
+
+<div align="left">
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original-wordmark.svg" height="40" alt="react logo"  />
+  <img width="12" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" height="40" alt="javascript logo"  />
+  <img width="12" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-plain.svg" height="40" alt="typescript logo"  />
+  <img width="12" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original-wordmark.svg" height="40" alt="tailwindcss logo"  />
+</div>
+
+###
+
+<img src="https://raw.githubusercontent.com/emersonalbino20/emersonalbino20/output/snake.svg" alt="Snake animation" />
+
+###
