@@ -4,10 +4,6 @@ import Footer from '../_components/Footer'
 import HomeBody from '@/_components/HomeBody';
 export default function HomePage(){
     return(
-        <>
-        <Header/>
         <HomeBody />
-        <Footer/>
-        </>
     );
 }

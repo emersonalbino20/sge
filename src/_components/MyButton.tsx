@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { EditIcon, CombineIcon, Trash, InfoIcon, UserPlus, LucideLibrary } from 'lucide-react';
+import { EditIcon, CombineIcon, Trash, InfoIcon, UserPlus, LucideLibrary, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 
@@ -15,6 +15,18 @@ export function EditButton(Icon)
         className={ClassIcon}/> 
         <Button 
         className="h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm border-blue-600" ></Button>
+        </>
+    );
+}
+
+export function SubmitButton(Icon)
+{
+    return (
+        <>
+        <Save 
+        className={ClassIcon}/> 
+        <Button 
+        className="h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600" ></Button>
         </>
     );
 }
@@ -75,7 +87,7 @@ export function LibraryButton()
             <LucideLibrary
             className={ClassIcon}
             />
-            <Button className='h-9 px-5 bg-amber-400 text-white font-semibold hover:bg-amber-400 rounded-sm border-amber-400'></Button>
+            <Button className='h-7 px-5 bg-amber-400 text-white font-semibold hover:bg-amber-400 rounded-sm border-amber-400'></Button>
         </>
     );
 }

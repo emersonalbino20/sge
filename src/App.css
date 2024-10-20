@@ -61,25 +61,6 @@
 .read-the-docs {
   color: #888;
 }
-/*Este código afecta o menu do componente Header.tsx*/
-.dropdownPerfil{
-  display: none;
-}
-.dropdownServicos{
-  display: none;
-}
-.dropdownAlunos{
-  display: none;
-}
-.menuPerfil:hover > .dropdownPerfil {
-  display: flex;
-}
-.menuServicos:active > .dropdownServicos {
-  display: flex;
-}
-.menuAlunos:active > .dropdownAlunos {
-  display: flex;
-}
 
 .errorMessage{
   color: rgb(231, 24, 24);

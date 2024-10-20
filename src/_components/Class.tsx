@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, SaveIcon, Trash} from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, SaveIcon, Trash, AlertTriangle, Search} from 'lucide-react'
 import { InfoIcon } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
 import DataTable from 'react-data-table-component'
@@ -29,12 +29,12 @@ import { useForm} from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { MyDialog, MyDialogContent } from './my_dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-
+import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 
 
 const TFormCreate =  z.object(
 {
-  nome: sala,/*A validacao da sala é equicalente com o turno*/
+  nome: sala,
   classeId: z.number(),
   salaId: z.number(),
   turnoId: z.number()
@@ -169,22 +169,7 @@ React.useEffect(()=>{
         const convClasse = JSON.stringify(receveClasse.data)
         const convClasse2 = JSON.parse(convClasse)
         setCAll(convClasse2.cursos[cursoId].classes)
-        /*
-        let tamanho = 1;
-        for(var propriedade in obj){
-          if (obj.hasOwnProperty(propriedade))
-            {
-              tamanho++;
-            }
-          }
-        console.log(tamanho);
-        */
-        //console.log(Object.keys(obj).length)
-        /*for (let i = 1; i <= Object.keys(obj).length; i++)
-        {
-          convClasse2.cursos[i].classes.map((a)=>{return "id: "+ a.id +" classe: "+ a.nome})
-        }
-        convClasse2.cursos[1].classes.map((a)=>{return console.log("id: "+ a.id +" classe: "+ a.nome)})*/
+      
     }
     search()
 },[cursoId])
@@ -192,231 +177,11 @@ React.useEffect(()=>{
 const changeResource = (id)=>{
   setBuscar(id)
 }
-    const columns = 
-    [
-        { 
-            name: 'Id',
-            selector: row => row.id,
-            sortable:true
-         },
-         { 
-          name: 'Turmas',
-          selector: row => row.nome,
-          sortable:true
-        },
-        { 
-            name: 'Classe',
-            selector: row => row.classe,
-            sortable:true
-         },
-        { 
-            name: 'Sala',
-            selector: row => row.sala,
-            sortable:true
-        },
-        {
-            name: 'Ação',
-            cell: (row) => (<div className='flex flex-row space-x-2' onClick={()=>{
-              changeResource(row.id)
-              if (estado)
-              {
-                formUpdate.setValue('nome', nome)
-                formUpdate.setValue('salaId', sala)
-                formUpdate.setValue('classeId', classe)
-                formUpdate.setValue('turnoId', turno)
-                formUpdate.setValue('id', row.id)
-                setEstado(false);
-              }
-            }}><EditIcon className='w-5 h-4 absolute text-white'/> 
-            <Dialog >
-          <DialogTrigger asChild >
-          <div title='actualizar' className='relative flex justify-center items-center'>
-          <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-            <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
-            </div>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] bg-white">
-                <DialogHeader>
-                  <DialogTitle>Actualizar Turma</DialogTitle>
-                  <DialogDescription>
-                  <p>altere uma informação do registro click em <span className='font-bold text-green-500'>actualizar</span> quando terminar.</p>
-                  </DialogDescription>
-                </DialogHeader>
-                <Form {...formUpdate} >
-              <form onSubmit={formUpdate.handleSubmit(handleSubmitUpdate)} >
-              <FormField
-          control={formUpdate.control}
-          name="id"
-          render={({field})=>(
-            <FormControl>
-          <Input 
-          type='hidden'
-            className="w-full"
-            
-            {...field} 
-            
-            onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
-           
-          />
-          </FormControl>
-        )}
-           />
-  
-              <div className="flex flex-col w-full py-4 bg-white">
-                <div className="w-full">
-                <Label htmlFor="nome" className="text-right">
-                  Nome
-                </Label>
-                <FormField
-                control={formUpdate.control}
-                name="nome"
-                render={({field})=>(
-                  <FormItem>
-                  <Input
-                    id="nome"
-                    type='text' {...field} className="w-full"
-                    />
-                  <FormMessage className='text-red-500 text-xs'/>
-                </FormItem>
-              )}/>
-              </div>
-              <div className="w-full">
-                <Label htmlFor="classe" className="text-right">
-                  Id da Classe
-                </Label>
-                <FormField
-                control={formUpdate.control}
-                name="classeId"
-                render={({field})=>(
-                  <FormItem>
-                  <Input
-                    id="classe"
-                    type='number' {...field} className="w-full"
-                    min="0"
-                    onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
-                  <FormMessage className='text-red-500 text-xs'/>
-                </FormItem>
-              )}/>
-              </div>
-              <div className="w-full">
-              <Label htmlFor="turno" className="text-right">
-                  Id do Turno
-                </Label>
-                <FormField
-                control={formUpdate.control}
-                name="turnoId"
-                render={({field})=>(
-                  <FormItem>
-                  <Input
-                    id="turno"
-                    type='number' {...field} className="w-full"
-                    min="0"
-                    onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
-                  <FormMessage className='text-red-500 text-xs'/>
-                </FormItem>
-              )}/>               
-              
-              </div>
-              <div className="w-full">
-              <Label htmlFor="sala" className="text-right">
-                  Id da Sala
-                </Label>
-                <FormField
-                control={formUpdate.control}
-                name="salaId"
-                render={({field})=>(
-                  <FormItem>
-                  <Input
-                    id="sala"
-                    type='number' {...field} className="w-full"
-                    min="0"
-                    onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
-                  <FormMessage className='text-red-500 text-xs'/>
-                </FormItem>
-              )}/>               
-              
-              </div>
-      </div>
-      <DialogFooter>
-      <Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
-      </DialogFooter>
-      </form></Form>
-    </DialogContent>
-  </Dialog>
 
- 
-            <div className='relative flex justify-center items-center cursor-pointer'>
-           
-            <Popover >
-      <PopoverTrigger asChild className='bg-white'>
-
-      <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
-        <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
-        </div>
-      </PopoverTrigger >
-      <PopoverContent className="w-80 bg-white">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-medium leading-none">Dados da Sala</h4>
-            <p className="text-sm text-muted-foreground">
-              Inspecione os dados
-            </p>
-          </div>
-          <div className="grid gap-2">
-          <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="maxWidth">Classe</Label>
-              <p>{classe}</p>
-            </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="maxWidth">Sala</Label>
-              <p>{sala}</p>
-            </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="height">Turno</Label>
-              <p className='text-xs'>{turno}</p>
-            </div>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
-            </div>
-            <div title='excluir' className='relative flex justify-center items-center cursor-pointer' ><Trash className='w-5 h-4 absolute text-white'/> <button className='py-3 px-5 rounded-sm bg-red-600  border-red-600'></button></div>
-            </div>),
-        }, 
-    ];
-    
-    const tableStyle = {
-        
-        headCells: {
-            style: {
-                backgroundColor: '#e8e9eb',
-                fontWeight: 'bold',
-                fontSize: '14px',
-                color: '#008ae1'
-            }
-        },
-        }
-           
-        const conditionalRowStyles = [
-            {
-                when: row => row.id % 2 === 0,
-                style: {
-                    backgroundColor: '#e8e9eb'
-
-                },
-            },
-            {
-                when: row => row.id % 2 !== 0,
-                style: {
-                    backgroundColor: '#ffffff'
-                },
-            },
-        ];
-
-        const [dados, setDados] = React.useState([])
-        const [dataApi, setDataApi] = React.useState([])
-        const one = 1;
-        const URL = `http://localhost:8000/api/turmas/${buscar}`
+    const [dados, setDados] = React.useState([])
+    const [dataApi, setDataApi] = React.useState([])
+    const one = 1;
+    const URL = `http://localhost:8000/api/turmas/${buscar}`
        
        useEffect( () => {
             const respFetch = async () => {
@@ -430,50 +195,23 @@ const changeResource = (id)=>{
              respFetch()
        },[updateTable])
     
-        const handleFilter =  (event) => {
-            const newData = dataApi.filter( row => {
-                return row.nome.toLowerCase().includes(event.target.value.toLowerCase().trim())
-            })
-            setDados(newData)
-        }
-    
-        const handleRows = ({selectedRows}) => {
-            setTimeout(()=>{
-               changeResource(selectedRows[0].id)
-            },1000)  
-        }
-          
-       const handleSort = (column, sortDirection) => {
-        console.log({column, sortDirection})
-       }
-    
+       const columns = ['Id', 'Turmas', 'Classes', 'Salas', 'Acção'];
+        
+       const handleFilter = (event) => {
+          const valores = dataApi.filter((element) =>{ return (element.nome.toLowerCase().includes(event.target.value.toLowerCase().trim())) });
+          setDados(valores)
+      }
 
     return (
-    
-         <div className='w-full h-72 '>
-         <br/><br/><br/>
-   <DataTable 
-   customStyles={ tableStyle }
-   conditionalRowStyles={conditionalRowStyles}
-   columns={columns}
-   data={dados}
-   fixedHeader
-   fixedHeaderScrollHeight='300px'
-   pagination
-   defaultSortFieldId={1}
-   selectableRows
-   selectableRowsSingle
-   onSelectedRowsChange={handleRows}
-   onSort={handleSort}
-   subHeader
-   subHeaderComponent={
-       <div className='flex flex-row space-x-2'><input className=' rounded-sm border-2 border-gray-400 placeholder:text-gray-400 placeholder:font-bold outline-none py-1 indent-2' type='text' placeholder='Pesquisar aqui...' onChange={handleFilter}/>
+      <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
        
-       <div className='relative flex justify-center items-center'>
-           <PrinterIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-           <button className='py-4 px-5 bg-green-700 border-green-700 rounded-sm ' onClick={() => window.print()}></button>
-       </div>
-       <Dialog>
+      <div className='flex flex-col space-y-2 justify-center w-[90%] z-10 mt-44'> 
+       <div className='flex flex-row space-x-2'>
+         <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
+             <Search className='absolute text-gray-300'/>            
+             <input className=' pl-6 rounded-md border-2 border-gray-400 placeholder:text-gray-400 placeholder:font-bold outline-none py-2 w-full indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
+         </div>
+         <Dialog>
     <DialogTrigger asChild>
     <div title='cadastrar' className='relative flex justify-center items-center'>
     <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
@@ -601,62 +339,266 @@ const changeResource = (id)=>{
       </DialogFooter>
       </form></Form>
     </DialogContent>
-  </Dialog>
-
-  {showModal &&
-  <MyDialog open={showModal} onOpenChange={setShowModal}>
+      </Dialog>       
+     </div>
+     <div className="overflow-x-auto overflow-y-auto w-full  h-80 md:h-1/2 lg:h-[500px]">
+         
+         <table className="w-full bg-white border border-gray-200 table-fixed">
+             
+             <thead className='sticky top-0 z-10'>
+                 <tr className={trStyle}>
+                     {columns.map((element, index) =>{ return( <th key={index} className={thStyle} >{element}</th>) })}
+                 </tr>
+             </thead>
+             <tbody >
+                 {dados.length == 0 ? (
+                 <tr className='w-96 h-32'>
+                     <td rowSpan={5} colSpan={5} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
+                         <div>
+                             <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+                             <p>Nenum Registro Foi Encontrado</p>
+                         </div>
+                     </td>
+                 </tr>
+                 ) : dados.map((item, index) => (
+                     <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-200"}>
+                         <td className={tdStyle}>{item.id}</td>
+                         <td className={tdStyle}>{item.nome}</td>
+                         <td className={tdStyle}>{item.classe}</td>
+                         <td className={tdStyle}>{item.sala}</td>
+                         <td className={tdStyleButtons}    onClick={()=>{
+                           changeResource(item.id)
+                           if (estado)
+                            {
+                              formUpdate.setValue('nome', nome)
+                              formUpdate.setValue('salaId', sala)
+                              formUpdate.setValue('classeId', classe)
+                              formUpdate.setValue('turnoId', turno)
+                              formUpdate.setValue('id', item.id)
+                              setEstado(false);
+                            }
+                          setEstado(false)
+                         }}>
+                          <Dialog >
+          <DialogTrigger asChild >
+          <div title='actualizar' className='relative flex justify-center items-center'>
+          <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
+            <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
+            </div>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px] bg-white">
+                <DialogHeader>
+                  <DialogTitle>Actualizar Turma</DialogTitle>
+                  <DialogDescription>
+                  <p>altere uma informação do registro click em <span className='font-bold text-green-500'>actualizar</span> quando terminar.</p>
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...formUpdate} >
+              <form onSubmit={formUpdate.handleSubmit(handleSubmitUpdate)} >
+              <FormField
+          control={formUpdate.control}
+          name="id"
+          render={({field})=>(
+            <FormControl>
+          <Input 
+          type='hidden'
+            className="w-full"
+            
+            {...field} 
+            
+            onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
+           
+          />
+          </FormControl>
+        )}
+           />
   
-    <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
-    {modalMessage == null &&
-        <div role="alert" className='w-full'>
-      <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-        <div>
-            <p>Sucesso</p>
-        </div>
-        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-            <p>X</p>
-          </div>
+              <div className="flex flex-col w-full py-4 bg-white">
+                <div className="w-full">
+                <Label htmlFor="nome" className="text-right">
+                  Nome
+                </Label>
+                <FormField
+                control={formUpdate.control}
+                name="nome"
+                render={({field})=>(
+                  <FormItem>
+                  <Input
+                    id="nome"
+                    type='text' {...field} className="w-full"
+                    />
+                  <FormMessage className='text-red-500 text-xs'/>
+                </FormItem>
+              )}/>
+              </div>
+              <div className="w-full">
+                <Label htmlFor="classe" className="text-right">
+                  Id da Classe
+                </Label>
+                <FormField
+                control={formUpdate.control}
+                name="classeId"
+                render={({field})=>(
+                  <FormItem>
+                  <Input
+                    id="classe"
+                    type='number' {...field} className="w-full"
+                    min="0"
+                    onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
+                  <FormMessage className='text-red-500 text-xs'/>
+                </FormItem>
+              )}/>
+              </div>
+              <div className="w-full">
+              <Label htmlFor="turno" className="text-right">
+                  Id do Turno
+                </Label>
+                <FormField
+                control={formUpdate.control}
+                name="turnoId"
+                render={({field})=>(
+                  <FormItem>
+                  <Input
+                    id="turno"
+                    type='number' {...field} className="w-full"
+                    min="0"
+                    onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
+                  <FormMessage className='text-red-500 text-xs'/>
+                </FormItem>
+              )}/>               
+              
+              </div>
+              <div className="w-full">
+              <Label htmlFor="sala" className="text-right">
+                  Id da Sala
+                </Label>
+                <FormField
+                control={formUpdate.control}
+                name="salaId"
+                render={({field})=>(
+                  <FormItem>
+                  <Input
+                    id="sala"
+                    type='number' {...field} className="w-full"
+                    min="0"
+                    onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
+                  <FormMessage className='text-red-500 text-xs'/>
+                </FormItem>
+              )}/>               
+              
+              </div>
       </div>
-      <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
-      <CheckCircleIcon className='w-28 h-20 text-green-400'/>
+      <DialogFooter>
+      <Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+      </DialogFooter>
+      </form></Form>
+    </DialogContent>
+                          </Dialog>
+ 
+                          <div className='relative flex justify-center items-center cursor-pointer'>
+                        
+                          <Popover >
+                    <PopoverTrigger asChild className='bg-white'>
+
+                    <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
+                      <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
+                      </div>
+                    </PopoverTrigger >
+                    <PopoverContent className="w-80 bg-white">
+                      <div className="grid gap-4">
+                        <div className="space-y-2">
+                          <h4 className="font-medium leading-none">Dados da Sala</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Inspecione os dados
+                          </p>
+                        </div>
+                        <div className="grid gap-2">
+                        <div className="grid grid-cols-3 items-center gap-4">
+                            <Label htmlFor="maxWidth">Classe</Label>
+                            <p>{classe}</p>
+                          </div>
+                          <div className="grid grid-cols-3 items-center gap-4">
+                            <Label htmlFor="maxWidth">Sala</Label>
+                            <p>{sala}</p>
+                          </div>
+                          <div className="grid grid-cols-3 items-center gap-4">
+                            <Label htmlFor="height">Turno</Label>
+                            <p className='text-xs'>{turno}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                          </div>
+                          <div title='excluir' className='relative flex justify-center items-center cursor-pointer' ><Trash className='w-5 h-4 absolute text-white'/> <button className='py-3 px-5 rounded-sm bg-red-600  border-red-600'></button>
+                          </div>
+                         </td>
+                     </tr>
+                 ))}
+             </tbody>
+             <tfoot className='sticky bottom-0 bg-white"'>
+             <tr>
+                 <td colSpan={5} className="py-2 text-blue-500">
+                     Total de registros: {dados.length}
+                 </td>
+             </tr>
+         </tfoot>
+         </table>
+     </div>
+    
+     </div>
+
+{showModal &&
+<MyDialog open={showModal} onOpenChange={setShowModal}>
+
+ <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
+ {modalMessage == null &&
+     <div role="alert" className='w-full'>
+   <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+     <div>
+         <p>Sucesso</p>
+     </div>
+     <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+         <p>X</p>
+       </div>
+   </div>
+   <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
+   <CheckCircleIcon className='w-28 h-20 text-green-400'/>
+   <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
+   <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
+     <Button className='bg-green-400 hover:bg-green-500
+     hover:font-medium
+      font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+ </div>
+ </div>
+ 
+   </div>
+   
+}
+{modalMessage != null &&
+     <div role="alert" className='w-full'>
+   <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+     <div>
+         <p>Falhou</p>
+     </div>
+     <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+         <p>X</p>
+       </div>
+   </div>
+   <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
+   <AlertCircleIcon className='w-28 h-20 text-red-400'/>
+   <p className='font-poppins uppercase'>{modalMessage}</p>
+   <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
+     <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+ </div>
+ </div>
+ 
+   </div>
+}
+      </MyDialogContent>
+</MyDialog>
+}
+    </div>
       
-      <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
-      <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
-        <Button className='bg-green-400 hover:bg-green-500
-        hover:font-medium
-         font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
-    </div>
-    </div>
-    
-      </div>
-  }
-   {modalMessage != null &&
-        <div role="alert" className='w-full'>
-      <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-        <div>
-            <p>Falhou</p>
-        </div>
-        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-            <p>X</p>
-          </div>
-      </div>
-      <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
-      <AlertCircleIcon className='w-28 h-20 text-red-400'/>
-      <p className='font-poppins uppercase'>{modalMessage}</p>
-      <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
-        <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
-    </div>
-    </div>
-    
-      </div>
-  }
-         </MyDialogContent>
-        </MyDialog>
-   }
-        </div>
-   }
->
-</DataTable>
-</div>
 )
 }

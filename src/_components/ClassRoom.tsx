@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, SaveIcon, Trash} from 'lucide-react'
-import { InfoIcon } from 'lucide-react'
+import { InfoIcon, AlertTriangle, Search } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
 import DataTable from 'react-data-table-component'
 import {anoLectivo, classe, anoLectivoId, cursoId, custoMatricula, sala, capacidade, localizacao } from '@/_zodValidations/validations'
@@ -28,6 +28,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm} from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { MyDialog, MyDialogContent } from './my_dialog'
+import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 
 
 
@@ -98,7 +99,10 @@ React.useEffect(()=>{
         setCapacidade(receve.capacidade)
         setLocalizacao(receve.localizacao)
         setId(receve.id)
-        setEstado(true)
+        formUpdate.setValue('nome', receve.nome)
+        formUpdate.setValue('capacidade', receve.capacidade)
+        formUpdate.setValue('localizacao', receve.localizacao)
+        formUpdate.setValue('id', receve.id)
     }
     search()
 },[buscar])
@@ -128,32 +132,142 @@ const changeResource = (id)=>{
       setBuscar(id)
     }
 
-    const columns = 
-    [
-        { 
-            name: 'Id',
-            selector: row => row.id,
-            sortable:true
-         },
-         { 
-          name: 'Sala',
-          selector: row => row.nome,
-          sortable:true
-        },
-        {
-            name: 'Ação',
-            cell: (row) => (<div className='flex flex-row space-x-2' onClick={()=>{
-              changeResource(row.id)
-              if (estado)
-              {
-              formUpdate.setValue('nome', nome)
-              formUpdate.setValue('capacidade', capacidade)
-              formUpdate.setValue('localizacao', localizacao)
-              formUpdate.setValue('id', row.id)
-              setEstado(false)
-            }
-            }}><EditIcon className='w-5 h-4 absolute text-white'/> 
-            <Dialog >
+        const [dados, setDados] = React.useState([])
+        const [dataApi, setDataApi] = React.useState([])
+        const URL = `http://localhost:8000/api/salas/`
+       
+       useEffect( () => {
+            const respFetch = async () => {
+                  const resp = await fetch (URL);
+                  const respJson = await resp.json();
+                  const conv1 = JSON.stringify(respJson.data)
+                  const conv2 = JSON.parse(conv1)
+                  conv2.sort((a, b) => a.nome.localeCompare(b.nome))
+                  setDados(conv2)
+                  setDataApi(conv2)
+            } 
+             respFetch()
+       },[updateTable])
+    
+       const columns = ['Id', 'Salas', 'Acção'];
+        
+        const handleFilter = (event) => {
+           const valores = dataApi.filter((element) =>{ return (element.nome.toLowerCase().includes(event.target.value.toLowerCase().trim())) });
+           setDados(valores)
+       }
+
+    return (
+      <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
+       
+      <div className='flex flex-col space-y-2 justify-center w-[90%] z-10 mt-44'> 
+       <div className='flex flex-row space-x-2'>
+         <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
+             <Search className='absolute text-gray-300'/>            
+             <input className=' pl-6 rounded-md border-2 border-gray-400 placeholder:text-gray-400 placeholder:font-bold outline-none py-2 w-full indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
+         </div>
+         <Dialog>
+    <DialogTrigger asChild>
+    <div title='cadastrar' className='relative flex justify-center items-center'>
+    <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
+      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
+      </div>
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[425px] bg-white">
+      <DialogHeader>
+        <DialogTitle>Cadastrar Sala</DialogTitle>
+        <DialogDescription>
+        <p>preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
+        </p>
+        </DialogDescription>
+      </DialogHeader>
+      <Form {...formCreate} >
+     <form onSubmit={formCreate.handleSubmit(handleSubmitCreate)} >
+     <div className="flex flex-col w-full py-4 bg-white">
+        <div className="w-full">
+          <Label htmlFor="nome" className="text-right">
+            Nome
+          </Label>
+          <FormField
+          control={formCreate.control}
+          name="nome"
+          render={({field})=>(
+            <FormItem>
+            <Input
+              id="nome"
+              type='text' {...field} className="w-full"
+              />
+            <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+        )}/>
+        </div>
+        <div className="w-full">
+        <Label htmlFor="capacidade" className="text-right">
+            Capacidade
+          </Label>
+          <FormField
+          control={formCreate.control}
+          name="capacidade"
+          render={({field})=>(
+            <FormItem>
+            <Input id="capacidade" type='number' {...field} className="w-full"
+            min="0"
+            onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
+            />
+            <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+        )}/>
+        </div>
+        <div className="w-full">
+        <Label htmlFor="localizacao" className="text-right">
+            Localização
+          </Label>
+          <FormField
+          control={formCreate.control}
+          name="localizacao"
+          render={({field})=>(
+            <FormItem>
+            <Input id="localizacao" type='text' {...field} className="w-full"
+            />
+            <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+        )}/>
+        </div>
+      </div>
+      <DialogFooter>
+      <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+      </DialogFooter>
+      </form></Form>
+    </DialogContent>
+      </Dialog>      
+     </div>
+     <div className="overflow-x-auto overflow-y-auto w-full  h-80 md:h-1/2 lg:h-[500px]">
+         
+         <table className="w-full bg-white border border-gray-200 table-fixed">
+             
+             <thead className='sticky top-0 z-10'>
+                 <tr className={trStyle}>
+                     {columns.map((element, index) =>{ return( <th key={index} className={thStyle} >{element}</th>) })}
+                 </tr>
+             </thead>
+             <tbody >
+                 {dados.length == 0 ? (
+                 <tr className='w-96 h-32'>
+                     <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
+                         <div>
+                             <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+                             <p>Nenum Registro Foi Encontrado</p>
+                         </div>
+                     </td>
+                 </tr>
+                 ) : dados.map((item, index) => (
+                     <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-200"}>
+                         <td className={tdStyle}>{item.id}</td>
+                         <td className={tdStyle}>{item.nome}</td>
+                         <td className={tdStyleButtons}    onClick={()=>{
+                           changeResource(item.id)
+                           
+                         }}>
+                          <Dialog >
           <DialogTrigger asChild >
           <div title='actualizar' className='relative flex justify-center items-center'>
           <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
@@ -246,252 +360,105 @@ const changeResource = (id)=>{
       </DialogFooter>
       </form></Form>
     </DialogContent>
-  </Dialog>
+                          </Dialog>
+                          <div className='relative flex justify-center items-center cursor-pointer'>
+                        
+                          <Popover >
+                    <PopoverTrigger asChild className='bg-white'>
 
- 
-            <div className='relative flex justify-center items-center cursor-pointer'>
-           
-            <Popover >
-      <PopoverTrigger asChild className='bg-white'>
-
-      <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
-        <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
-        </div>
-      </PopoverTrigger >
-      <PopoverContent className="w-80 bg-white">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-medium leading-none">Dados da Sala</h4>
-            <p className="text-sm text-muted-foreground">
-              Inspecione os dados
-            </p>
-          </div>
-          <div className="grid gap-2">
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="maxWidth">Capacidade</Label>
-              <p>{capacidade}</p>
-            </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="height">Localização</Label>
-              <p className='text-xs'>{localizacao}</p>
-            </div>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
-            </div>
-    </div>),
-        }, 
-    ];
+                    <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
+                      <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
+                      </div>
+                    </PopoverTrigger >
+                    <PopoverContent className="w-80 bg-white">
+                      <div className="grid gap-4">
+                        <div className="space-y-2">
+                          <h4 className="font-medium leading-none">Dados da Sala</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Inspecione os dados
+                          </p>
+                        </div>
+                        <div className="grid gap-2">
+                          <div className="grid grid-cols-3 items-center gap-4">
+                            <Label htmlFor="maxWidth">Capacidade</Label>
+                            <p>{capacidade}</p>
+                          </div>
+                          <div className="grid grid-cols-3 items-center gap-4">
+                            <Label htmlFor="height">Localização</Label>
+                            <p className='text-xs'>{localizacao}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                          </div>
+                         </td>
+                     </tr>
+                 ))}
+             </tbody>
+             <tfoot className='sticky bottom-0 bg-white"'>
+             <tr>
+                 <td colSpan={3} className="py-2 text-blue-500">
+                     Total de registros: {dados.length}
+                 </td>
+             </tr>
+         </tfoot>
+         </table>
+     </div>
     
-   
+     </div>
 
-    const tableStyle = {
-        
-        headCells: {
-            style: {
-                backgroundColor: '#e8e9eb',
-                fontWeight: 'bold',
-                fontSize: '14px',
-                color: '#008ae1'
-            }
-        },
-        }
-           
-        const conditionalRowStyles = [
-            {
-                when: row => row.id % 2 === 0,
-                style: {
-                    backgroundColor: '#e8e9eb'
+{showModal &&
+<MyDialog open={showModal} onOpenChange={setShowModal}>
 
-                },
-            },
-            {
-                when: row => row.id % 2 !== 0,
-                style: {
-                    backgroundColor: '#ffffff'
-                },
-            },
-        ];
-
-        const [dados, setDados] = React.useState([])
-        const [dataApi, setDataApi] = React.useState([])
-        const URL = `http://localhost:8000/api/salas/`
-       
-       useEffect( () => {
-            const respFetch = async () => {
-                  const resp = await fetch (URL);
-                  const respJson = await resp.json();
-                  const conv1 = JSON.stringify(respJson.data)
-                  const conv2 = JSON.parse(conv1)
-                  setDados(conv2)
-                  setDataApi(conv2)
-            } 
-             respFetch()
-       },[updateTable])
-    
-        const handleFilter =  (event) => {
-            const newData = dataApi.filter( row => {
-                return row.nome.toLowerCase().includes(event.target.value.toLowerCase().trim())
-            })
-            setDados(newData)
-        }
-          
-       const handleSort = (column, sortDirection) => {
-        console.log({column, sortDirection})
-       }
-    
-
-    return (
-    
-         <div className='w-full h-72 '>
-         <br/><br/><br/>
-   <DataTable 
-   customStyles={ tableStyle }
-   conditionalRowStyles={conditionalRowStyles}
-   columns={columns}
-   data={dados}
-   fixedHeader
-   fixedHeaderScrollHeight='300px'
-   pagination
-   defaultSortFieldId={1}
-   onSort={handleSort}
-   subHeader
-   subHeaderComponent={
-       <div className='flex flex-row space-x-2'><input className=' rounded-sm border-2 border-gray-400 placeholder:text-gray-400 placeholder:font-bold outline-none py-1 indent-2' type='text' placeholder='Pesquisar aqui...' onChange={handleFilter}/>
-       
-       <div className='relative flex justify-center items-center'>
-           <PrinterIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-           <button className='py-4 px-5 bg-green-700 border-green-700 rounded-sm ' onClick={() => window.print()}></button>
+ <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
+ {modalMessage == null &&
+     <div role="alert" className='w-full'>
+   <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+     <div>
+         <p>Sucesso</p>
+     </div>
+     <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+         <p>X</p>
        </div>
-       <Dialog>
-    <DialogTrigger asChild>
-    <div title='cadastrar' className='relative flex justify-center items-center'>
-    <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
-      </div>
-    </DialogTrigger>
-    <DialogContent className="sm:max-w-[425px] bg-white">
-      <DialogHeader>
-        <DialogTitle>Cadastrar Sala</DialogTitle>
-        <DialogDescription>
-        <p>preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
-        </p>
-        </DialogDescription>
-      </DialogHeader>
-      <Form {...formCreate} >
-     <form onSubmit={formCreate.handleSubmit(handleSubmitCreate)} >
-     <div className="flex flex-col w-full py-4 bg-white">
-        <div className="w-full">
-          <Label htmlFor="nome" className="text-right">
-            Nome
-          </Label>
-          <FormField
-          control={formCreate.control}
-          name="nome"
-          render={({field})=>(
-            <FormItem>
-            <Input
-              id="nome"
-              type='text' {...field} className="w-full"
-              />
-            <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-        )}/>
-        </div>
-        <div className="w-full">
-        <Label htmlFor="capacidade" className="text-right">
-            Capacidade
-          </Label>
-          <FormField
-          control={formCreate.control}
-          name="capacidade"
-          render={({field})=>(
-            <FormItem>
-            <Input id="capacidade" type='number' {...field} className="w-full"
-            min="0"
-            onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
-            />
-            <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-        )}/>
-        </div>
-        <div className="w-full">
-        <Label htmlFor="localizacao" className="text-right">
-            Localização
-          </Label>
-          <FormField
-          control={formCreate.control}
-          name="localizacao"
-          render={({field})=>(
-            <FormItem>
-            <Input id="localizacao" type='text' {...field} className="w-full"
-            />
-            <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-        )}/>
-        </div>
-      </div>
-      <DialogFooter>
-      <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
-      </DialogFooter>
-      </form></Form>
-    </DialogContent>
-  </Dialog>
-  {showModal &&
-  <MyDialog open={showModal} onOpenChange={setShowModal}>
-  
-    <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
-    {modalMessage == null &&
-        <div role="alert" className='w-full'>
-      <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-        <div>
-            <p>Sucesso</p>
-        </div>
-        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-            <p>X</p>
-          </div>
-      </div>
-      <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
-      <CheckCircleIcon className='w-28 h-20 text-green-400'/>
-      
-      <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
-      <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
-        <Button className='bg-green-400 hover:bg-green-500
-        hover:font-medium
-         font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+   </div>
+   <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
+   <CheckCircleIcon className='w-28 h-20 text-green-400'/>
+   <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
+   <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
+     <Button className='bg-green-400 hover:bg-green-500
+     hover:font-medium
+      font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+ </div>
+ </div>
+ 
+   </div>
+   
+}
+{modalMessage != null &&
+     <div role="alert" className='w-full'>
+   <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+     <div>
+         <p>Falhou</p>
+     </div>
+     <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+         <p>X</p>
+       </div>
+   </div>
+   <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
+   <AlertCircleIcon className='w-28 h-20 text-red-400'/>
+   <p className='font-poppins uppercase'>{modalMessage}</p>
+   <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
+     <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+ </div>
+ </div>
+ 
+   </div>
+}
+      </MyDialogContent>
+</MyDialog>
+}
     </div>
-    </div>
-    
-      </div>
-  }
-   {modalMessage != null &&
-        <div role="alert" className='w-full'>
-      <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-        <div>
-            <p>Falhou</p>
-        </div>
-        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-            <p>X</p>
-          </div>
-      </div>
-      <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
-      <AlertCircleIcon className='w-28 h-20 text-red-400'/>
-      <p className='font-poppins uppercase'>{modalMessage}</p>
-      <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
-        <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
-    </div>
-    </div>
-    
-      </div>
-  }
-         </MyDialogContent>
-        </MyDialog>
-   }
-        </div>
-   }
->
-</DataTable>
-</div>
+   
 )
 }

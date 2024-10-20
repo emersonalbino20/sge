@@ -1,17 +1,10 @@
-import './App.css'
-import * as React from "react"
-import HomePage from './_pages/HomePage';
-import Form from './_components/FormStudent';
-import StudentInsertPage from './_pages/StudentInsertPage';
-import Fetch from './Fetch';
-import StudentListPage from './_pages/StudentListPage';
+import * as React from "react";
+import './App.css';
 import AppRoutes from './_routes/AppRoutes';
-import Table from './_components/table';
-
+import Bulletin from "./_components/Bulletin";
 
 function App(){
-  return <><AppRoutes/></>;
+  return <AppRoutes/>
 }
 
-export default App
-
+export default App;

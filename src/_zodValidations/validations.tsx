@@ -103,8 +103,8 @@ export const  numeroCasaZod = z
  export const emailZod = z.string({
       invalid_type_error: 'O endereço de email deve ser uma string.',
     })
-    .trim()
     .email({ message: 'o endereço de email é inválido.' })
+    .trim()
     .optional()
 
     const CURSO_NOME_REGEX =
@@ -306,3 +306,11 @@ export const  numeroCasaZod = z
       }
     )
     .optional()
+
+   export const nota = z
+    .number({
+      required_error: 'A nota é obrigatória.',
+      invalid_type_error: 'A nota deve ser número.',
+    })
+    .max(20, { message: 'O valor máximo da nota é 20.' })
+    .transform((value) => value.toFixed(1))

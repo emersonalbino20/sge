@@ -4,7 +4,7 @@ import * as React from 'react'
 export default function CursePage(){
     return( 
     <>
-        <Header title="Lista das Disciplinas" visible={true}/>
+        <Header title="Lista das Disciplinas"/>
         <Curse/>
     </>)
 }

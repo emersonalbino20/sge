@@ -1,23 +1,13 @@
 'use client'
 import * as React from 'react'
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-  } from "@/components/ui/dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { AlertCircleIcon, CheckCircleIcon, PlusIcon, SaveIcon } from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, Link, PlusIcon, SaveIcon } from 'lucide-react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver} from '@hookform/resolvers/zod'
-import {nomeCompletoZod,  dataNascimentoZod, generoZod, numeroBiZod, bairroZod, ruaZod, numeroCasaZod, telefoneZod, emailZod, idZod} from '../_zodValidations/validations'
+import {nomeCompletoZod,  dataNascimentoZod, generoZod, numeroBiZod, bairroZod, ruaZod, numeroCasaZod, telefoneZod, emailZod} from '../_zodValidations/validations'
 import { MyDialog, MyDialogContent } from './my_dialog'
 import { Button } from '@/components/ui/button'
 import InputMask from 'react-input-mask'
@@ -89,59 +79,45 @@ const { fields, append, remove } =
 
 /*Área q implementa o código pra pesquisar cursos*/
 const [metodo, setMetodo] = React.useState([]);
-const [ano, setAno] = React.useState([]);
+const [ano, setAno] = React.useState();
 const [classe, setClasse] = React.useState([]);
 const [turma, setTurma] = React.useState([]);
 const [turno, setTurno] = React.useState([]);
 const [idCurso, setIdCurso] = React.useState(0);
 const [idClasse, setIdClasse] = React.useState(0);
 const [dataApiCursos, setDataApiCursos] = React.useState([]);
-const URLCURSO = "http://localhost:8000/api/cursos"
-const URLPAGAMENTO = "http://localhost:8000/api/metodos-pagamento"
-const URLLECTIVO = "http://localhost:8000/api/ano-lectivos"
-const URLCLASSE = `http://localhost:8000/api/cursos/${idCurso}/classes`
-const URLTURMA = `http://localhost:8000/api/classes/${idClasse}/turmas`
-const URLTURNO = `http://localhost:8000/api/turnos/`
+
 React.useEffect( () => {
     const respFetchCursos = async () => {
-          const resp = await fetch (URLCURSO);
+          const resp = await fetch ("http://localhost:8000/api/cursos");
           const respJson = await resp.json();
-          const conv1 = JSON.stringify(respJson.data)
-          const conv2 = JSON.parse(conv1)
-          setDataApiCursos(conv2)
-          //Buscar Métodos de pagamento
-          const resppay = await fetch (URLPAGAMENTO);
+          setDataApiCursos(respJson.data)
+
+          const resppay = await fetch ("http://localhost:8000/api/metodos-pagamento");
           const resppayJson = await resppay.json();
-          const convpay1 = JSON.stringify(resppayJson.data)
-          const convpay2 = JSON.parse(convpay1)
-          setMetodo(convpay2);
-          //Buscar Ano Lectivos
-          const resplectivo = await fetch (URLLECTIVO);
+          setMetodo(resppayJson.data);
+
+          const resplectivo = await fetch ("http://localhost:8000/api/ano-lectivos");
           const resplectivoJson = await resplectivo.json();
-          const convlectivo1 = JSON.stringify(resplectivoJson.data)
-          const convlectivo2 = JSON.parse(convlectivo1)
-          setAno(convlectivo2);
-          //Buscar Classes
-          const respclasse = await fetch (URLCLASSE);
-          const respclasseJson = await respclasse.json();
-          const convclasse1 = JSON.stringify(respclasseJson.data)
-          const convclasse2 = JSON.parse(convclasse1)
-          setClasse(convclasse2)
-          //Buscar Turmas
-          const respturma = await fetch (URLTURMA);
-          const respturmaJson = await respturma.json();
-          const convturma1 = JSON.stringify(respturmaJson.data)
-          const convturma2 = JSON.parse(convturma1)
-          setTurma(convturma2)
-          console.log(convturma2)
-          //Buscar Turnos
-          const respturno = await fetch (URLTURNO);
+          var meuarray = resplectivoJson.data.find((c)=>{
+            return c.activo === true
+          })
+          setAno(meuarray.nome)
+          if (idCurso > 0)
+          {
+            const respclasse = await fetch (`http://localhost:8000/api/cursos/${idCurso}/classes`);
+            const respclasseJson = await respclasse.json();
+            setClasse(respclasseJson.data)
+          }
+          if (idClasse > 0)
+          {
+            const respturma = await fetch (`http://localhost:8000/api/classes/${idClasse}/turmas`);
+            const respturmaJson = await respturma.json();
+            setTurma(respturmaJson.data)
+          }
+          const respturno = await fetch ("http://localhost:8000/api/turnos/");
           const respturnoJson = await respturno.json();
-          const convturno1 = JSON.stringify(respturnoJson.data)
-          const convturno2 = JSON.parse(convturno1)
-          setTurno(convturno2)
-          console.log(convturno2)
-          
+          setTurno(respturnoJson.data)
     } 
      respFetchCursos()
 },[idCurso, idClasse])
@@ -191,73 +167,65 @@ const handleSubmitCreate = async (dados: z.infer<typeof TFormCreate>) => {
           responsaveis: dados.responsaveis
         }
       }
-    await fetch('http://localhost:8000/api/matriculas/',{
+      try {
+    const response = await fetch('http://localhost:8000/api/matriculas/',{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(data)
-        })
-        .then((resp => resp.json()))
-        .then((resp) =>{ 
-            setShowModal(true);
-            if (resp.message != null) {
-             
-                let index = Object.values(resp.errors.aluno)
-                let conv = parseInt(String(Object.keys(index)))
-                if (Object.keys(resp.errors.aluno)[0] == "numeroBi")
-                {
-                    setModalMessage("Erro Nos dados do Aluno, "+Object.values(resp.errors.aluno)[0][0])
-                }
-                if (Object.keys(resp.errors.aluno)[0] == "contacto")
-                {
-                    setModalMessage("Erro Nos dados do Aluno, "+Object.values(Object.values(resp.errors.aluno)[0])[0][0])
-                }
-                if (Object.keys(resp.errors.aluno)[0] == "responsaveis")
-                {
-                    setModalMessage("Erro Nos dados do Responsavel, "+Object.values(Object.values(Object.values(Object.values(resp.errors.aluno)[0])[0])[0])[0][0])
-                }
-                if (Object.values(Object.values(resp.errors.aluno)[0])[0] == "responsaveis não podem conter contactos duplicados.")
-                {
-                    setModalMessage("responsaveis não podem conter contactos duplicados.")
-                }
-                /*console.log(Object.values(Object.values(resp.errors.aluno)[0])[0][0])//show contacto
-                */
-                let responsaveis = Object.keys(resp.errors.aluno)[0]
-                console.log(responsaveis+": "+Object.values(Object.values(resp.errors.aluno)[0])[0])
-                console.log(resp)
-               
-                //setModalMessage(resp.message)
-                
-            }else{
-                setModalMessage(resp.message);
+        });
+        setShowModal(true);
+        if (response.ok) {
+            const blob = await response.blob(); 
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'matricula.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setModalMessage(null);
+        } else {
+            const errorData = await response.json();
+            console.error('Erro ao gerar PDF:', response.statusText, errorData.message);
+            let index = Object.values(errorData.errors.aluno)
+            let conv = parseInt(String(Object.keys(index)))
+            if (Object.keys(errorData.errors.aluno)[0] == "numeroBi")
+            {
+                setModalMessage("Erro Nos dados do Aluno, "+Object.values(errorData.errors.aluno)[0][0])
             }
-            console.log(resp)
+            if (Object.keys(errorData.errors.aluno)[0] == "contacto")
+            {
+                setModalMessage("Erro Nos dados do Aluno, "+Object.values(Object.values(errorData.errors.aluno)[0])[0][0])
+            }
+            if (Object.keys(errorData.errors.aluno)[0] == "responsaveis")
+            {
+                setModalMessage("Erro Nos dados do Responsavel, "+Object.values(Object.values(Object.values(Object.values(errorData.errors.aluno)[0])[0])[0])[0][0])
+            }
+            if (Object.values(Object.values(errorData.errors.aluno)[0])[0] == "responsaveis não podem conter contactos duplicados.")
+            {
+                setModalMessage("responsaveis não podem conter contactos duplicados.")
+            }
+
         }
-        )
-        .catch((error) => console.log(`error: ${error}`))
-        //console.log(data)
+    }catch(error){
+        console.error('Erro na requisição:', error);
+    }
+        
     }
 
 return(
-    <div className='flex flex-col h-screen p-5 pt-40 w-screen'>
-    <fieldset className='flex flex-col justify-center  bg-slate-700 md:bg-gray-300'>
-        <h1 className=' font-poppins text-h1         text-center font-bold text-white md:text-slate-700'>
-        Matrícula de Estudante
-        </h1>
-</fieldset>
-<Form {...form} >
+    <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center pt-[1340px]'>
+        <div className='flex flex-col space-y-2 justify-center w-[90%]'>
+        <div>
+        <Form {...form} >
         <form onSubmit={form.handleSubmit(handleSubmitCreate)} >
-    <Tabs defaultValue="entrada" className="w-full flex items-center flex-col">
-  <TabsList>
-    <TabsTrigger value="entrada">Dados de Entrada</TabsTrigger>
-    <TabsTrigger value="juridico">Dados juridicos</TabsTrigger>
-  </TabsList>
-  <TabsContent value="entrada" className='w-full flex flex-col '> 
+    
         <div className='flex flex-col '>
         <fieldset >
             <legend className='bg-blue-600 w-full h-9 pl-2 mr-2 text-white flex items-center'><p>Informações do Aluno</p></legend>
-            <div className='flex flex-col space-y-3 mb-5'>
+            <div className='flex flex-col space-y-3 mb-5 '>
                 <div className='flex flex-col'>
                     <FormField
                     control={form.control}
@@ -267,7 +235,7 @@ return(
                         <FormLabel>Nome Completo*</FormLabel>
                         <FormControl>
                         {errors.nomeCompleto?.message ?
-                        <Input className='text-red-400 border-red-500 focus:border-red-500' type='text' {...field} />
+                        <Input className='text-red-400 border-red-500 focus:border-red-500 ' type='text' {...field} />
                         :
                         <Input type='text' {...field} />
                         }
@@ -681,8 +649,6 @@ return(
              
           </div>
       
-</TabsContent>
- <TabsContent value="juridico" className='w-full'>
             <fieldset>
             <legend className='bg-blue-600 w-full h-9 pl-2 mr-2 text-white flex items-center'><p>Informações Essenciais</p></legend>
             <div className='flex flex-col space-y-3 mb-5'>
@@ -728,19 +694,16 @@ return(
                     <FormItem>
                         <FormLabel>Classes*</FormLabel>
                         <FormControl>
-                        <Select onValueChange={(value) => {field.onChange(parseInt(value, 10),
-                                setIdClasse(parseInt(value, 10) || 0))}}>
-                            <SelectTrigger className='text-black bg-white mt-0 border-gray-300 rounded-sm'>
-                                <SelectValue placeholder="Seleciona a classe"  {...field} />
-                            </SelectTrigger>
-                            <SelectContent className='bg-white'>
-                                {
-                                    classe.map((field)=>{
-                                        return <SelectItem value={`${field.id}`}>{field.nome}</SelectItem>
-                                    })
-                                }
-                            </SelectContent>
-                            </Select>
+                        <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                            setIdClasse(parseInt(e.target.value, 10) || 0)
+                          }}>
+                        <option >Selecione a classe</option>
+                        {
+                              classe.map((field)=>{
+                                  return <option value={`${field.id}`}>{field.nome}</option>
+                              })
+                        }
+                    </select>
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
                     </FormItem>)
@@ -829,13 +792,14 @@ return(
                    
                 </div>
                 </fieldset>
-         </TabsContent>
-        </Tabs>
         <div className='w-full flex items-center justify-center'>
             <Button title='matricular' type='submit' className='w-28 py-1 mb-4 bg-blue-700 text-white  hover:bg-blue-700' ><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
         </div>
         </form>
       </Form>
+      
+      </div>
+      </div>
       {showModal &&
   <MyDialog open={showModal} onOpenChange={setShowModal}>
   

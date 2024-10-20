@@ -1,11 +1,13 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import IPPUImage from '../assets /_images/IPPU.png'
+import { setCookies } from '@/_cookies/Cookies';
 
 export default function Index()
 {
     const nav = useNavigate();
     const goHome = () =>{
+        setCookies('user', true, 1, false) 
         nav('/Home')
     }
     return(
@@ -33,7 +35,7 @@ export default function Index()
                         </div>
                         <a href="#" className="ms-auto text-sm text-blue-700 hover:underline dark:text-blue-500">Esqueceu A Senha?</a>
                     </div>
-                    <button type="submit" className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={()=>(goHome)}>Entre Na Tua Conta</button>
+                    <button type="submit" className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={()=>{goHome}}>Entre Na Tua Conta</button>
                     <div className="text-sm font-medium text-gray-500 dark:text-gray-300">
                         Não registrado? <a href="#" className="text-blue-700 hover:underline dark:text-blue-500">Criar conta</a>
                     </div>

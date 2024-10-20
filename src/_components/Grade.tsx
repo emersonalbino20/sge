@@ -18,11 +18,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, SaveIcon, Trash} from 'lucide-react'
-import { InfoIcon } from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, EditIcon, Library, PrinterIcon, SaveIcon, Trash} from 'lucide-react'
+import { InfoIcon, AlertTriangle, Search } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
 import DataTable from 'react-data-table-component'
-import {anoLectivo, classe, anoLectivoId, cursoId, custoMatricula } from '@/_zodValidations/validations'
+import {anoLectivo, classe, anoLectivoId, cursoId, custoMatricula, sala } from '@/_zodValidations/validations'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm} from 'react-hook-form'
@@ -30,7 +30,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MyDialog, MyDialogContent } from './my_dialog'
 import { table } from 'console'
-
+import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
+import { Link } from 'react-router-dom'
 
 
 const TFormCreate =  z.object(
@@ -42,11 +43,27 @@ const TFormCreate =  z.object(
 
 const TFormUpdate =  z.object({
   nome: classe,
-  //anoLectivoId: anoLectivoId, O id do anoLectivo é actualizado de forma automático por mei dum algoritmo
   cursoId: cursoId,
   valorMatricula: custoMatricula,
   id: z.number()
 })
+
+
+const TFormCreateClass =  z.object(
+  {
+    nome: sala,
+    classeId: z.number(),
+    salaId: z.number(),
+    turnoId: z.number()
+  })
+
+  const TFormUpdateClass =  z.object({
+    nome: sala,
+    classeId: z.number(),
+    salaId: z.number(),
+    turnoId: z.number(),
+    id: z.number()
+  })
 
 export default function Grade(){
 
@@ -60,34 +77,42 @@ const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
   resolver: zodResolver(TFormUpdate)
   })
 
-   const [updateTable, setUpdateTable] = React.useState(false)
-   const[estado, setEstado] = React.useState(false);
-   const [showModal, setShowModal] = React.useState(false);
-   const [modalMessage, setModalMessage] = React.useState(''); 
-const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>,e) => {
-      
-await fetch(`http://localhost:8000/api/classes/`,{
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data)
-  })
-  .then((resp => resp.json()))
-  .then((resp) =>{ 
-          setShowModal(true);  
-          if (resp.message != null && resp.statusCode != 400) {
-            setModalMessage(resp.message);  
-          }else{
-            setModalMessage(resp.message);
-          }
-          console.log(resp)
-  })
-  .catch((error) => console.log(`error: ${error}`))
-  setUpdateTable(!updateTable)
-}
+const formCreateClass  = useForm<z.infer<typeof TFormCreateClass>>({
+  mode: 'all', 
+  resolver: zodResolver(TFormCreateClass)
+})
 
+const formUpdateClass  = useForm<z.infer<typeof TFormUpdateClass>>({
+  mode: 'all', 
+  resolver: zodResolver(TFormUpdateClass)
+  })
 
+const [updateTable, setUpdateTable] = React.useState(false)
+const[estado, setEstado] = React.useState(false);
+const [showModal, setShowModal] = React.useState(false);
+const [modalMessage, setModalMessage] = React.useState(''); 
+  const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>,e) => {
+
+  await fetch(`http://localhost:8000/api/ano-lectivos/${idAno}/classes`,{
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+    .then((resp => resp.json()))
+    .then((resp) =>{ 
+            setShowModal(true);  
+            if (resp.message != null && resp.statusCode != 400) {
+              setModalMessage(resp.message);  
+            }else{
+              setModalMessage(resp.message);
+            }
+            console.log(resp)
+    })
+    .catch((error) => console.log(`error: ${error}`))
+    setUpdateTable(!updateTable)
+  }
 
 const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
 
@@ -116,8 +141,47 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
     .catch((error) => console.log(`error: ${error}`))
     setUpdateTable(!updateTable)
 }
+
+const handleSubmitCreateClass = async (data: z.infer<typeof TFormCreateClass>,e) => {
+      
+  await fetch(`http://localhost:8000/api/turmas/`,{
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+    .then((resp => resp.json()))
+    .then((resp) =>{ 
+            setShowModal(true);  
+            if (resp.message != null) {
+              setModalMessage(resp.message);  
+            }else{
+              setModalMessage(resp.message);
+            }
+    })
+    .catch((error) => console.log(`error: ${error}`))
+  }
+
+const[salas,setSalas] = React.useState([]);
+const[turnos, setTurnos] = React.useState([]);
+const URLSALA = "http://localhost:8000/api/salas"
+const URLTURNO = "http://localhost:8000/api/turnos"
+
+React.useEffect(()=>{
+  const search = async () => {
+      const respSala = await fetch(URLSALA);
+      const receveSala = await respSala.json()
+      setSalas(receveSala.data)
+      const respTurno = await fetch(URLTURNO);
+      const receveTurno = await respTurno.json()
+      setTurnos(receveTurno.data)
+  }
+  search()
+},[])
+
 /*Buscar dados do Ano Academico, Curso*/
-const[idAno,setIdAno] = React.useState();
+const[idAno,setIdAno] = React.useState(0);
 const[bNomeCurso, setBNomeCurso] = React.useState([]);
 const URLCURSO = `http://localhost:8000/api/cursos/`
 
@@ -125,20 +189,15 @@ React.useEffect(()=>{
     const search = async () => {
         const resp = await fetch(`http://localhost:8000/api/ano-lectivos/`);
         const receve = await resp.json()
-        const convlectivo1 = JSON.stringify(receve.data)
-        const convlectivo2 = JSON.parse(convlectivo1)
-        var meuarray = convlectivo2.filter((c)=>{
+        var meuarray = receve.data.find((c)=>{
           return c.activo === true
         })
-        setIdAno(meuarray[parseInt(String(Object.keys(meuarray)))].id)
+        setIdAno(meuarray.id)
         
         const respC = await fetch(URLCURSO);
         const receveC = await respC.json()
-        const convC = JSON.stringify(receveC.data)
-        const convC2 = JSON.parse(convC)
-        setBNomeCurso(convC2)
+        setBNomeCurso(receveC.data)
         setEstado(true)
-        
     }
     search()
 },[])
@@ -146,45 +205,333 @@ React.useEffect(()=>{
 const[buscar, setBuscar] = React.useState();
 const [dados, setDados] = React.useState([])
 const [dataApi, setDataApi] = React.useState([])
+
 const URLCLASSE = `http://localhost:8000/api/ano-lectivos/${idAno}/classes`
+React.useEffect(()=>{
+  const search = async () => {
+      const resp = await fetch(URLCLASSE);
+      const receve = await resp.json()
+      let nArray = Object.values(receve.data.cursos)
+      setDataApi(nArray);}
+  search()
+},[idAno])
+
+const[cAll,setCAll] = React.useState([]);
+const[cursoId, setCursoId] = React.useState(0);
 React.useEffect(()=>{
   const search = async () => {
       const resp = await fetch(URLCLASSE);
       const receve = await resp.json()
       const conv1 = JSON.stringify(receve.data)
       const conv2 = JSON.parse(conv1)
-      let nArray = Object.values(conv2.cursos)
-      setDataApi(nArray);
-  }
+      setCAll(conv2.cursos[cursoId].classes)
+}
   search()
-},[idAno])
+},[cursoId])
+
+const [classe, setClasse] = React.useState([])
+React.useEffect( ()=>{
+  const search = async () =>{
+    const resp = await fetch(`http://localhost:8000/api/classes/${buscar}/turmas`);
+      const receve = await resp.json();
+      if(receve.data.length > 0){
+        setClasse(receve.data);
+      }else{
+        setClasse([{id:0, nome:"nenhuma"}]);
+      }
+      
+  }
+  search();
+}, [buscar])
 
 const changeResource = (id)=>{
   setBuscar(id)
 }
 
-    const columns = 
-    [
-        { 
-            name: 'Id',
-            selector: row => row.id,
-            sortable:true
-         },
-         { 
-          name: 'Classes',
-          selector: row => row.nome,
-          sortable:true
-        },
+    const handleFilter =  (event) => {
+        const curso = dataApi.find(curso => curso.nome === event.target.value);
+        if(curso)
         {
-            name: 'Ação',
-            cell: (row) => (<div className='flex flex-row space-x-2'  onClick={()=>{
-              changeResource(row.id)
-              if(estado){
-              formUpdate.setValue('id', row.id)
-            }
-            setEstado(false)
-            }}><EditIcon className='w-5 h-4 absolute text-white'/> 
-            <Dialog >
+          let i = curso.classes.map( classe =>
+            {
+              return classe;
+            })
+           
+            i.sort((a, b) => a.nome.localeCompare(b.nome))
+            setDados(i)
+        }
+        console.log(curso)
+    }
+    const columns = ['Id', 'Classes', 'Acção'];
+
+    return (
+      <>
+      { idAno == 0 ? <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
+      <div className='w-full text-center text-4xl text-red-600 md:text-2xl lg:text-2xl'>
+          <div>
+              <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+              <p>SELECIONE O ANO LECTIVO</p>
+              <p className='italic font-semibold text-sm cursor-pointer'><Link to={'/AcademicYearPage'}>Selecionar agora</Link></p>
+          </div>
+      </div>
+        </div> : (
+      <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
+       
+      <div className='flex flex-col space-y-2 justify-center w-[90%] z-10 mt-44'> 
+       <div className='flex flex-row space-x-2'>
+         <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
+             <select className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3'  onChange={handleFilter} >
+              <option>Selecione o curso</option>
+              {
+                  dataApi.map((field)=>{
+                      return <option>{field.nome}</option>
+                  })
+              }
+        </select>
+         </div>
+         <Dialog>
+    <DialogTrigger asChild>
+    <div title='cadastrar classe' className='relative flex justify-center items-center'>
+    <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
+      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
+      </div>
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[425px] bg-white">
+      <DialogHeader>
+        <DialogTitle>Cadastrar Classe</DialogTitle>
+        <DialogDescription>
+        <p>preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
+        </p>
+        </DialogDescription>
+      </DialogHeader>
+      <Form {...formCreate} >
+     <form onSubmit={formCreate.handleSubmit(handleSubmitCreate)} >
+     <div className="flex flex-col w-full py-4 bg-white">
+        <div className="w-full">
+          <Label htmlFor="nome" className="text-right">
+            Nome
+          </Label>
+          <FormField
+          control={formCreate.control}
+          name="nome"
+          render={({field})=>(
+            <FormItem>
+            <Input
+              id="nome"
+              type='text' {...field} className="w-full"
+              />
+            <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+        )}/>
+        </div>
+        <div className="w-full">
+        <Label htmlFor="valorMatricula" className="text-right">
+            Custo
+          </Label>
+          <FormField
+          control={formCreate.control}
+          name="valorMatricula"
+          render={({field})=>(
+            <FormItem>
+            <Input id="valorMAtricula" type='number' {...field} className="w-full"
+            min="0"
+            onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
+            <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+        )}/>
+        </div>
+        <div className="w-full">
+        <FormField
+          control={formCreate.control}
+          name={'cursoId'}
+          render={({field})=>(
+          <FormItem>
+            <Label htmlFor="curso" className="text-right">
+            Curso
+          </Label>
+              <FormControl>
+              <select id='curso' {...field} className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                        <option>Selecione o curso</option>
+                        {
+                                    bNomeCurso.map((field)=>{
+                                        return <option value={`${field.id}`}>{field.nome}</option>
+                                    })
+                         }
+                  </select>
+              </FormControl>
+            <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>)
+          }
+          />
+        </div>
+      </div>
+      <DialogFooter>
+      <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+      </DialogFooter>
+      </form></Form>
+    </DialogContent>
+        </Dialog>  
+        <Dialog>
+    <DialogTrigger asChild>
+    <div title='cadastrar turma' className='relative flex justify-center items-center'>
+      <Library className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
+      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
+      </div>
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[425px] bg-white">
+      <DialogHeader>
+        <DialogTitle>Cadastrar Turma</DialogTitle>
+        <DialogDescription>
+        <p>preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
+        </p>
+        </DialogDescription>
+      </DialogHeader>
+      <Form {...formCreateClass} >
+     <form onSubmit={formCreateClass.handleSubmit(handleSubmitCreateClass)} >
+     <div className="flex flex-col w-full py-4 bg-white">
+        <div className="w-full">
+          <Label htmlFor="nome" className="text-right">
+            Nome
+          </Label>
+          <FormField
+          control={formCreateClass.control}
+          name="nome"
+          render={({field})=>(
+            <FormItem>
+            <Input
+              id="nome"
+              type='text' {...field} className="w-full"
+              />
+            <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+        )}/>
+        </div>
+        <div className="w-full">
+         <label htmlFor="curso" className="text-right">
+                Cursos
+              </label>
+              <select className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3'  onChange={(e)=>{setCursoId(parseInt(e.target.value))}}>
+                      <option value="">Selecione o curso</option>
+                      {
+                            bNomeCurso.map((field)=>{
+                                return <option value={`${field.id}`}>{field.nome}</option>
+                            })
+                      }
+                  </select>
+        </div>
+        <div className="w-full">
+            <FormField
+              control={formCreateClass.control}
+              name={'classeId'}
+              render={({field})=>(
+              <FormItem>
+                <label htmlFor="classe" className="text-right">
+                Classes
+              </label>
+                  <FormControl>
+                  <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                      <option value="">Seleciona a classe</option>
+                      {
+                            cAll.map((field)=>{
+                                return <option value={`${field.id}`}>{field.nome}</option>
+                            })
+                      }
+                  </select>
+                     </FormControl>
+                <FormMessage className='text-red-500 text-xs'/>
+              </FormItem>)
+              }
+              />
+              </div>
+              
+              <div className="w-full">
+              <FormField
+              control={formCreateClass.control}
+              name={'turnoId'}
+              render={({field})=>(
+              <FormItem>
+                <Label htmlFor="turno" className="text-right">
+                Turno
+              </Label>
+                  <FormControl>
+              <select id='turno' {...field} className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                            <option>Selecione o turno</option>
+                            {
+                                    turnos.map((field)=>{
+                                        return <option value={`${field.id}`}>{field.nome}</option>
+                                    })
+                         }
+                      </select>
+                  </FormControl>
+                <FormMessage className='text-red-500 text-xs'/>
+              </FormItem>)
+              }
+              />
+              </div>
+              <div className="w-full">
+              <FormField
+              control={formCreateClass.control}
+              name={'salaId'}
+              render={({field})=>(
+              <FormItem>
+                <Label htmlFor="sala" className="text-right">
+                Sala
+              </Label>
+                  <FormControl>
+              <select id='sala' {...field} className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                            <option>Selecione a sala</option>
+                            {
+                                    salas.map((field)=>{
+                                        return <option value={`${field.id}`}>{field.nome}</option>
+                                    })
+                         }
+                      </select>
+                  </FormControl>
+                <FormMessage className='text-red-500 text-xs'/>
+              </FormItem>)
+              }
+              />
+              
+              </div>
+      </div>
+      <DialogFooter>
+      <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+      </DialogFooter>
+      </form></Form>
+    </DialogContent>
+      </Dialog>  
+     </div>
+     <div className="overflow-x-auto overflow-y-auto w-full  h-80 md:h-1/2 lg:h-[500px]">
+         
+         <table className="w-full bg-white border border-gray-200 table-fixed">
+             
+             <thead className='sticky top-0 z-10'>
+                 <tr className={trStyle}>
+                     {columns.map((element, index) =>{ return( <th key={index} className={thStyle} >{element}</th>) })}
+                 </tr>
+             </thead>
+             <tbody >
+                 {dados.length == 0 ? (
+                 <tr className='w-96 h-32'>
+                     <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
+                         <div>
+                             <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+                             <p>Nenum Registro Foi Encontrado</p>
+                         </div>
+                     </td>
+                 </tr>
+                 ) : dados.map((item, index) => (
+                     <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-200"}>
+                         <td className={tdStyle}>{item.id}</td>
+                         <td className={tdStyle}>{item.nome}</td>
+                         <td className={tdStyleButtons}    onClick={()=>{
+                           changeResource(item.id)
+                           if(estado){
+                            formUpdate.setValue('id', item.id)
+                          }
+                          setEstado(false)
+                         }}>
+                         <Dialog >
           <DialogTrigger asChild>
           <div title='actualizar' className='relative flex justify-center items-center'>
           <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
@@ -265,229 +612,104 @@ const changeResource = (id)=>{
       </DialogFooter>
       </form></Form>
     </DialogContent>
-  </Dialog>
+                         </Dialog>
+                         <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>
+                                
+                                <Popover >
+                          <PopoverTrigger asChild className='bg-white'>
 
-            </div>),
-        }, 
-    ];
+                          <div title='ver turmas' className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
+                            <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
+                            </div>
+                          </PopoverTrigger >
+                          <PopoverContent className="w-80 bg-white">
+                            <div className="grid gap-4">
+                              <div className="space-y-2">
+                                <h4 className="font-medium leading-none">Dados do Curso</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  Ver todas as turmas do curso.
+                                </p>
+                              </div>
+                              <div className="grid gap-2">
+                                
+                                <div className="grid grid-cols-3 items-center gap-4">
+                                  <Label htmlFor="height">Turmas</Label>
+                                  <ul className='flex flex-row space-x-2'>
+                                  {classe && (classe.map((nome, id)=>{return <li key={id}>{nome.nome},</li>}))}
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                          </div>
+                         </td>
+                     </tr>
+                 ))}
+             </tbody>
+             <tfoot className='sticky bottom-0 bg-white"'>
+             <tr>
+                 <td colSpan={3} className="py-2 text-blue-500">
+                     Total de registros: {dados.length}
+                 </td>
+             </tr>
+         </tfoot>
+         </table>
+     </div>
     
-   
+     </div>
 
-    const tableStyle = {
-     
-        headCells: {
-            style: {
-                backgroundColor: '#e8e9eb',
-                fontWeight: 'bold',
-                fontSize: '14px',
-                color: '#008ae1'
-            }
-        },
-        }
-        
-        /*Estilizacao da linhas da tabela */
-        const conditionalRowStyles = [
-            {
-                when: row => row.id % 2 === 0,
-                style: {
-                    backgroundColor: '#e8e9eb'
+{showModal &&
+<MyDialog open={showModal} onOpenChange={setShowModal}>
 
-                },
-            },
-            {
-                when: row => row.id % 2 !== 0,
-                style: {
-                    backgroundColor: '#ffffff'
-                },
-            },
-        ];
-
-        const handleFilter =  (event) => {
-            const curso = Object.values(dataApi).find(curso => curso.nome === event.target.value);
-            if(curso)
-            {
-              let i = curso.classes.map( classe =>
-                {
-                  return classe;
-                })
-                setDados(i)
-            }
-        }
-
-       const handleSort = (column, sortDirection) => {
-        console.log({column, sortDirection})
-       }
-    
-
-    return (
-    
-         <div className='w-full h-72'>
-         <br/><br/><br/>
-   <DataTable
-   customStyles={ tableStyle }
-   conditionalRowStyles={conditionalRowStyles}
-   columns={columns}
-   data={dados}
-   fixedHeader
-   fixedHeaderScrollHeight='300px'
-   pagination
-   defaultSortFieldId={1}
-   onSort={handleSort}
-   subHeader
-   subHeaderComponent={
-       <div className='flex flex-row space-x-2'>
-       
-       <select className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3'  onChange={handleFilter} >
-          <option>Selecione o curso</option>
-          {
-              dataApi.map((field)=>{
-                  return <option>{field.nome}</option>
-              })
-          }
-    </select>
-       <div className='relative flex justify-center items-center'>
-           <PrinterIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-           <button className='py-4 px-5 bg-green-700 border-green-700 rounded-sm ' onClick={() => window.print()}></button>
+ <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
+ {modalMessage == null &&
+     <div role="alert" className='w-full'>
+   <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+     <div>
+         <p>Sucesso</p>
+     </div>
+     <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+         <p>X</p>
        </div>
-       <Dialog>
-    <DialogTrigger asChild>
-    <div title='cadastrar' className='relative flex justify-center items-center'>
-    <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
-      </div>
-    </DialogTrigger>
-    <DialogContent className="sm:max-w-[425px] bg-white">
-      <DialogHeader>
-        <DialogTitle>Cadastrar Classe</DialogTitle>
-        <DialogDescription>
-        <p>preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
-        </p>
-        </DialogDescription>
-      </DialogHeader>
-      <Form {...formCreate} >
-     <form onSubmit={formCreate.handleSubmit(handleSubmitCreate)} >
-     <div className="flex flex-col w-full py-4 bg-white">
-        <div className="w-full">
-          <Label htmlFor="nome" className="text-right">
-            Nome
-          </Label>
-          <FormField
-          control={formCreate.control}
-          name="nome"
-          render={({field})=>(
-            <FormItem>
-            <Input
-              id="nome"
-              type='text' {...field} className="w-full"
-              />
-            <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-        )}/>
-        </div>
-        <div className="w-full">
-        <Label htmlFor="valorMatricula" className="text-right">
-            Custo
-          </Label>
-          <FormField
-          control={formCreate.control}
-          name="valorMatricula"
-          render={({field})=>(
-            <FormItem>
-            <Input id="valorMAtricula" type='number' {...field} className="w-full"
-            min="0"
-            onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
-            <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-        )}/>
-        </div>
-        <div className="w-full">
-        <FormField
-          control={formCreate.control}
-          name={'cursoId'}
-          render={({field})=>(
-          <FormItem>
-            <Label htmlFor="curso" className="text-right">
-            Curso
-          </Label>
-              <FormControl>
-              <select id='curso' {...field} className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
-                        <option>Selecione o curso</option>
-                        {
-                                    bNomeCurso.map((field)=>{
-                                        return <option value={`${field.id}`}>{field.nome}</option>
-                                    })
-                         }
-                  </select>
-              </FormControl>
-            <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>)
-          }
-          />
-        </div>
-      </div>
-      <DialogFooter>
-      <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
-      </DialogFooter>
-      </form></Form>
-    </DialogContent>
-  </Dialog>
-
-  {showModal &&
-  <MyDialog open={showModal} onOpenChange={setShowModal}>
-  
-    <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
-    {modalMessage == null &&
-        <div role="alert" className='w-full'>
-      <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-        <div>
-            <p>Sucesso</p>
-        </div>
-        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-            <p>X</p>
-          </div>
-      </div>
-      <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
-      <CheckCircleIcon className='w-28 h-20 text-green-400'/>
-      
-      <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
-      <p className='font-poppins lowercase'>Actualize a página (F5) e pesquise pelo curso!</p>
-      <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
-        <Button className='bg-green-400 hover:bg-green-500
-        hover:font-medium
-         font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+   </div>
+   <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
+   <CheckCircleIcon className='w-28 h-20 text-green-400'/>
+   <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
+   <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
+     <Button className='bg-green-400 hover:bg-green-500
+     hover:font-medium
+      font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+ </div>
+ </div>
+ 
+   </div>
+   
+}
+{modalMessage != null &&
+     <div role="alert" className='w-full'>
+   <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+     <div>
+         <p>Falhou</p>
+     </div>
+     <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+         <p>X</p>
+       </div>
+   </div>
+   <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
+   <AlertCircleIcon className='w-28 h-20 text-red-400'/>
+   <p className='font-poppins uppercase'>{modalMessage}</p>
+   <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
+     <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+ </div>
+ </div>
+ 
+   </div>
+}
+      </MyDialogContent>
+</MyDialog>
+}
     </div>
-    </div>
-    
-      </div>
-  }
-   {modalMessage != null &&
-        <div role="alert" className='w-full'>
-      <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-        <div>
-            <p>Falhou</p>
-        </div>
-        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-            <p>X</p>
-          </div>
-      </div>
-      <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
-      <AlertCircleIcon className='w-28 h-20 text-red-400'/>
-      <p className='font-poppins uppercase'>{modalMessage}</p>
-      <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
-        <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
-    </div>
-    </div>
-    
-      </div>
-  }
-         </MyDialogContent>
-        </MyDialog>
-   }
-
-        </div>
-   }
->
-</DataTable>
-</div>
+        )}</>
 )
 }

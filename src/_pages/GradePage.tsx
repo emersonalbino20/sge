@@ -4,7 +4,7 @@ import * as React from 'react'
 export default function GradePage(){
     return( 
     <>
-        <Header title="Lista das Classe" visible={true}/>
+        <Header title="Lista das Classe" />
         <Grade/>
     </>)
 }

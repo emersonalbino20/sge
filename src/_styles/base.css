@@ -5,7 +5,7 @@ button{
     @apply py-1 px-2 rounded-lg bg-transparent  border border-blue-500 text-blue-500
 }
 fieldset{
-    @apply mb-4 border p-2 rounded-md border-gray-300 bg-fieldSet
+    @apply mb-4 p-2 border-gray-300 bg-gray-200
 }
 FormLabel{
     @apply text-label font-playfair font-semibold
