@@ -21,7 +21,6 @@ export default function StudentInsertPage(){
    const resp = ano ? ano : 'Indisponível';
     return(
     <>
-    <Header title={"Matrícula de Estudante "+resp}/>
     <Form/>
     </>
     );

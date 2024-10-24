@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ArrowDown, ArrowRight, Clock, HomeIcon } from 'lucide-react';
+import { ArrowDown, ArrowRight, ChevronDown, ChevronUp, Clock, HomeIcon } from 'lucide-react';
 import IPPUImage from '../assets /_images/IPPU.png'
 import {Link, useNavigate} from 'react-router-dom'
 import { getCookies, removeCookies } from '@/_cookies/Cookies';
@@ -40,90 +40,98 @@ export default function Header({title}){
       let minutes = time.getMinutes();
       let seconds = time.getSeconds();
       let turno = ''
-      /*if (hours < 12) {
-        turno = ' da manhã'
-      }else if(hours < 18){
-        turno = ' da tarde'
-      }else{
-        turno = 'da noite'
-      }*/
+      
       return `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)} ${turno}`
     }
 
     function padZero(number) {
       return (number < 10 ? '0' : '') + number
     }
+    const [openSubMenu, setOpenSubMenu] = React.useState(null);
+
+    const handleMouseEnter = (menu) => {
+      setOpenSubMenu(menu);
+    };
+  
+    const handleMouseLeave = () => {
+      setOpenSubMenu(null);
+    };
+  
     
     return (
-        <>
-        <div className='absolute top-0 w-screen z-20 flex flex-col'>
-            <nav className='w-full  h-20 bg-gray-200   text-white font-semibold flex justify-between items-center p-4  shadow-2xl'>
-                <div className='flex flex-row space-x-2 items-center'>
+        <div className='w-screen z-20 flex flex-col h-44 '>
+            <nav className='w-full bg-white  text-white font-semibold flex flex-col space-y-4 items-center p-4  shadow-2xl'>
+                <div className='flex flex-row space-x-2 items-start w-full'>
                     <img src={IPPUImage} title='Ulumbo LOGO' alt="None" className='w-[70px] '/>
                     <div className="text-5xl font-extrabold ...">
-                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-red-500 font-playfair">
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-red-500 font-playfair md:text-3xl lg:text-4xl xl:text-5xl">
                       IPPU
                     </span>
                   </div>
                 </div>
-                {!openMenu &&
+                {/*!openMenu &&
                 <span className='text-3xl text-gray-500 font-bold  cursor-pointer' onClick={()=>{setOpenMenu(!openMenu)}}>&#9776;</span>}
                 {openMenu &&
                 <span className='text-3xl text-gray-500 font-normal  cursor-pointer' onClick={()=>{setOpenMenu(!openMenu)}}>
                 &Chi;
                 </span>
-                }
-            </nav>
-            {openMenu &&
-            <div className='bg-slate-900 w-[70%] rounded-br-md p-4 '>
-            <ul className='w-full text-border text-lg'>
-                    <Link to={'/Home'}><li className={listMarked}> <HomeIcon className='w-7 h-6 font mr-2'/> HOME</li></Link>
-                    <li className={dropdown} onClick={()=>{setOpenPessoal(!openPessoal)
-                    setOpenAcade(false)
-                    setOpenTurma(false)
-                    }}>Pessoal {openPessoal && <ArrowDown/>}{!openPessoal && <ArrowRight/>}</li>
-                    {openPessoal &&
-                    <ul className='indent-4 bg-[#2f3742] rounded-md bg-opacity-30'>
-                        <Link to={'/StudentListPage'}><li className={subList}>Estudantes</li></Link>
-                        <Link to={'/TeacherPage'}><li className={subList}>Professores</li></Link>
-                        <Link to={'/ParentsPage'}>
-                        <li className={subList}>Criar Parentescos</li></Link>
-                    </ul>
-                    }
-                    <li className={dropdown} onClick={()=>{setOpenAcade(!openAcade)
-                    setOpenPessoal(false)
-                    setOpenTurma(false)
-                    }}>Gestão Académica {openAcade && <ArrowDown/>}{!openAcade && <ArrowRight/>}</li>
-                    {openAcade &&
-                    <ul className='indent-4 bg-[#2f3742] bg-opacity-30 rounded-md'>
-                        <Link to={'/CursePage'}><li className={subList}>Cursos</li></Link>
-                        <Link to={'/SubjectPage'}><li className={subList}>Disciplinas</li></Link>
-                        <Link to={'/AcademicYearPage'}><li className={subList}>Ano Académico</li></Link>
-                        <Link to={'/StudentInsertPage'}><li className={subList}>Fazer Matrícula</li></Link>
-                    </ul>
-                    }
-                    <li className={dropdown} onClick={()=>{setOpenTurma(!openTurma)
+                */}
+                <div className='w-full text-right'>
+                  <ul className='w-full flex flex-row-reverse space-x-3 xl:space-x-5   text-orange-500 md:text-md lg:text-lg xl:text-2xl cursor-pointer'>
+                  <li className='pl-4 font-semibold text-orange-500'  onClick={Logout}>Sair </li>
+                  <Link to="/PaymentPage"><li className='font-semibold text-orange-500'>Finanças </li></Link>
+                    
+                    <li onClick={()=>{setOpenTurma(!openTurma)
                     setOpenAcade(false)
                     setOpenPessoal(false)
-                    }}>Gestão Turma {openTurma && <ArrowDown/>}{!openTurma && <ArrowRight/>}</li>
-                    {openTurma &&
-                    <ul className='indent-4 bg-[#2f3742] rounded-md bg-opacity-30'>
-                        <Link to={'/PeriodPage'}><li className={subList}>Turnos</li></Link>
-                        <Link to={'/ClassRoomPage'}><li className={subList}>Salas</li></Link>
-                        <Link to={'/GradePage'}><li className={subList}>Classes</li></Link>
-                    </ul>
-                    }
-                    <Link to="/BulletinPage"><li className={list}>Boletim de Notas</li></Link>
-                    <Link to="/PaymentPage"><li className={list}>Finanças</li></Link>
-                    <li className={list}>Relatórios Financeiros</li>
-                    <button className='border-red-500 bg-red-500 text-white mt-2' onClick={Logout}>Sair</button>
-                </ul>
-                <div className='w-full flex justify-end items-center'>
-                    <Clock className='text-red-700 text-xl'/>
-                    <p className='text-red-700 text-xl text-right'>: {formatDate()}</p>
+                    }}
+                    onMouseEnter={() => handleMouseEnter(3)} 
+                    className='font-semibold text-orange-500'><span className='flex space-x-1 line-clamp-2'><p>Gestão de Turma</p> {openSubMenu === 3 ? <ChevronUp className='w-6 h-8'/> : <ChevronDown className='w-6 h-8'/>}</span>
+                      {openSubMenu === 3 &&(
+                    <ul className='show z-20 absolute mt-4 bg-white text-orange-500 md md:text-md lg:text-lg xl:text-xl text-left p-4 rounded-bl-md rounded-br-md w-56' onMouseLeave={handleMouseLeave}>
+                        <Link to={'/PeriodPage'}><li className='p-2 hover:font-bold'>Turnos</li></Link>
+                        <Link to={'/ClassRoomPage'}><li className='p-2 hover:font-bold'>Salas</li></Link>
+                        <Link to={'/GradePage'}><li className='p-2 hover:font-bold'>Classes</li></Link>
+                        <Link to="/BulletinPage"><li className='p-2 hover:font-bold'>Registro de Notas</li></Link>
+                      </ul>
+                      )}
+                    </li>
+                    <li onClick={()=>{setOpenAcade(!openAcade)
+                    setOpenPessoal(false)
+                    setOpenTurma(false)
+                    }} 
+                    onMouseEnter={() => handleMouseEnter(2)}
+                    className='font-semibold text-orange-500'>
+                      <span className='flex space-x-1 line-clamp-2'><p>Gestão Ácademica</p> {openSubMenu === 2 ? <ChevronUp className='w-6 h-8'/> : <ChevronDown className='w-6 h-8'/>}</span>
+                      {openSubMenu === 2 &&(
+                    <ul className='show z-20 absolute mt-4 bg-white text-orange-500 md md:text-md lg:text-lg xl:text-xl text-left p-4 rounded-bl-md rounded-br-md w-56' onMouseLeave={handleMouseLeave}>
+                        <Link to={'/CursePage'}><li className='p-2 hover:font-bold'>Cursos</li></Link>
+                        <Link to={'/SubjectPage'}><li className='p-2 hover:font-bold'>Disciplinas</li></Link>
+                        <Link to={'/AcademicYearPage'}><li className='p-2 hover:font-bold'>Ano Ácademico</li></Link>
+                        <Link to={'/StudentInsertPage'}><li className='p-2 hover:font-bold'>Matrícula</li></Link>
+                      </ul>
+                      )}
+                    </li>
+                    <li onClick={()=>{setOpenPessoal(!openPessoal)
+                    setOpenAcade(false)
+                    setOpenTurma(false)
+                    }} className='font-semibold text,-orange-500'
+                    onMouseEnter={() => handleMouseEnter(1)} 
+                    
+                    ><span className='flex space-x-2 line-clamp-2'><p>Pessoal</p> {openSubMenu === 1 ? <ChevronUp className='w-6 h-8'/> : <ChevronDown className='w-6 h-8'/>}</span>
+                    {openSubMenu === 1 &&(
+                      <ul className='z-20 absolute mt-4 text-orange-500 bg-white md md:text-md lg:text-lg xl:text-xl text-left p-4 rounded-bl-md rounded-br-md w-56' onMouseLeave={handleMouseLeave}>
+                        <Link to={'/StudentListPage'}><li className='p-2 hover:font-bold'>Estudantes</li></Link>
+                        <Link to={'/TeacherPage'}><li className='p-2 hover:font-bold'>Professores</li></Link>
+                        <Link to={'/ParentsPage'}><li className='p-2 hover:font-bold'>Criar Parentescos</li></Link>
+                      </ul>)
+                      }
+                    </li>
+                    <Link to={'/Home'}><li className='font-semibold text-orange-500'>Home</li></Link>
+                  </ul>
                 </div>
-            </div>
-            }
+                
+            </nav>
             {title && !openMenu && 
             <div className='w-full flex justify-center'>
             <div className='w-[90%] bg-slate-700 md:bg-gray-300 rounded-b-lg h-10
@@ -137,7 +145,5 @@ export default function Header({title}){
             </div>
         </div>}
         </div>
-        
-        </>
         );
 }

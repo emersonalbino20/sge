@@ -1,17 +1,20 @@
-import { AlertCircleIcon, AlertTriangle, CheckCircleIcon, Edit, InfoIcon, Save, SaveIcon, Search } from 'lucide-react';
+import { AlertCircleIcon, AlertTriangle, Check, CheckCircleIcon, Edit, InfoIcon, Save, SaveIcon, Search } from 'lucide-react';
 import * as React from 'react';
 import { tdStyle, thStyle, trStyle } from './table';
 import Select from 'react-select';
-import { AroundDiv, InfoButton, SubmitButton } from './MyButton';
-import { idZod, nota } from '@/_zodValidations/validations';
+import { idZod } from '@/_zodValidations/validations';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form'
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { MyDialog, MyDialogContent } from './my_dialog';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Link } from 'react-router-dom';
+import Header from './Header';
+import IPPUImage from '../assets /_images/IPPU.png'
+import './stepper.css';
 
 const TForm = z.object({
   alunoId: idZod,
@@ -100,11 +103,9 @@ export default function Bulletin() {
   const [trimestreId, setTrimestreId] = React.useState(null);
   const [classeId, setClasseId] = React.useState(null);
   const [buscarNotas, setBucarNotas] = React.useState([]);
-  const [step, setStep] = React.useState(false);
   const [dados, setDados] = React.useState([]);
-  const [selectedOption, setSelectedOption] = React.useState(null);
-  const columns = ['Id', 'Nome', 'Média Trimestral', 'Acção'];
-  const columnsClasse = ['Id', 'Nome', 'Acção'];
+  const [idAno, setIdAno] = React.useState<number>(0);
+  const columnsClasse = ['Id', 'Nome', 'Existe', 'Acção'];
   React.useEffect(() => {
     const search = async () => {
       const URL = "http://localhost:8000/api/professores/1/classes";
@@ -132,11 +133,18 @@ export default function Bulletin() {
       const responseTrimestres = await fetch(URLTRIMESTRES);
       const responseTrimestresJson = await responseTrimestres.json();
       setTrimestres(responseTrimestresJson.data);
+
+      const resp = await fetch(`http://localhost:8000/api/ano-lectivos/`);
+        const receve = await resp.json()
+        var meuarray = receve.data.find((c)=>{
+          return c.activo === true
+        })
+        setIdAno(meuarray.id)
     };
     search();
   }, []);
 
-  // Função para buscar classes baseadas no curso selecionado
+ 
   const loadClasses = async (cursoId) => {
     const URL = `http://localhost:8000/api/cursos/${cursoId}/classes`;
     const response = await fetch(URL);
@@ -144,7 +152,8 @@ export default function Bulletin() {
     setClasses(responseJson.data);
   };
 
-  // Função para buscar alunos da classe selecionada
+  const [nomeDisciplina, setNomeDisciplina] = React.useState<string>('');
+  const [alunoNota, setAlunoNota] = React.useState([]);
   const handleClassChange = async (selectedClass) => {
     
     setClasseId(selectedClass.value);
@@ -158,22 +167,52 @@ export default function Bulletin() {
     
     const responseClasse = await fetch(URLClasse);
     const responseJsonClasse = await responseClasse.json();
+    
     setAlunosClasse(responseJsonClasse.data);
     setDados(responseJsonClasse.data);
 
+    async function getUpdatedData() {
+      // Cria um array de promessas para aguardar todas as requisições
+      const updatedData = await Promise.all(
+        dados.map(async (item) => {
+          const URL = `http://localhost:8000/api/alunos/${item.id}/notas?trimestreId=${trimestreId}&classeId=${classeId}`;
+          
+          const response = await fetch(URL);
+          const responseJson = await response.json();
+          
+          if (responseJson.data && responseJson.data.length > 0) {
+            const disciplina = responseJson.data[0].disciplina;
+            
+            if (disciplina === nomeDisciplina) {
+              item.estado = 'ok';
+            } else {
+              item.estado = 'no';
+            }
+            console.log(responseJson.data);
+          } else {
+            // Se não houver dados, considere 'no'
+            item.estado = 'no';
+          }
+        })
+      );
+      
+      
+      setAlunoNota(dados);
+    }
+    
+    getUpdatedData();
   };
 
   const handleTurmaChange = async (e) => {
     const URL = `http://localhost:8000/api/notas/alunos/sem-notas?classeId=${classeId}&turmaId=${e.value}&trimestreId=${trimestreId}&disciplinaId=${disciplinaId}&pageSize=20`;
     const response = await fetch(URL);
     const responseJson = await response.json();
+
     setAlunos(responseJson.data);
-    console.log(responseJson.data)
     
   };
 
 const clickBuscarNotas = async (idAluno) => {
-  
     const URL = `http://localhost:8000/api/alunos/${idAluno}/notas?trimestreId=${trimestreId}&classeId=${classeId}`;
     
     const response = await fetch(URL);
@@ -181,21 +220,23 @@ const clickBuscarNotas = async (idAluno) => {
     setBucarNotas(responseJson.data);
   };
 
-  // Cria as opções para o Select
+  
   const createCursoSelectOptions = () => {
     const cursoOptions = cursos.map(curso => ({
       value: curso.curso.id,
       label: curso.curso.nome,
-      classes: [] // Inicialmente vazio
+      classes: [] 
     }));
     return cursoOptions;
   };
 
+  
   const createDisciplinaSelectOptions = () => {
     const disciplinaOptions = disciplinas.map(disciplina => ({
       value: disciplina.id,
       label: disciplina.nome,
     }));
+    
     return disciplinaOptions;
   };
 
@@ -217,152 +258,113 @@ const clickBuscarNotas = async (idAluno) => {
 
   const handleCursoChange = async (selected) => {
     if (!selected) return;
-
-    // Carrega classes ao selecionar um curso
-    await loadClasses(selected.value);
-    setSelectedOption(selected);
+      await loadClasses(selected.value);
   };
 
 const handleFilterClasse = (event) => {
-    const valores = alunosClasse.filter((element) =>{ return (element.nomeCompleto.toLowerCase().includes(event.target.value.toLowerCase().trim())) });
-    setDados(valores)
+    const valores = alunoNota.filter((element) =>{ return (element.nomeCompleto.toLowerCase().includes(event.target.value.toLowerCase().trim())) });
+    setAlunoNota(valores)
 }
+const step = ['Filtrar Turmas', 'Inserir Nota'];
+    const[ currentStep, setCurrentStep ] = React.useState<number>(1);
+    const[ complete, setComplete ] = React.useState<boolean>(false);
 
-/*const handleFilter = (event) => {
-  const valores = alunos.filter((element) =>{ return (element.nomeCompleto.toLowerCase().includes(event.target.value.toLowerCase().trim())) });
-  setDados(valores)
-}*/
-  return (
-    <>
-      <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'> <div className='flex flex-col space-y-2 justify-center w-[90%] mt-44'> 
-        
-       
-        
-        <div className='mb-2 z-10 flex flex-col space-y-4'>
-          <div className='flex flex-row space-x-2'>
-            <Select
-              onChange={handleCursoChange}
-              options={createCursoSelectOptions()}
-              placeholder="Selecione um curso"
-            />
-            <Select
-              onChange={(e)=>{setDisciplinaId(e.value)}}
-              options={createDisciplinaSelectOptions()}
-              placeholder="Selecione uma disciplina"
-            />
-             <Select
-             onChange={(e)=>{setTrimestreId(e.value)}}
-              options={createTrimestreSelectOptions()}
-              placeholder="Selecione o trimestre"
-            />
+  return (<>
+      
+    { idAno == 0 ?  <section className="w-screen min-h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
+      <Header title={false}/> 
+      <div className='w-full text-center text-4xl text-red-600 md:text-2xl lg:text-2xl'>
+          <div>
+              <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+              <p>SELECIONE O ANO LECTIVO</p>
+              <p className='italic font-semibold text-sm cursor-pointer'><Link to={'/AcademicYearPage'}>Selecionar agora</Link></p>
           </div>
-        
-          {(trimestreId > 0 && disciplinaId > 0 && classes.length > 0) && (
-            <div className='flex flex-row space-x-2'>
-            <Select
-              onChange={handleClassChange}
-              options={classes.map(classe => ({
-                value: classe.id,
-                label: classe.nome,
-              }))}
-              placeholder="Selecione uma classe"
-            />
-             <Select
-              onChange={(e)=>{handleTurmaChange(e)}}
-              options={createTurmaSelectOptions()}
-              placeholder="Selecione uma turma"
-            />
-            <select className='py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{
-              if(e.target.value === "1"){
-                setStep(false)
-              }else{
-                setStep(true);
-              }
-            }}>
-              <option >Selecione uma</option>
-              <option value="1">Atribuir Notas</option>
-              <option value="2">Consultar e Editar Notas</option>
-          </select>
-        </div>
-          )}
-        </div>
-          <div className="overflow-x-auto overflow-y-auto w-full h-80 md:h-1/2 lg:h-[500px]">
-            {!step && (
-            <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmitNota)} >
-          {/*<div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
-         <Search className='absolute text-gray-300'/>            
-         <input className=' pl-6 rounded-md border-2 border-gray-400 placeholder:text-gray-400 placeholder:font-bold outline-none py-2 w-full indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
-         </div>
-            */}  <table className="w-full bg-white border border-gray-200 table-fixed">
-              <thead className='sticky top-0 z-0'>
-                <tr className={trStyle}>
-                  {columns.map((element, index) => (
-                    <th key={index} className={thStyle}>{element}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {alunos.length === 0 ? (
-                  <tr className='w-96 h-32'>
-                    <td rowSpan={4} colSpan={4} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
-                      <div>
-                        <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
-                        <p>Nenhum Registro Foi Encontrado</p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : alunos.map((item, index) => (
-                  <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-200"}>
-                    <td className={tdStyle}>{item.id}</td>
-                    <td className={tdStyle}>{item.nomeCompleto}</td>
-                    <td className={tdStyle}>
-                    <FormField
-                      control={form.control}
-                      name="nota"
-                      render={({field})=>(
-                      <FormItem>
-                      <FormControl>
-                      <Input className='border-2 rounded-md font-mono' type="number" {...field} onChange={(e)=>{ field.onChange(parseFloat(e.target.value))}} min={0} max={20} step={0.01}  />
-                    </FormControl>
-                    <FormMessage className='text-red-500 text-xs'/>
-                    </FormItem>
-                        )}
-                          />
-                    </td>
-                    <td className={tdStyle}><div className={AroundDiv}>
-                    <Save 
-                    className="w-5 h-4 absolute text-white font-extrabold cursor-pointer"/> 
-                    <Button  type='submit'
-                    className="h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600" onClick={()=>{
-                      form.setValue('alunoId', item.id);
-                      form.setValue('classeId', classeId);
-                      form.setValue('trimestreId', trimestreId);
-                      form.setValue('disciplinaId', disciplinaId);
-                    }}></Button>
-                      </div></td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot className='sticky bottom-0 bg-white'>
-                <tr>
-                  <td colSpan={4} className="py-2 text-blue-500">
-                    Total de registros: {alunos.length}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-            </form>
-        </Form>
-        )}
-        {step && (
-          <>
-         <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
+      </div>
+        </section> : (
+      <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
+         <Header title={false}/> 
+         <div className='flex flex-col space-y-2 justify-center items-center w-full'>
+         <div className='flex justify-center items-center '>
+            <div className='flex justify-between'>{
+            step?.map((step, i) => 
+                (
+                    <div key={i} className={`step-item ${currentStep === i + 1 ? 'active' : '' } ${ (i + 1 < currentStep || complete) && 'complete'}`}>
+                        <div className='step'>{ 
+                        (i + 1 < currentStep || complete) ?
+                        <Check/> : i + 1 }</div>
+                        <p className='text-gray-500'>{step}</p>
+                    </div>
+                    
+                )
+                )}
+              </div>
+            </div>
+            {currentStep === 1 && ( <div className="w-full max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
+              
+                <div className="space-y-6">
+                    <div>
+                <img src={IPPUImage} className="h-20 w-20" alt="Ulumbo Logo" />
+                    <h5 className="text-sky-700 text-2xl font-semibold  ">Preencha A primeira Etapa</h5>
+                    </div>
+                    <div>
+                        <label className="text-sky-600 text-lg font-semibold">Curso*</label>
+                        <Select
+                        onChange={handleCursoChange}
+                       options={createCursoSelectOptions()}
+                       placeholder="Selecione um curso"
+                     />
+                    </div>
+                    <div>
+                    <label className="text-sky-600 text-lg font-semibold">Disciplina*</label>
+                        <Select
+                        onChange={(e)=>{setDisciplinaId(e.value); setNomeDisciplina(e.label)}}
+                        options={createDisciplinaSelectOptions()}
+                        placeholder="Selecione uma disciplina"
+                      />
+                        </div>
+                        <div>
+                        <label className="text-sky-600 text-lg font-semibold">Trimestre*</label>
+                        <Select
+                        onChange={(e)=>{setTrimestreId(e.value)}}
+                          options={createTrimestreSelectOptions()}
+                          placeholder="Selecione o trimestre"
+                        />
+                        </div>
+                        <div>
+                        <label className="text-sky-600 text-lg font-semibold">Classe*</label>
+                        <Select
+                          onChange={handleClassChange}
+                          options={classes.map(classe => ({
+                            value: classe.id,
+                            label: classe.nome,
+                          }))}
+                          placeholder="Selecione uma classe"
+                        />
+                        </div>
+                        <div>
+                        <label className="text-sky-600 text-lg font-semibold">Turma</label>
+                        <Select
+                      onChange={(e)=>{handleTurmaChange(e)}}
+                      options={createTurmaSelectOptions()}
+                      placeholder="Selecione uma turma"
+                    />
+                        </div>
+                        
+                      <button type='button' onClick={()=>{
+                          currentStep === step.length ?
+                          setComplete(true) :
+                          setCurrentStep(prev => prev + 1);
+                      }} className='bg-sky-700 hover:bg-sky-600 text-white font-semibold text-lg px-5 py-1 border-sky-700'>Próximo</button>
+                </div>
+            </div>)}
+            {currentStep === 2 && (
+          <div className="overflow-x-auto overflow-y-auto w-[777px] h-80 ">
+         <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96 mb-4'>
          <Search className='absolute text-gray-300'/>            
          <input className=' pl-6 rounded-md border-2 border-gray-400 placeholder:text-gray-400 placeholder:font-bold outline-none py-2 w-full indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilterClasse}/>
-     </div>
+     </div><>
           <table className="w-full bg-white border border-gray-200 table-fixed">
-          <thead className='sticky top-0 z-0'>
+          <thead className='sticky top-0 z-10'>
             <tr className={trStyle}>
               {columnsClasse.map((element, index) => (
                 <th key={index} className={thStyle}>{element}</th>
@@ -370,21 +372,73 @@ const handleFilterClasse = (event) => {
             </tr>
           </thead>
           <tbody>
-            {dados.length === 0 ? (
+            {alunoNota.length === 0 ? (
               <tr className='w-96 h-32'>
-                <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
+                <td rowSpan={4} colSpan={4} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                   <div>
                     <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
                     <p>Nenhum Registro Foi Encontrado</p>
                   </div>
                 </td>
               </tr>
-            ) : dados.map((item, index) => (
+            ) : alunoNota.map((item, index) => (
               <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-200"}>
+               
                 <td className={tdStyle}>{item.id}</td>
                 <td className={tdStyle}>{item.nomeCompleto}</td>
+                <td className={tdStyle}>{item.estado === 'ok' ? <span className='text-green-500'>ok</span> : <span className='text-red-500'>no</span>}</td>
                 <td className={tdStyle} onClick={()=>{clickBuscarNotas(item.id)}}>
                   <div className='flex flex-row space-x-2'>
+                  {item.estado === 'no' ? 
+                  <Dialog>
+            <DialogTrigger asChild >
+            <div title='vincular' className='relative flex justify-center items-center'>
+            <Save className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
+            <button className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 border-green-600 rounded-sm' ></button>
+              </div>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px] bg-white">
+                  <DialogHeader>
+                    <DialogTitle>Adicionar nota ao {item.nomeCompleto}</DialogTitle>
+                    <DialogDescription>
+                    Essa secção tem como objectivo atribuir uma nota trimestral ao aluno.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmitNota)} >
+                <div className="flex flex-col w-full py-4 bg-white">              
+                <div className="w-full">
+               
+                
+                <FormField
+                            control={form.control}
+                            name='nota'
+                            render={({field})=>(
+                            <FormItem>
+                                <FormLabel>Nota*</FormLabel>
+                                <FormControl>
+                      <Input className='border-2 rounded-md font-mono' type="number" {...field} onChange={(e)=>{ field.onChange(parseFloat(e.target.value))}} min={0} max={20} step={0.01}  />
+                      </FormControl>
+                                <FormMessage className='text-red-500 text-xs'/>
+                            </FormItem>)
+                            }
+                            />
+                </div>
+               <div>
+               </div>
+            </div>
+        <DialogFooter>
+          <Button type="submit" title='vincular' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 hover:text-white w-12'  onClick={()=>{form.setValue('alunoId', item.id);
+                      form.setValue('classeId', classeId);
+                      form.setValue('trimestreId', trimestreId);
+                      form.setValue('disciplinaId', disciplinaId);
+                }}><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+        </DialogFooter>
+        </form>
+        </Form>
+      </DialogContent>
+                  </Dialog>
+                  :
                   <Dialog>
                       <DialogTrigger asChild >
                       <div title='vincular' className='relative flex justify-center items-center'>
@@ -427,8 +481,8 @@ const handleFilterClasse = (event) => {
                   </form></Form>
                 </DialogContent>
                   </Dialog>
-                   
-                <Dialog >
+                  }
+                  <Dialog >
               <DialogTrigger asChild>
               <div title='ver dados' className='relative flex justify-center items-center'>
               <InfoIcon className='w-5 h-4 absolute text-white font-extrabold'/>
@@ -462,7 +516,7 @@ const handleFilterClasse = (event) => {
                 <DialogFooter>
                 </DialogFooter>
               </DialogContent>
-                </Dialog>
+                  </Dialog>
                     </div>
                   </td>
               </tr>
@@ -470,18 +524,34 @@ const handleFilterClasse = (event) => {
           </tbody>
           <tfoot className='sticky bottom-0 bg-white'>
             <tr>
-              <td colSpan={3} className="py-2 text-blue-500">
+              <td colSpan={4} className="py-2 text-blue-500">
                 Total de registros: {alunosClasse.length}
               </td>
             </tr>
           </tfoot>
-        </table></>
-        )}
-        </div> 
-          
-        </div>
+        </table>
+        {currentStep > 1 && 
+    <button type='button' onClick={()=>{
+        currentStep === step.length && setComplete(false);
+        
+        currentStep > 1 && setCurrentStep(prev => prev - 1);
+    }} className='bg-gray-700 hover:bg-gray-600 text-white font-semibold text-lg px-5 py-1 border-gray-700'>Voltar</button>
+    }
+        </>
+        
+        </div> )}
+        <div className='w-full flex items-center justify-between'>
+        
        
-      </div>
+    
+   
+
+    
+        </div>
+       </div>   
+        </section>
+       
+      )}
       {showModal &&
 <MyDialog open={showModal} onOpenChange={setShowModal}>
 
@@ -532,6 +602,7 @@ const handleFilterClasse = (event) => {
        </MyDialogContent>
 </MyDialog>
  }
+
     </>
   );
 }

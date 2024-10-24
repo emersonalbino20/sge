@@ -35,6 +35,7 @@ import InputMask from 'react-input-mask'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import { Link } from 'react-router-dom';
 import { getCookies, removeCookies, setCookies } from '@/_cookies/Cookies'
+import Header from './Header'
 
 const TForm =  z.object({
     nomeCompleto: nomeCompletoZod,
@@ -259,24 +260,55 @@ React.useEffect( () => {
 
   
   const [dados, setDados] = React.useState([])
+  const [loading, setLoading] = React.useState(false);
   const [dataApi, setDataApi] = React.useState([])
-  const URL = "http://localhost:8000/api/alunos?pageSize=22"
-  
-  useEffect( () => {
-      const respFetch = async () => {
-            const resp = await fetch (URL);
-            const respJson = await resp.json();
-            const conv1 = JSON.stringify(respJson.data)
-            const conv2 = JSON.parse(conv1)
-            conv2.sort((a, b) => a.nomeCompleto.localeCompare(b.nomeCompleto))
-            setDados(conv2)
-            setDataApi(conv2)
-            setUpdateTable(false)
-      } 
-        respFetch()
-  },[updateTable])
+  const [cursor, setCursor] = React.useState(null);  
+  const [hasMore, setHasMore] = React.useState(10);
+
+  const tableRef = React.useRef(null);
+
+  const fetchData = async (initial = false) => {
+   if (loading) return; 
+
+   setLoading(true);
+    let pageSize = 10; 
+    const url = cursor
+      ? `http://localhost:8000/api/alunos?pageSize=${hasMore}&cursor=${cursor}`
+      : `http://localhost:8000/api/alunos?pageSize=${hasMore}`;
+
+    try {
+      const resp = await fetch(url);
+      const data = await resp.json();
+
+      if (data.data.statusCode != 500 ) {
+        setDados(data.data);
+        setCursor(data.next_cursor); 
+       setDataApi(data.data)
+        console.log(data.next_cursor);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar dados:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  React.useEffect(() => {
+    fetchData(true);  
+  }, [cursor]);
+
+  const handleScroll = () => {
+    if (!tableRef.current) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = tableRef.current;
+    if (scrollTop + clientHeight + 1 >= scrollHeight) {
+      setHasMore(hasMore + 10)
+      fetchData(true);
+      console.log("Estou no fim")
+    }
+  };
 
     const columns = ['Id', 'Nome', 'Gênero', 'Número Bi', 'Data de Nasc.', 'Acção'];
+    
    const handleFilter = (event) => {
         const a = dataApi.filter((element) =>{ return (element.nomeCompleto.toLowerCase().includes(event.target.value.toLowerCase().trim())) });
         setDados(a)
@@ -284,16 +316,14 @@ React.useEffect( () => {
 
     return (
     <>
-    <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
-       
-       <div className='flex flex-col space-y-2 justify-center w-[90%] z-10 mt-44'> 
-        <div className='flex flex-row space-x-2'>
-          <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
+   <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
+        <Header title={false}/> 
+       <div className='flex flex-col space-y-2 justify-center w-full items-center z-10 '> 
+          <div className='relative flex  items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
               <Search className='absolute text-gray-300'/>            
               <input className=' pl-6 rounded-md border-2 border-gray-400 placeholder:text-gray-400 placeholder:font-bold outline-none py-2 w-full indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
           </div>
-      </div>
-      <div className="overflow-x-auto overflow-y-auto w-full  h-80 md:h-1/2 lg:h-[500px]">
+      <div ref={tableRef}  onScroll={handleScroll} className="overflow-x-auto overflow-y-auto h-[499px] w-[1207px]">
           
           <table className="w-full bg-white border border-gray-200 table-fixed">
               
@@ -583,7 +613,6 @@ React.useEffect( () => {
             <FolderOpenIcon className='w-5 h-4 absolute text-white font-extrabold'/>
               <button className='h-7 px-5 bg-amber-400 text-white font-semibold hover:bg-amber-400 border-amber-400 rounded-sm' ></button>
               </div>
-              
             </DialogTrigger>
             <DialogContent className="sm:max-w-[645px] overflow-y-scroll h-[690px] bg-white">
               <DialogHeader>
@@ -597,7 +626,7 @@ React.useEffect( () => {
               <Form {...formConfirmacao} >
             <form onSubmit={formConfirmacao.handleSubmit(handleSubmitCreateConfirmacao)} >
             <fieldset>
-                    <legend className='bg-blue-600 w-full h-9 pl-2 mr-2 text-white flex items-center'><p>Informações Essenciais</p></legend>
+                    <div className='bg-gradient-to-r from-yellow-500 to-red-500  w-full h-9 pl-2 mr-2 text-white font-semibold flex items-center text-xl tracking-wider'><p>Informações Essenciais</p></div>
                     <div className='flex flex-col space-y-3 mb-5'>
                       
                         <div className='flex flex-col w-full'>
@@ -885,7 +914,7 @@ React.useEffect( () => {
        </MyDialogContent>
 </MyDialog>
  }
- </div>
+ </section>
 
     </>)
 }

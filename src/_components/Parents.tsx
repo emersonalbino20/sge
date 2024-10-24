@@ -29,6 +29,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MyDialog, MyDialogContent } from './my_dialog'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
+import Header from './Header'
 
 
 const TFormCreate =  z.object(
@@ -123,10 +124,10 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
 
        const columns = ['Id', 'Nome', 'Acção'];
 
-    return (
-      <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
+    return (<section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
+    <Header title={false}/>
        
-      <div className='flex flex-col space-y-2 justify-center w-[90%] z-10 mt-44'> 
+      <div className='flex flex-col space-y-2 justify-center w-[90%] z-10'> 
        <div className='flex flex-row space-x-2'>
          <div className='flex flex-row space-x-2'>
        
@@ -374,7 +375,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
       </MyDialogContent>
 </MyDialog>
 }
-</div>
+</section>
       
 )
 }

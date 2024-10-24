@@ -5,7 +5,7 @@ import { z } from "zod";
  export  const nomeCompletoZod = z.string({
     required_error: 'campo obrigatório',
     invalid_type_error: 'O nome deve ser uma string.',}
- ).trim().min(4, {message:'o campo não pode conter menos de 4 letras'}).max(100, {
+ ).trim().min(10, {message:'o campo não pode conter menos de 10 letras'}).max(100, {
     message: 'Limite de caracteres excedeu.',
   }).regex(FULL_NAME_REGEX, {message:'o campo só pode conter letras'})
 

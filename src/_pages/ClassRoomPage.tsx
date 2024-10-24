@@ -1,10 +1,8 @@
-import ClassRoom from '@/_components/ClassRoom'
-import Header from '@/_components/Header'
 import * as React from 'react'
+import ClassRoom from '@/_components/ClassRoom'
+
 export default function ClassRoomPage(){
     return( 
-    <>
-        <Header title="Lista das Salas" visible={true}/>
         <ClassRoom/>
-    </>)
+    )
 }

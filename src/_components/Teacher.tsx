@@ -23,6 +23,7 @@ import { MyDialog, MyDialogContent } from './my_dialog'
 import InputMask from 'react-input-mask'
 import { AroundDiv, CombineButton, EditButton, InfoButton, LibraryButton, TrashButton, UserPlusButton } from './MyButton'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
+import Header from './Header'
 
 const TForm =  z.object({
   nomeCompleto: nomeCompletoZod,
@@ -397,10 +398,10 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
            setDados(valores)
        }
     
-    return( 
-      <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
+    return(<section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
+    <Header title={false}/>
        
-         <div className='flex flex-col space-y-2 justify-center w-[90%] z-10 mt-44'> 
+         <div className='flex flex-col space-y-2 justify-center w-[90%] z-10 '> 
           <div className='flex flex-row space-x-2'>
             <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
                 <Search className='absolute text-gray-300'/>            
@@ -704,8 +705,8 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
                                 <p>Adiciona as classes que um professor lecionará no ano acádemico corrente.
                                 </p>
                                 </DialogDescription>
-                              </DialogHeader>
-                            
+                             retr
+                            </DialogHeader>
                               <Form {...formClasse} >
                             <form onSubmit={formClasse.handleSubmit(handleSubmitClasse)} >
                             <fieldset>
@@ -819,7 +820,7 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
                                               <DialogDescription>
                                               Essa secção tem como objectivo relacionar professores em alguma disciplina especifíca.
                                               </DialogDescription>
-                                            </DialogHeader>
+                                          </DialogHeader>
                                             <Form {...formConnect} >
                                           <form onSubmit={formConnect.handleSubmit(handleSubmitConnect)
                                           
@@ -1065,6 +1066,6 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
          </MyDialogContent>
   </MyDialog>
    }
-   </div>
+   </section>
  )     
 }

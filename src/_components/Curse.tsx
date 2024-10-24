@@ -32,6 +32,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import Select from 'react-select';
 import { MyDialog, MyDialogContent } from './my_dialog'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
+import { Link } from 'react-router-dom'
+import Header from './Header'
 
 const TFormCreate =  z.object({
   nome: nomeCursoZod,
@@ -110,31 +112,6 @@ await fetch(`http://localhost:8000/api/cursos`,{
   //console.log(data)
 }
 
-const[buscar, setBuscar] = React.useState();
-const[nome, setNome] = React.useState();
-const[descricao, setDescricao] = React.useState();
-const[duracao,setDuracao] = React.useState();
-const[id,setId] = React.useState();
-React.useEffect(()=>{
-    const search = async () => {
-        const resp = await fetch(`http://localhost:8000/api/cursos/${buscar}`);
-        const receve = await resp.json()
-        setNome(receve.nome)
-        setDescricao(receve.descricao)
-        setDuracao(receve.duracao)
-        setId(receve.id)
-        formUpdate.setValue('nome', receve.nome)
-        formUpdate.setValue('descricao', receve.descricao)
-        formUpdate.setValue('duracao', receve.duracao)
-        formUpdate.setValue('id', receve.id)
-    }
-    search()
-},[buscar])
-
-const changeResource = (id)=>{
-    setBuscar(id)
-}
-
 
 const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
   await fetch(`http://localhost:8000/api/cursos/${data.id}`,{
@@ -159,72 +136,105 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
     setUpdateTable(!updateTable)
 }
 
-/*Área q implementa o código pra pesquisar disciplinas*/
-    const [disciplina, setDisciplina] = React.useState([]);
-    const URLDISCIPLINA = "http://localhost:8000/api/disciplinas"
-   
-    useEffect( () => {
-      const respFetch = async () => {
-            const resp = await fetch (URLDISCIPLINA);
-            const respJson = await resp.json();
-            setDisciplina(respJson.data)
-      } 
-      respFetch()
-   },[])
+const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
+     
+  const disciplinas = 
+  {
+    disciplinas: data.disciplinas
+  }
 
-   const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
-    /*vincular curso à classe*/       
-    const disciplinas = 
-    {
-      disciplinas: data.disciplinas
-    }
-  
-    await fetch(`http://localhost:8000/api/cursos/${data.idCursos}/disciplinas`,{
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(disciplinas)
-          })
-          .then((resp => resp.json()))
-          .then((resp) =>{ 
-            setShowModal(true);  
-            if (resp.message != null) {
-              let index = parseInt(Object.keys(resp.errors.disciplinas)[0]);
-              setModalMessage(resp.errors.disciplinas[index]+"\n Disciplina: "+data.nomeDisciplinas[index]);  
-            }else{
-              setModalMessage(resp.message);
-            }
-          })
-          .catch((error) => console.log(`error: ${error}`))
-      }
-
-      const handleSubmitUnConnect = async (data: z.infer<typeof TFormUnConnect>,e) => {
-        /*desvincular curso à classe*/       
-        const disciplinas = 
-        {
-          disciplinas: data.disciplinas
-        }
-      
-        await fetch(`http://localhost:8000/api/cursos/${data.idCursos}/disciplinas`,{
-                  method: 'DELETE',
-                  headers: {
-                      'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify(disciplinas)
-              })
-              .then((resp => resp.json()))
-              .then((resp) =>{ 
-                setShowModal(true);  
-                if (resp.message != null) {
-                  let index = parseInt(Object.keys(resp.errors.disciplinas)[0]);
-                  setModalMessage(resp.errors.disciplinas[index]+"\n Disciplina: "+data.nomeDisciplinas[index]);  
-                }else{
-                  setModalMessage(resp.message);
-                }
-              })
-              .catch((error) => console.log(`error: ${error}`))
+  await fetch(`http://localhost:8000/api/cursos/${data.idCursos}/disciplinas`,{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(disciplinas)
+        })
+        .then((resp => resp.json()))
+        .then((resp) =>{ 
+          setShowModal(true);  
+          if (resp.message != null) {
+            let index = parseInt(Object.keys(resp.errors.disciplinas)[0]);
+            setModalMessage(resp.errors.disciplinas[index]+"\n Disciplina: "+data.nomeDisciplinas[index]);  
+          }else{
+            setModalMessage(resp.message);
           }
+        })
+        .catch((error) => console.log(`error: ${error}`))
+    }
+
+    const handleSubmitUnConnect = async (data: z.infer<typeof TFormUnConnect>,e) => {
+      
+      const disciplinas = 
+      {
+        disciplinas: data.disciplinas
+      }
+    
+      await fetch(`http://localhost:8000/api/cursos/${data.idCursos}/disciplinas`,{
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(disciplinas)
+            })
+            .then((resp => resp.json()))
+            .then((resp) =>{ 
+              setShowModal(true);  
+              if (resp.message != null) {
+                let index = parseInt(Object.keys(resp.errors.disciplinas)[0]);
+                setModalMessage(resp.errors.disciplinas[index]+"\n Disciplina: "+data.nomeDisciplinas[index]);  
+              }else{
+                setModalMessage(resp.message);
+              }
+            })
+            .catch((error) => console.log(`error: ${error}`))
+        }
+
+const[buscar, setBuscar] = React.useState();
+const[nome, setNome] = React.useState();
+const[descricao, setDescricao] = React.useState();
+const[duracao,setDuracao] = React.useState();
+const[id,setId] = React.useState();
+React.useEffect(()=>{
+    const search = async () => {
+        const resp = await fetch(`http://localhost:8000/api/cursos/${buscar}`);
+        const receve = await resp.json()
+        setNome(receve.nome)
+        setDescricao(receve.descricao)
+        setDuracao(receve.duracao)
+        setId(receve.id)
+        formUpdate.setValue('nome', receve.nome)
+        formUpdate.setValue('descricao', receve.descricao)
+        formUpdate.setValue('duracao', receve.duracao)
+        formUpdate.setValue('id', receve.id)
+    }
+    search()
+},[buscar])
+
+  const changeResource = (id)=>{
+    setBuscar(id)
+    }
+
+  const [idAno, setIdAno] = React.useState<number>(0);
+  const [disciplina, setDisciplina] = React.useState([]);
+  const URLDISCIPLINA = "http://localhost:8000/api/disciplinas"
+  useEffect( () => {
+    const respFetch = async () => {
+      let resp = await fetch (URLDISCIPLINA);
+      const respJson = await resp.json();
+      setDisciplina(respJson.data)
+
+      resp = await fetch(`http://localhost:8000/api/ano-lectivos/`);
+        const receve = await resp.json()
+        var meuarray = receve.data.find((c)=>{
+          return c.activo === true
+        })
+        setIdAno(meuarray.id)
+    } 
+  respFetch()
+  },[])
+
+   
 
        //Vincular um curso a multiplas disciplina
        const[selectedValues, setSelectedValues] = React.useState([]);
@@ -266,9 +276,20 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
      
 
     return (
-      <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
+      <>
+      { idAno == 0 ? <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
+      <div className='w-full text-center text-4xl text-red-600 md:text-2xl lg:text-2xl'>
+          <div>
+              <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+              <p>SELECIONE O ANO LECTIVO</p>
+              <p className='italic font-semibold text-sm cursor-pointer'><Link to={'/AcademicYearPage'}>Selecionar agora</Link></p>
+          </div>
+      </div>
+        </div> : (
+      <section  className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
+      <Header title={false}/>
        
-      <div className='flex flex-col space-y-2 justify-center w-[90%] z-10 mt-44'> 
+      <div className='flex flex-col space-y-2 justify-center w-[90%] z-10'> 
        <div className='flex flex-row space-x-2'>
          <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
              <Search className='absolute text-gray-300'/>            
@@ -702,6 +723,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
       </MyDialogContent>
 </MyDialog>
 }
-    </div>
+    </section>)}
+    </>
 )
 }

@@ -32,6 +32,7 @@ import { MyDialog, MyDialogContent } from './my_dialog'
 import { table } from 'console'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import { Link } from 'react-router-dom'
+import Header from './Header'
 
 
 const TFormCreate =  z.object(
@@ -180,7 +181,7 @@ React.useEffect(()=>{
   search()
 },[])
 
-/*Buscar dados do Ano Academico, Curso*/
+
 const[idAno,setIdAno] = React.useState(0);
 const[bNomeCurso, setBNomeCurso] = React.useState([]);
 const URLCURSO = `http://localhost:8000/api/cursos/`
@@ -275,9 +276,10 @@ const changeResource = (id)=>{
           </div>
       </div>
         </div> : (
-      <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
+      <div className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
+      <Header title={false}/>
        
-      <div className='flex flex-col space-y-2 justify-center w-[90%] z-10 mt-44'> 
+      <div className='flex flex-col space-y-2 justify-center w-[90%] z-10'> 
        <div className='flex flex-row space-x-2'>
          <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
              <select className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3'  onChange={handleFilter} >
