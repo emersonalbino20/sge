@@ -16,10 +16,32 @@ import { z } from "zod";
     message: 'Limite de caracteres excedeu.',
   }).regex(FULL_NAME_REGEX, {message:'o campo só pode conter letras'})
 
- export const dataNascimentoZod = z
-      .string({
-        required_error: 'campo obrigatório',
-        })
+  const currentYear = new Date().getFullYear();
+
+  // Define o ano mínimo e máximo
+  const minYear = currentYear - 50;
+  const maxYear = currentYear - 14;
+  
+  // Validação de data de nascimento
+  export const dataNascimentoZod = z
+    .string({
+      required_error: 'Campo obrigatório',
+    })
+    .refine((value) => {
+      const date = new Date(value);
+      const year = date.getFullYear();
+      
+      // Verifica se o ano da data está dentro do intervalo permitido
+      return year >= minYear && year <= maxYear;
+    }, {
+      message: `A data de nascimento deve estar entre ${minYear} e ${maxYear}.`,
+    })
+    .refine((value) => {
+      // Verifica se a data é válida
+      return !isNaN(new Date(value).getTime());
+    }, {
+      message: 'Data inválida.',
+    });
 
 export const anoLectivo = z
 .string({

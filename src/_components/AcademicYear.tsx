@@ -222,7 +222,8 @@ const URL = "http://localhost:8000/api/ano-lectivos"
     return (
       <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
       <Header title={false}/>
-       
+      <div className='flex flex-col space-y-2 justify-center items-center w-full'>
+        <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
       <div className='flex flex-col space-y-2 justify-center w-[90%] z-10'> 
        <div className='flex flex-row space-x-2'>
          <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
@@ -238,18 +239,18 @@ const URL = "http://localhost:8000/api/ano-lectivos"
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
-        <DialogTitle>Cadastrar Ano Académico</DialogTitle>
-        <DialogDescription>
-          <p>preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
-          </p>
-        </DialogDescription>
+      <DialogTitle className='text-sky-800 text-xl'>Cadastrar Ano Académico</DialogTitle>
+      <DialogDescription>
+        <p className='text-base text-gray-800'>
+        preencha o formulárioe em seguida click em <span className='font-bold text-sky-700'>cadastrar</span> quando terminar.
+      </p>
+      </DialogDescription>
       </DialogHeader>
       <Form {...formCreate} >
      <form onSubmit={formCreate.handleSubmit(handleSubmitCreate)} >
      <div className="flex flex-col w-full py-4 bg-white">
         <div className="w-full">
-          <Label htmlFor="inicio" className="text-right">
-            Íncicio
+        <Label htmlFor="inicio"className='text-sky-700 text-lg font-semibold'>Íncio<span className='text-red-500'>*</span>
           </Label>
           <FormField
           control={formCreate.control}
@@ -258,22 +259,23 @@ const URL = "http://localhost:8000/api/ano-lectivos"
             <FormItem>
             <Input
               id="inicio"
-              type='date' {...field} className="w-full"
+              type='date' {...field} className={formCreate.formState.errors.inicio?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
               min="2024-01-01"/>
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
         </div>
         <div className="w-full">
-        <Label htmlFor="termino" className="text-right">
-            Termino
+        <Label htmlFor="termino"className='text-sky-700 text-lg font-semibold'>Término<span className='text-red-500'>*</span>
           </Label>
           <FormField
           control={formCreate.control}
           name="termino"
           render={({field})=>(
             <FormItem>
-            <Input id="termino" type='date' {...field} className="w-full"
+            <Input id="termino" type='date' {...field} className={formCreate.formState.errors.termino?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
             min="2025-01-01"/>
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
@@ -296,18 +298,18 @@ const URL = "http://localhost:8000/api/ano-lectivos"
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
-        <DialogTitle>Cadastrar Trimestre</DialogTitle>
+      <DialogTitle className='text-sky-800 text-xl'>Cadastrar Trimestre</DialogTitle>
         <DialogDescription>
-          <p>esta secção tem como finalidade adicionar um novo trimestre ao ano lectivo corrente.
-          </p>
+          <p className='text-base text-gray-800'>
+          esta secção tem como finalidade adicionar um novo trimestre ao ano lectivo corrente.
+        </p>
         </DialogDescription>
       </DialogHeader>
       <Form {...formCreateTrimestre} >
      <form onSubmit={formCreateTrimestre.handleSubmit(handleSubmitCreateTrimestre)} >
      <div className="flex flex-col w-full py-4 bg-white">
      <div className="w-full">
-          <Label htmlFor="inicio" className="text-right">
-            Número
+          <Label htmlFor="numero"className='text-sky-700 text-lg font-semibold'>Número<span className='text-red-500'>*</span>
           </Label>
           <FormField
           control={formCreateTrimestre.control}
@@ -316,15 +318,15 @@ const URL = "http://localhost:8000/api/ano-lectivos"
             <FormItem>
             <Input
               id="numero"
-              type='number' {...field} className="w-full"
+              type='number' {...field} className={formCreateTrimestre.formState.errors.numero?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
               onChange={(e)=>{field.onChange(parseInt(e.target.value))}}/>
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
         </div>
         <div className="w-full">
-          <Label htmlFor="inicio" className="text-right">
-            Íncicio
+         <Label htmlFor="inicio"className='text-sky-700 text-lg font-semibold'>Ínicio<span className='text-red-500'>*</span>
           </Label>
           <FormField
           control={formCreateTrimestre.control}
@@ -333,22 +335,23 @@ const URL = "http://localhost:8000/api/ano-lectivos"
             <FormItem>
             <Input
               id="inicio"
-              type='date' {...field} className="w-full"
+              type='date' {...field} className={formCreateTrimestre.formState.errors.inicio?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
               min="2024-01-01"/>
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
         </div>
         <div className="w-full">
-        <Label htmlFor="termino" className="text-right">
-            Termino
+        <Label htmlFor="termino"className='text-sky-700 text-lg font-semibold'>Término<span className='text-red-500'>*</span>
           </Label>
           <FormField
           control={formCreateTrimestre.control}
           name="termino"
           render={({field})=>(
             <FormItem>
-            <Input id="termino" type='date' {...field} className="w-full"
+            <Input id="termino" type='date' {...field} className={formCreateTrimestre.formState.errors.termino?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
             min="2025-01-01"/>
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
@@ -376,7 +379,7 @@ const URL = "http://localhost:8000/api/ano-lectivos"
                  <tr className='w-96 h-32'>
                      <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                          <div>
-                             <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+                             <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
                              <p>Nenum Registro Foi Encontrado</p>
                          </div>
                      </td>
@@ -404,10 +407,12 @@ const URL = "http://localhost:8000/api/ano-lectivos"
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
                 <DialogHeader>
-                  <DialogTitle>Actualizar Ano Académico</DialogTitle>
-                  <DialogDescription>
-                  <p>altere uma informação do registro click em <span className='font-bold text-green-500'>actualizar</span> quando terminar.</p>
-                  </DialogDescription>
+                <DialogTitle className='text-sky-800 text-xl'>Actualizar Ano Académico</DialogTitle>
+              <DialogDescription>
+                <p className='text-base text-gray-800'>
+                altere uma informação do ano e em seguida click em <span className='font-bold text-sky-700'>actualizar</span> quando terminar.
+              </p>
+              </DialogDescription>
                 </DialogHeader>
                 <Form {...formUpdate} >
               <form onSubmit={formUpdate.handleSubmit(handleSubmitUpdate)} >
@@ -431,9 +436,8 @@ const URL = "http://localhost:8000/api/ano-lectivos"
   
               <div className="flex flex-col w-full py-4 bg-white">
               <div className="w-full">
-                <Label htmlFor="inicio" className="text-right">
-                  Ínicio
-                </Label>
+              <Label htmlFor="inicio"className='text-sky-700 text-lg font-semibold'>Ínicio<span className='text-red-500'>*</span>
+          </Label>
                 <FormField
                 control={formUpdate.control}
                 name="inicio"
@@ -441,16 +445,16 @@ const URL = "http://localhost:8000/api/ano-lectivos"
                   <FormItem>
                   <Input
                     id="inicio"
-                    type='date' {...field} className="w-full"
+                    type='date' {...field} className={formUpdate.formState.errors.inicio?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+                    'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
                     min="2024-01-01"/>
                   <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
               )}/>
               </div>
               <div className="w-full">
-              <Label htmlFor="termino" className="text-right">
-                  Fim
-                </Label>
+              <Label htmlFor="termino"className='text-sky-700 text-lg font-semibold'>Término<span className='text-red-500'>*</span>
+              </Label>
                 <FormField
                 control={formUpdate.control}
                 name="termino"
@@ -458,7 +462,8 @@ const URL = "http://localhost:8000/api/ano-lectivos"
                   <FormItem>
                   <Input
                     id="termino"
-                    type='date' {...field} className="w-full"
+                    type='date' {...field} className={formUpdate.formState.errors.termino?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+                    'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
                     min="2025-01-01"/>
                   <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
@@ -529,8 +534,8 @@ const URL = "http://localhost:8000/api/ano-lectivos"
          </tfoot>
          </table>
      </div>
-    
-     </div>
+    </div>
+     </div></div>
 
 {showModal &&
 <MyDialog open={showModal} onOpenChange={setShowModal}>

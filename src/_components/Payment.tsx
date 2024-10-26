@@ -141,7 +141,8 @@ export default function Payment (){
     return( 
       <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
       <Header title={false}/>
-      <div className='flex flex-col space-y-2 justify-center w-[90%] z-10'> 
+      <div className='flex flex-col space-y-2 justify-center items-center w-full'>
+        <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
        <div className='flex flex-row space-x-2'>
          <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
              <Search className='absolute text-gray-300'/>            
@@ -259,7 +260,7 @@ export default function Payment (){
                  <tr className='w-96 h-32'>
                      <td rowSpan={2} colSpan={2} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                          <div>
-                             <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+                             <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
                              <p>Nenum Registro Foi Encontrado</p>
                          </div>
                      </td>
@@ -280,7 +281,7 @@ export default function Payment (){
          </tfoot>
          </table>
      </div>
-    
+    </div>
      </div>
      {showModal &&
 <MyDialog open={showModal} onOpenChange={setShowModal}>

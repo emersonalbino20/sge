@@ -279,8 +279,8 @@ React.useEffect(()=>{
       <>
       { idAno == 0 ? <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
       <div className='w-full text-center text-4xl text-red-600 md:text-2xl lg:text-2xl'>
-          <div>
-              <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+          <div >
+              <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
               <p>SELECIONE O ANO LECTIVO</p>
               <p className='italic font-semibold text-sm cursor-pointer'><Link to={'/AcademicYearPage'}>Selecionar agora</Link></p>
           </div>
@@ -289,7 +289,9 @@ React.useEffect(()=>{
       <section  className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
       <Header title={false}/>
        
-      <div className='flex flex-col space-y-2 justify-center w-[90%] z-10'> 
+      <div className='flex flex-col space-y-2 justify-center items-center w-full'> 
+      <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
+          
        <div className='flex flex-row space-x-2'>
          <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
              <Search className='absolute text-gray-300'/>            
@@ -304,10 +306,10 @@ React.useEffect(()=>{
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
-        <DialogTitle>Cadastrar Curso</DialogTitle>
+      <DialogTitle className='text-sky-800 text-xl'>Cadastrar Curso</DialogTitle>
         <DialogDescription>
-        <p>
-          preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
+          <p className='text-base text-gray-800'>
+          preencha o formulário e em seguida click em <span className='font-bold text-sky-700'>cadastrar</span> quando terminar.
         </p>
         </DialogDescription>
       </DialogHeader>
@@ -315,8 +317,7 @@ React.useEffect(()=>{
      <form onSubmit={formCreate.handleSubmit(handleSubmitCreate)} >
      <div className="flex flex-col w-full py-4 bg-white">
         <div className="w-full">
-          <Label htmlFor="name" className="text-right">
-            Nome
+        <Label htmlFor="name"className='text-sky-700 text-lg font-semibold'>Nome<span className='text-red-500'>*</span>
           </Label>
           <FormField
           control={formCreate.control}
@@ -325,7 +326,8 @@ React.useEffect(()=>{
             <FormItem>
             <Input
               id="name"
-              className="w-full" {...field}
+              className={formCreate.formState.errors.nome?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'} {...field}
             />
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
@@ -333,15 +335,15 @@ React.useEffect(()=>{
           
         </div>
         <div className="w-full">
-          <Label htmlFor="username" className="text-right">
-            Descrição
+          <Label htmlFor="descricao"className='text-sky-700 text-lg font-semibold'>Descrição<span className='text-red-500'>*</span>
           </Label>
           <FormField
           control={formCreate.control}
           name="descricao"
           render={({field})=>(
             <FormItem>
-             <Textarea className='w-full border-gray-300 placeholder:text-gray-500' placeholder="Dê uma descrição ao curso." {...field}/>
+             <Textarea id='descricao' className={formCreate.formState.errors.descricao?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'} placeholder="Dê uma descrição ao curso." {...field}/>
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
@@ -349,44 +351,19 @@ React.useEffect(()=>{
         
         </div>
         <div className="w-full">
-        <Label htmlFor="username" className="text-right">
-           Anos de Duração
+        <Label htmlFor="duracao"className='text-sky-700 text-lg font-semibold'>Ano de Duração<span className='text-red-500'>*</span>
           </Label>
-             
           <FormField
           control={formCreate.control}
           name="duracao"
           render={({field})=>(
             <FormItem>
-             <Input type="number" className='w--full border-gray-300 placeholder:text-gray-700' {...field} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}/>
+             <Input id='duracao' type="number" className={formCreate.formState.errors.duracao?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:outline-none focus:text-red-600 font-semibold  focus:border-red-500 py-4 mb-2':
+            'w-full text-md border-2 border-gray-300 text-gray-600 focus:outline-none focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'} {...field} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}/>
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
         </div>
-        <div className="w-full">
-            <FormField
-            control={formCreate.control}
-            name="disciplinas"
-            render={({field})=>(
-            <FormItem>
-              <Label htmlFor="disciplina" className="text-right">
-              Disciplinas
-            </Label>
-                <FormControl>
-                <Select
-                name="disciplina"
-                isMulti
-                options={disciplinaOptions}
-                className="basic-multi-select"
-                onChange={handleChange}
-                classNamePrefix="select"
-              />
-                </FormControl>
-              <FormMessage className='text-red-500 text-xs'/>
-            </FormItem>)
-            }
-            />
-            </div>
       </div>
       <DialogFooter>
         <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
@@ -409,7 +386,7 @@ React.useEffect(()=>{
                  <tr className='w-96 h-32'>
                      <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                          <div>
-                             <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+                             <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
                              <p>Nenum Registro Foi Encontrado</p>
                          </div>
                      </td>
@@ -430,11 +407,13 @@ React.useEffect(()=>{
             </div>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
-                <DialogHeader>
-                  <DialogTitle>Actualizar Curso</DialogTitle>
-                  <DialogDescription>
-                  <p>altere uma informação do registro click em <span className='font-bold text-green-500'>actualizar</span> quando terminar.</p>
-                  </DialogDescription>
+            <DialogHeader>
+            <DialogTitle className='text-sky-800 text-xl'>Actualizar Curso</DialogTitle>
+              <DialogDescription>
+                <p className='text-base text-gray-800'>
+                altere uma informação do curso e em seguida click em <span className='font-bold text-sky-700'>actualizar</span> quando terminar.
+              </p>
+              </DialogDescription>
                 </DialogHeader>
                 <Form {...formUpdate} >
               <form onSubmit={formUpdate.handleSubmit(handleSubmitUpdate)} >
@@ -458,17 +437,17 @@ React.useEffect(()=>{
   
               <div className="flex flex-col w-full py-4 bg-white">
               <div className="w-full">
-                <Label htmlFor="name" className="text-right">
-                  Nome
-                </Label>
+              <Label htmlFor="nome"className='text-sky-700 text-lg font-semibold'>Nome<span className='text-red-500'>*</span>
+              </Label>
                 <FormField
                 control={formUpdate.control}
                 name="nome"
                 render={({field})=>(
                   <FormItem>
                   <Input
-                    id="name"
-                    className="w-full" {...field}
+                    id="nome"
+                    className={formUpdate.formState.errors.nome?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+                  'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'} {...field}
                   />
                   <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
@@ -476,15 +455,15 @@ React.useEffect(()=>{
                 
               </div>
               <div className="w-full">
-                <Label htmlFor="username" className="text-right">
-                  Descrição
-                </Label>
+              <Label htmlFor="descricao"className='text-sky-700 text-lg font-semibold'>Descrição<span className='text-red-500'>*</span>
+              </Label>
                 <FormField
                 control={formUpdate.control}
                 name="descricao"
                 render={({field})=>(
                   <FormItem>
-                  <Textarea className='w-full border-gray-300 placeholder:text-gray-500' placeholder="Dê uma descrição ao curso." {...field}/>
+                  <Textarea id='descricao' className={formUpdate.formState.errors.descricao?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+                  'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'} placeholder="Dê uma descrição ao curso." {...field}/>
                   <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
               )}/>
@@ -492,16 +471,15 @@ React.useEffect(()=>{
               
               </div>
               <div className="w-full">
-              <Label htmlFor="username" className="text-right">
-                Anos de Duração
-                </Label>
-                  
+              <Label htmlFor="duracao"className='text-sky-700 text-lg font-semibold'>Ano de Duração<span className='text-red-500'>*</span>
+              </Label>
                 <FormField
                 control={formUpdate.control}
                 name="duracao"
                 render={({field})=>(
                   <FormItem>
-                  <Input type="number" className='w--full border-gray-300 placeholder:text-gray-700' {...field} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}/>
+                  <Input id='duracao' type="number" className={formUpdate.formState.errors.duracao?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+                  'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'} {...field} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}/>
                   <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
               )}/>
@@ -670,7 +648,7 @@ React.useEffect(()=>{
          </tfoot>
          </table>
      </div>
-    
+      </div>
      </div>
 
 {showModal &&

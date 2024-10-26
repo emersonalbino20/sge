@@ -246,7 +246,7 @@ export default function PersonIncharge (){
       {!getCookies('idAluno') ? <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
       <div className='w-full text-center text-4xl text-red-600 md:text-2xl lg:text-2xl'>
           <div>
-              <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+              <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
               <p>ACESSO INDEVIDO</p>
           </div>
       </div>
@@ -254,7 +254,8 @@ export default function PersonIncharge (){
        <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
        <Header title={false}/>
        
-       <div className='flex flex-col space-y-2 justify-center w-[90%] z-10 mt-44'> 
+       <div className='flex flex-col space-y-2 justify-center items-center w-full'> 
+       <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
         <div className='flex flex-row space-x-2'>
           <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
               <Search className='absolute text-gray-300'/>            
@@ -468,7 +469,7 @@ export default function PersonIncharge (){
                   <tr className='w-96 h-32'>
                       <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                           <div>
-                              <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+                              <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
                               <p>Nenum Registro Foi Encontrado</p>
                           </div>
                       </td>
@@ -784,7 +785,7 @@ export default function PersonIncharge (){
           </table>
           <p className='text-blue-500 font-semibold' onClick={()=>{removeCookies('idAluno')}}><Link to={'/StudentListPage'}>Voltar</Link></p>
       </div>
-     
+      </div>
       </div>
 
 {showModal &&

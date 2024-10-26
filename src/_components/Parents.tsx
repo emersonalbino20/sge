@@ -127,7 +127,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
     return (<section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
     <Header title={false}/>
        
-      <div className='flex flex-col space-y-2 justify-center w-[90%] z-10'> 
+      <div className='flex flex-col space-y-2 justify-center items-center w-full'> <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
        <div className='flex flex-row space-x-2'>
          <div className='flex flex-row space-x-2'>
        
@@ -173,55 +173,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
       </form></Form>
     </DialogContent>
   </Dialog>
-  {showModal &&
-  <MyDialog open={showModal} onOpenChange={setShowModal}>
-  
-    <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
-    {modalMessage == null &&
-        <div role="alert" className='w-full'>
-      <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-        <div>
-            <p>Sucesso</p>
-        </div>
-        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-            <p>X</p>
-          </div>
-      </div>
-      <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
-      <CheckCircleIcon className='w-28 h-20 text-green-400'/>
-      
-      <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
-      <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
-        <Button className='bg-green-400 hover:bg-green-500
-        hover:font-medium font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
-    </div>
-    </div>
-    
-      </div>
-  }
-   {modalMessage != null &&
-        <div role="alert" className='w-full'>
-      <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-        <div>
-            <p>Falhou</p>
-        </div>
-        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-            <p>X</p>
-          </div>
-      </div>
-      <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
-      <AlertCircleIcon className='w-28 h-20 text-red-400'/>
-      <p className='font-poppins uppercase'>{modalMessage}</p>
-      <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
-        <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
-    </div>
-    </div>
-    
-      </div>
-  }
-         </MyDialogContent>
-        </MyDialog>
-   }
+ 
         </div>         
      </div>
      <div className="overflow-x-auto overflow-y-auto w-full  h-80 md:h-1/2 lg:h-[500px]">
@@ -238,7 +190,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
                  <tr className='w-96 h-32'>
                      <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                          <div>
-                             <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+                             <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
                              <p>Nenum Registro Foi Encontrado</p>
                          </div>
                      </td>
@@ -322,59 +274,59 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
          </tfoot>
          </table>
      </div>
+     </div>
+     </div>
+
+ {showModal &&
+  <MyDialog open={showModal} onOpenChange={setShowModal}>
+  
+    <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
+    {modalMessage == null &&
+        <div role="alert" className='w-full'>
+      <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+        <div>
+            <p>Sucesso</p>
+        </div>
+        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+            <p>X</p>
+          </div>
+      </div>
+      <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
+      <CheckCircleIcon className='w-28 h-20 text-green-400'/>
+      
+      <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
+      <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
+        <Button className='bg-green-400 hover:bg-green-500
+        hover:font-medium font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+    </div>
+    </div>
     
-     </div>
+      </div>
+  }
+   {modalMessage != null &&
+        <div role="alert" className='w-full'>
+      <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
+        <div>
+            <p>Falhou</p>
+        </div>
+        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
+            <p>X</p>
+          </div>
+      </div>
+      <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
+      <AlertCircleIcon className='w-28 h-20 text-red-400'/>
+      <p className='font-poppins uppercase'>{modalMessage}</p>
+      <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
+        <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+    </div>
+    </div>
+    
+      </div>
+  }
+         </MyDialogContent>
+        </MyDialog>
+   }
 
-{showModal &&
-<MyDialog open={showModal} onOpenChange={setShowModal}>
-
- <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
- {modalMessage == null &&
-     <div role="alert" className='w-full'>
-   <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-     <div>
-         <p>Sucesso</p>
-     </div>
-     <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-         <p>X</p>
-       </div>
-   </div>
-   <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
-   <CheckCircleIcon className='w-28 h-20 text-green-400'/>
-   <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
-   <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
-     <Button className='bg-green-400 hover:bg-green-500
-     hover:font-medium
-      font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
- </div>
- </div>
- 
-   </div>
-   
-}
-{modalMessage != null &&
-     <div role="alert" className='w-full'>
-   <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-     <div>
-         <p>Falhou</p>
-     </div>
-     <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-         <p>X</p>
-       </div>
-   </div>
-   <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
-   <AlertCircleIcon className='w-28 h-20 text-red-400'/>
-   <p className='font-poppins uppercase'>{modalMessage}</p>
-   <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
-     <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
- </div>
- </div>
- 
-   </div>
-}
-      </MyDialogContent>
-</MyDialog>
-}
 </section>
       
 )

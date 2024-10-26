@@ -1,23 +1,19 @@
 'use client'
 import * as React from 'react'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { AlertCircleIcon, CheckCircleIcon,  PlusIcon, SaveIcon } from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon,  PlusIcon } from 'lucide-react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver} from '@hookform/resolvers/zod'
 import {nomeCompletoZod,  dataNascimentoZod, generoZod, numeroBiZod, bairroZod, ruaZod, numeroCasaZod, telefoneZod, emailZod} from '../_zodValidations/validations'
 import { MyDialog, MyDialogContent } from './my_dialog'
 import { Button } from '@/components/ui/button'
-import InputMask from 'react-input-mask'
-import IPPUImage from '../assets /_images/IPPU.png'
-import {Link, useNavigate} from 'react-router-dom'
-import { getCookies, removeCookies } from '@/_cookies/Cookies';
 import './stepper.css';
 import { Check } from 'lucide-react';
 import Header from './Header'
 import { useHookFormMask, withMask } from 'use-mask-input'
+import { error } from 'console'
 //define the data that will send for the server to be insert on database
 
 const TFormCreate =  z.object({
@@ -73,7 +69,7 @@ defaultValues:{
     }]
 }
 })
-const {control, setError, formState:{ errors }, register} = form;
+const {control, watch, formState:{ errors, isValid }, register} = form;
 //use of useFieldArray to create dynamic fields
 const { fields, append, remove } =
     useFieldArray({
@@ -81,6 +77,9 @@ const { fields, append, remove } =
         control
     })
 
+const [fieldNome, fieldBi, fieldGenero, fieldTelefone, fieldDataNascimento, fieldNumeroCasa, fieldBairro, fieldRua, fieldNomeCompleMae, fieldNomeCompletoPai, fieldRespNome, fieldRespParentescoId, fieldRespBairro, fieldRespRua, fieldRespNumeroCasa, fieldRespTelefone, fieldClasseId, fieldTurmaId, fieldTurnoId, fieldMetodoId] = watch(["nomeCompleto", "genero", "numeroBi", "dataNascimento", "telefone", "numeroCasa", "bairro", "rua", "nomeCompletoMae", "nomeCompletoPai", "responsaveis.0.nomeCompleto", "responsaveis.0.parentescoId", "responsaveis.0.endereco.bairro", "responsaveis.0.endereco.rua",
+"responsaveis.0.endereco.numeroCasa",
+"responsaveis.0.contacto.telefone", "classeId", "turmaId", "turnoId", "metodoId"]);  
 /*Área q implementa o código pra pesquisar cursos*/
 const [metodo, setMetodo] = React.useState([]);
 const [ano, setAno] = React.useState();
@@ -133,9 +132,7 @@ React.useEffect(()=>{
     const search = async () => {
         const resp = await fetch(`http://localhost:8000/api/parentescos/`);
         const respJson = await resp.json()
-        const conv1 = JSON.stringify(respJson.data)
-        const conv2 = JSON.parse(conv1)
-        setParentesco(conv2)
+        setParentesco(respJson.data)
     }
     search()
 },[])
@@ -248,8 +245,8 @@ return(
         <Form {...form} >
         <form onSubmit={form.handleSubmit(handleSubmitCreate)} >
     
-        <div className='flex flex-col'>
-        {currentStep === 1 && (<fieldset >
+        <div >
+        {currentStep === 1 && (<fieldset className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-inflex flex-col' >
             <div className='bg-gradient-to-r from-yellow-500 to-red-500 mb-3  w-full h-9 pl-2 mr-2 text-white font-semibold flex items-center text-2xl tracking-wider'><p>Informações do Aluno</p></div>
             <div className='flex flex-row space-x-3 mb-5'>
                 <div className='flex flex-col w-full'>
@@ -258,13 +255,13 @@ return(
                     name="nomeCompleto"
                     render={({field})=>(
                     <FormItem>
-                        <label className='text-sky-700 text-xl font-semibold'>Nome Completo*</label>
+                        <label className='text-sky-700 text-xl font-semibold'>Nome Completo<span className='text-red-500'>*</span></label>
                         <FormControl>
                        
                         <Input type='text' {...field} 
                         
-                        className={errors.nomeCompleto?.message ? 'text-xl border-2 border-red-300 text-red-700 font-semibold focus:border-red-500 py-6':
-                        'text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-6'}/>
+                        className={errors.nomeCompleto?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
+                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'}/>
                         
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -279,12 +276,12 @@ return(
                 name="genero"
                 render={({field})=>(
                 <FormItem>
-                     <label className='text-sky-700 text-xl font-semibold'>Gênero*</label>
+                     <label className='text-sky-700 text-xl font-semibold'>Gênero<span className='text-red-500'>*</span></label>
                     
                     <FormControl>
                     
-                     <select {...field} className={errors.genero?.message ? 'w-72 text-xl border-2 border-red-300 text-red-700 font-semibold focus:border-red-500 py-3':
-                        'w-72 text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-3'}>
+                     <select {...field} className={errors.genero?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-3 focus:outline-none rounded-md':
+                    'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:outline-none rounded-md focus:font-semibold focus:border-sky-500 py-3'}>
                         <option>Selecione o gênero</option>
                         <option value="M">Masculino</option>
                         <option value="F">Feminino</option>
@@ -305,12 +302,12 @@ return(
                     name="numeroBi"
                     render={({field})=>(
                     <FormItem>
-                        <label className='text-sky-700 text-xl font-semibold'>Número do BI*</label>
+                        <label className='text-sky-700 text-xl font-semibold'>Número do BI<span className='text-red-500'>*</span></label>
                         <FormControl>
                         <Input type='text' {...field} 
                         
-                        className={errors.numeroBi?.message ? 'text-xl border-2 border-red-300 text-red-700 font-semibold focus:border-red-500 py-6':
-                        'text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-6'}/>
+                        className={errors.numeroBi?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
+                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'}/>
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
                     </FormItem>
@@ -323,14 +320,14 @@ return(
                 name="dataNascimento"
                 render={({field})=>(
                 <FormItem>
-                     <label className='text-sky-700 text-xl font-semibold'>Data de Nasc.*</label>
+                     <label className='text-sky-700 text-xl font-semibold'>Data de Nasc.<span className='text-red-500'>*</span></label>
                     
                     <FormControl>
                     
                     {errors.dataNascimento?.message ?
-                        <Input type='date' className='text-xl border-2 border-red-300 text-red-700 font-semibold focus:border-red-500 py-6' {...field} max="2010-01-01" min="1960-01-01"/>
+                        <Input type='date' className=' animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6' {...field} />
                         :
-                        <Input  type='date' max="2010-01-01" min="1960-01-01" {...field} className='text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-6'/>
+                        <Input  type='date'  {...field} className='w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'/>
                         }
                     </FormControl>
                     <FormMessage className='text-red-500 text-xs'/>
@@ -351,8 +348,8 @@ return(
                         <FormControl>
                         <Input type='email' {...field} 
                         
-                        className={errors.email?.message ? 'text-xl border-2 border-red-300 text-red-700 font-semibold focus:border-red-500 py-6':
-                        'text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-6'}/>
+                        className={errors.email?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
+                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'}/>
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
                     </FormItem>
@@ -365,10 +362,10 @@ return(
                     name="telefone"
                     render={({field})=>(
                     <FormItem>
-                         <label className='text-sky-700 text-xl font-semibold'>Telefone*</label>
+                         <label className='text-sky-700 text-xl font-semibold'>Telefone<span className='text-red-500'>*</span></label>
                         <FormControl>
-                        <Input {...registerWithMask('telefone',['999999999'], {required: true})}  className={errors.telefone?.message ? 'text-xl border-2 border-red-300 text-red-700 font-semibold focus:border-red-500 py-6':
-                                'text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-6'}/>
+                        <Input {...registerWithMask('telefone',['999999999'], {required: true})}  className={errors.telefone?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
+                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'}/>
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
                     </FormItem>
@@ -385,14 +382,14 @@ return(
                     name="numeroCasa"
                     render={({field})=>(
                     <FormItem>
-                         <label className='text-sky-700 text-xl font-semibold'>Número da Casa*</label>
+                         <label className='text-sky-700 text-xl font-semibold'>Número da Residência<span className='text-red-500'>*</span></label>
                        
                         <FormControl>
 
                         <Input type='number' {...field} 
                         
-                        className={errors.numeroCasa?.message ? 'text-xl border-2 border-red-300 text-red-700 font-semibold focus:border-red-500 py-6':
-                        'text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-6'} min={0} {...field} onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
+                        className={errors.numeroCasa?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
+                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'} min={0} {...field} onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
                         
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -406,13 +403,13 @@ return(
                     name="bairro"
                     render={({field})=>(
                     <FormItem>
-                         <label className='text-sky-700 text-xl font-semibold'>Bairro*</label>
+                         <label className='text-sky-700 text-xl font-semibold'>Bairro<span className='text-red-500'>*</span></label>
                         
                         <FormControl>
                         <Input type='text' {...field} 
                         
-                        className={errors.bairro?.message ? 'text-xl border-2 border-red-300 text-red-700 font-semibold focus:border-red-500 py-6':
-                        'text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-6'} />
+                        className={errors.bairro?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
+                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'} />
                         
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -426,12 +423,12 @@ return(
                     name="rua"
                     render={({field})=>(
                     <FormItem>
-                         <label className='text-sky-700 text-xl font-semibold'>Rua*</label>
+                         <label className='text-sky-700 text-xl font-semibold'>Rua<span className='text-red-500'>*</span></label>
                         <FormControl>
                         <Input type='text' {...field} 
                         
-                        className={errors.rua?.message ? 'text-xl border-2 border-red-300 text-red-700 font-semibold focus:border-red-500 py-6':
-                        'text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-6'} />
+                        className={errors.rua?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
+                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'} />
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
                     </FormItem>
@@ -446,13 +443,13 @@ return(
                     name="nomeCompletoPai"
                     render={({field})=>(
                     <FormItem>
-                         <label className='text-sky-700 text-xl font-semibold'>Nome do Pai*</label>
+                         <label className='text-sky-700 text-xl font-semibold'>Nome do Pai<span className='text-red-500'>*</span></label>
                         
                         <FormControl>
                         <Input type='text' {...field} 
                         
-                        className={errors.nomeCompletoPai?.message ? 'text-xl border-2 border-red-300 text-red-700 font-semibold focus:border-red-500 py-6':
-                        'text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-6'} />
+                        className={errors.nomeCompletoPai?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
+                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'} />
                         
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -466,13 +463,13 @@ return(
                     name="nomeCompletoMae"
                     render={({field})=>(
                     <FormItem>
-                         <label className='text-sky-700 text-xl font-semibold'>Nome da Mãe*</label>
+                         <label className='text-sky-700 text-xl font-semibold'>Nome da Mãe<span className='text-red-500'>*</span></label>
                         
                         <FormControl>
                         <Input type='text' {...field} 
                         
-                        className={errors.nomeCompletoMae?.message ? 'text-xl border-2 border-red-300 text-red-700 font-semibold focus:border-red-500 py-6':
-                        'text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-6'} />
+                        className={errors.nomeCompletoMae?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
+                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'} />
                         
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -483,9 +480,9 @@ return(
             </div>
             </fieldset>)}
             
-                { currentStep === 2 &&
+                { (currentStep === 2 ) &&
                 fields.map((field, index) => {
-                    return (<fieldset key={field.id}>
+                    return (<fieldset className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in' key={field.id}>
                         <div className='
                         bg-gradient-to-r from-yellow-500 to-red-500  w-full h-9 pl-2 mr-2 text-white font-semibold mb-3 flex items-center text-xl tracking-wider
                         '><p>Informações do Encarregado</p></div>
@@ -504,13 +501,14 @@ return(
                                 render={({field})=>(
                                     
                                 <FormItem>
-                                    <label className='text-sky-700 text-xl font-semibold'>Nome Completo*</label>
+                                    <label className='text-sky-700 text-xl font-semibold'>Nome Completo<span className='text-red-500'>*</span></label>
                                     
                                     <FormControl>
                                     <Input type='text' {...field} 
                         
                                      className={
-                                    'text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-6'} />
+                                errors.responsaveis?.[index]?.nomeCompleto?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
+                                'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'} />
                                     </FormControl>
                                     <FormMessage className='text-red-500 text-xs'/>
                                 </FormItem>
@@ -524,18 +522,21 @@ return(
                             
                             render={({field})=>(
                             <FormItem>
-                                <label className='text-sky-700 text-xl font-semibold'>Parentescos*</label>
+                                <label className='text-sky-700 text-xl font-semibold'>Parentescos<span className='text-red-500'>*</span></label>
                                 
                                 <FormControl>
-                                <select {...field} className='w-full text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                                <select {...field} 
+                                className={errors.responsaveis?.[index]?.parentescoId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-3 focus:outline-none rounded-md':
+                                'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-3 focus:outline-none rounded-md'}
+                                onChange={(e)=>{field.onChange(parseInt(e.target.value))
                             
                         }}>
                       <option >Selecione o grau</option>
-                      {
-                            parentesco.map((field)=>{
-                                return <option value={`${field.id}`}>{field.nome}</option>
-                            })
-                      }
+                        {
+                              parentesco.map((field)=>{
+                                  return <option value={`${field.id}`}>{field.nome}</option>
+                              })
+                        }
                       </select>
                                 </FormControl>
                                 <FormMessage className='text-red-500 text-xs'/>
@@ -552,11 +553,12 @@ return(
                             name={`responsaveis.${index}.contacto.telefone`}
                             render={({field})=>(
                             <FormItem>
-                                <label className='text-sky-700 text-xl font-semibold'>Telefone*</label>
+                                <label className='text-sky-700 text-xl font-semibold'>Telefone<span className='text-red-500'>*</span></label>
                                 
                                 <FormControl>
-                                <Input {...registerWithMask(`responsaveis.${index}.contacto.telefone`,['999999999'], {required: true})}  className={errors.telefone?.message ? 'text-xl border-2 border-red-300 text-red-700 font-semibold focus:border-red-500 py-6':
-                                'text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-6'}/>
+                                <Input {...registerWithMask(`responsaveis.${index}.contacto.telefone`,['999999999'], {required: true})}  className={errors.responsaveis?.[index]?.contacto?.telefone?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
+                                'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'}
+                                />
                                 </FormControl>
                                 <FormMessage className='text-red-500 text-xs'/>
                             </FormItem>
@@ -572,7 +574,8 @@ return(
                                     <label className='text-sky-700 text-xl font-semibold'>Email</label>
                                     
                                     <FormControl>
-                                    <Input type='text' {...field} className='text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-6'/>
+                                    <Input type='text' {...field} className={errors.responsaveis?.[index]?.contacto?.email?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
+                                'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'}/>
                                     </FormControl>
                                     <FormMessage className='text-red-500 text-xs'/>
                                 </FormItem>
@@ -588,10 +591,11 @@ return(
                             name={`responsaveis.${index}.endereco.numeroCasa`}
                             render={({field})=>(
                             <FormItem>
-                                <label className='text-sky-700 text-xl font-semibold'>Número da Casa*</label>
+                                <label className='text-sky-700 text-xl font-semibold'>Número da Residência<span className='text-red-500'>*</span></label>
                                 
                                 <FormControl>
-                                <Input type='number' min={1} {...field}  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}} className='text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-6'/>
+                                <Input type='number' min={1} {...field}  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}} className={errors.responsaveis?.[index]?.endereco?.numeroCasa?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
+                                'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'}/>
                                 </FormControl>
                                 <FormMessage className='text-red-500 text-xs'/>
                             </FormItem>
@@ -604,9 +608,10 @@ return(
                         name={`responsaveis.${index}.endereco.bairro`}
                         render={({field})=>(
                         <FormItem>
-                            <label className='text-sky-700 text-xl font-semibold'>Bairro*</label>
+                            <label className='text-sky-700 text-xl font-semibold'>Bairro<span className='text-red-500'>*</span></label>
                             <FormControl>
-                            <Input type='text' {...field} className='text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-6' />
+                            <Input type='text' {...field} className={errors.responsaveis?.[index]?.endereco?.bairro?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
+                                'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'} />
                             </FormControl>
                             <FormMessage className='text-red-500 text-xs'/>
                         </FormItem>
@@ -619,9 +624,10 @@ return(
                     name={`responsaveis.${index}.endereco.rua`}
                     render={({field})=>(
                     <FormItem>
-                        <label className='text-sky-700 text-xl font-semibold'>Rua*</label>
+                        <label className='text-sky-700 text-xl font-semibold'>Rua<span className='text-red-500'>*</span></label>
                         <FormControl>
-                        <Input type='text' {...field} className='text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-6'/>
+                        <Input type='text' {...field} className={errors.responsaveis?.[index]?.endereco?.rua?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
+                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'}/>
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
                     </FormItem>
@@ -650,7 +656,7 @@ return(
                 )   }   
           </div>
             {currentStep === 3 &&
-            <fieldset>
+            <fieldset className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in'>
             <div className='bg-gradient-to-r from-yellow-500 to-red-500  w-full h-9 pl-2 mr-2 text-white font-semibold mb-3 flex items-center text-xl tracking-wider '><p>Informações Essenciais</p></div>
             <div className='flex flex-col space-y-3 mb-5'>
                 <div className='flex flex-row space-x-3 mb-5'>
@@ -659,7 +665,7 @@ return(
                     name=''
                     render={({field})=>(
                     <FormItem>
-                        <label className='text-sky-700 text-xl font-semibold'>Cursos*</label>
+                        <label className='text-sky-700 text-xl font-semibold'>Cursos<span className='text-red-500'>*</span></label>
                         <FormControl>
                     <select {...field} onChange={(e) => {
                         field.onChange(
@@ -667,8 +673,8 @@ return(
                             setIdCurso(parseInt(e.target.value, 10) || 0))
                         }
                                 } className={
-                    'w-full text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-3'}>
-                        <option>Selecione o curso</option>
+                    'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-3 focus:outline-none rounded-md'}>
+                        <option >Selecione o curso</option>
                         {
                             
                         dataApiCursos.map((field)=>{
@@ -691,9 +697,10 @@ return(
                     name='classeId'
                     render={({field})=>(
                     <FormItem>
-                        <label className='text-sky-700 text-xl font-semibold'>Classes*</label>
+                        <label className='text-sky-700 text-xl font-semibold'>Classes<span className='text-red-500'>*</span></label>
                         <FormControl>
-                        <select {...field} className='w-full text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                        <select {...field} className={errors.classeId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-3 focus:outline-none rounded-md':
+                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-3 focus:outline-none rounded-md'}onChange={(e)=>{field.onChange(parseInt(e.target.value))
                             setIdClasse(parseInt(e.target.value, 10) || 0)
                           }}>
                         <option >Selecione a classe</option>
@@ -717,9 +724,10 @@ return(
                     name='turmaId'
                     render={({field})=>(
                     <FormItem>
-                        <label className='text-sky-700 text-xl font-semibold'>Turmas*</label>
+                        <label className='text-sky-700 text-xl font-semibold'>Turmas<span className='text-red-500'>*</span></label>
                         <FormControl>
-                        <select {...field} className='w-full text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                        <select {...field} className={errors.turmaId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-3 focus:outline-none rounded-md':
+                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-3 focus:outline-none rounded-md'}onChange={(e)=>{field.onChange(parseInt(e.target.value))
                           }}>
                         <option >Selecione a turma</option>
                         {
@@ -740,9 +748,10 @@ return(
                     name='turnoId'
                     render={({field})=>(
                     <FormItem>
-                        <label className='text-sky-700 text-xl font-semibold'>Turnos*</label>
+                        <label className='text-sky-700 text-xl font-semibold'>Turnos<span className='text-red-500'>*</span></label>
                         <FormControl>
-                        <select {...field} className='w-full text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                        <select {...field} className={errors.turmaId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-3 focus:outline-none rounded-md':
+                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-3 focus:outline-none rounded-md'}onChange={(e)=>{field.onChange(parseInt(e.target.value))
                             
                           }}>
                         <option >Selecione a turno</option>
@@ -759,7 +768,8 @@ return(
                     />
                     </div>
                     </div>
-                <div className='flex flex-col'>
+                    <div className="grid grid-cols-2 gap-4 w-full">
+                <div className='col-span-1'>
                     <FormField
                     control={form.control}
                     name='metodoId'
@@ -767,10 +777,11 @@ return(
                     <FormItem>
                         
                         <FormControl>
-                        <select {...field} className='w-72 text-xl border-2 border-gray-300 text-sky-700 font-semibold focus:border-sky-500 py-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                        <select {...field} className={errors.metodoId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-3 focus:outline-none rounded-md':
+                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-3 focus:outline-none rounded-md'}onChange={(e)=>{field.onChange(parseInt(e.target.value))
                             setIdClasse(parseInt(e.target.value, 10) || 0)
                           }}>
-                        <option >Pagar Em*</option>
+                        <option >Pagar Em<span className='text-red-500'>*</span></option>
                         {
                               metodo.map((field)=>{
                                   return <option value={`${field.id}`}>{field.nome}</option>
@@ -783,7 +794,7 @@ return(
                     }
                     />
                     </div>
-                   
+                    </div>
                 </div>
                 </fieldset>}
         <div className='w-full flex items-center justify-between'>
@@ -796,17 +807,44 @@ return(
     }} className='bg-gray-700 hover:bg-gray-600 text-white font-semibold text-xl px-7 py-2 border-gray-700'>Voltar</button>
     }
     
-    {currentStep === step.length ? 
+    {(currentStep === step.length) ? <div>{ (!errors.classeId && !errors.turmaId && !errors.turnoId && !errors.metodoId && fieldClasseId && fieldTurmaId && fieldTurnoId && fieldMetodoId) &&
     <button type={(currentStep===step.length && complete) ? 'submit' : 'button'} onClick={()=>{
         currentStep === step.length ?
         setComplete(true) :
         setCurrentStep(prev => prev + 1);
-    }} className={`${currentStep === 3 && complete ? 'bg-green-700 hover:bg-green-600 border-green-700': 'bg-sky-700 hover:bg-sky-600 border-sky-700'} text-white font-semibold text-xl px-7 py-2 `}>Cadastrar</button> : 
+    }} className={`${currentStep === 3 && complete ? 'animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in bg-green-700 hover:bg-green-600 border-green-700': 'animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in  bg-sky-700 hover:bg-sky-600 border-sky-700'} text-white font-semibold text-xl px-7 py-2 `} disabled={!isValid}>{!isValid}Cadastrar</button> }</div>: 
     <button type='button' onClick={()=>{
-        currentStep === step.length ?
-        setComplete(true) :
-        setCurrentStep(prev => prev + 1);
-    }} className='bg-sky-700 hover:bg-sky-600 text-white font-semibold text-xl px-7 py-2 border-sky-700'>Próximo</button>}
+    const isStep1Valid = !errors.nomeCompleto && !errors.numeroBi && !errors.genero &&
+    !errors.telefone && !errors.dataNascimento && !errors.numeroCasa &&
+    !errors.bairro && !errors.rua && !errors.nomeCompletoMae && !errors.nomeCompletoPai &&
+    fieldNome && fieldBi && fieldGenero && fieldTelefone && fieldDataNascimento &&
+    fieldNumeroCasa && fieldBairro && fieldRua && fieldNomeCompleMae && fieldNomeCompletoPai;
+
+  const isResponsavelValid = !Object.values(errors.responsaveis?.[0] || {}).some(Boolean) &&
+    fieldRespNome &&
+    fieldRespBairro &&
+    fieldRespNumeroCasa &&
+    fieldRespParentescoId && fieldRespRua &&
+    fieldRespTelefone;
+
+  if (isStep1Valid) {
+    // Se Step 1 estiver válido, tente ir para Step 2
+    if (currentStep === 1) {
+      setCurrentStep(2);
+    } 
+    // Se o Step 2 estiver válido (responsável validado), vá para o Step 3
+    else if (currentStep === 2 && isResponsavelValid) {
+      setCurrentStep(3);
+    }
+    // Caso contrário, finalize o formulário se estiver no último Step
+    else if (currentStep === step.length) {
+      setComplete(true);
+    }
+  } else {
+    // Retorne ao Step 1 caso as condições de validação não estejam atendidas
+    setCurrentStep(1);
+  }
+    }} className='active:animate-ping animate-once animate-duration-500 animate-delay-400 animate-ease-out bg-sky-700 hover:bg-sky-600 text-white font-semibold text-xl px-7 py-2 border-sky-700' >Próximo</button>}
 
     
         </div>

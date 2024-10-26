@@ -61,10 +61,10 @@ export default function Header({title}){
     return (
         <div className='w-screen z-20 flex flex-col h-44 '>
             <nav className='w-full bg-white  text-white font-semibold flex flex-col space-y-4 items-center p-4  shadow-2xl'>
-                <div className='flex flex-row space-x-2 items-start w-full'>
+                <div className='animate-flip-down animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-row space-x-2 items-start w-full'>
                     <img src={IPPUImage} title='Ulumbo LOGO' alt="None" className='w-[70px] '/>
                     <div className="text-5xl font-extrabold ...">
-                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-red-500 font-playfair md:text-3xl lg:text-4xl xl:text-5xl">
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-red-500 font-playfair md:text-3xl lg:text-4xl xl:text-5xl ">
                       IPPU
                     </span>
                   </div>
@@ -88,7 +88,7 @@ export default function Header({title}){
                     onMouseEnter={() => handleMouseEnter(3)} 
                     className='font-semibold text-orange-500'><span className='flex space-x-1 line-clamp-2'><p>Gestão de Turma</p> {openSubMenu === 3 ? <ChevronUp className='w-6 h-8'/> : <ChevronDown className='w-6 h-8'/>}</span>
                       {openSubMenu === 3 &&(
-                    <ul className='show z-20 absolute mt-4 bg-white text-orange-500 md md:text-md lg:text-lg xl:text-xl text-left p-4 rounded-bl-md rounded-br-md w-56' onMouseLeave={handleMouseLeave}>
+                    <ul className='animate-jump-in animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-out show z-20 absolute mt-4 bg-white text-orange-500 md md:text-md lg:text-lg xl:text-xl text-left p-4 rounded-bl-md rounded-br-md w-56' onMouseLeave={handleMouseLeave}>
                         <Link to={'/PeriodPage'}><li className='p-2 hover:font-bold'>Turnos</li></Link>
                         <Link to={'/ClassRoomPage'}><li className='p-2 hover:font-bold'>Salas</li></Link>
                         <Link to={'/GradePage'}><li className='p-2 hover:font-bold'>Classes</li></Link>
@@ -104,7 +104,7 @@ export default function Header({title}){
                     className='font-semibold text-orange-500'>
                       <span className='flex space-x-1 line-clamp-2'><p>Gestão Ácademica</p> {openSubMenu === 2 ? <ChevronUp className='w-6 h-8'/> : <ChevronDown className='w-6 h-8'/>}</span>
                       {openSubMenu === 2 &&(
-                    <ul className='show z-20 absolute mt-4 bg-white text-orange-500 md md:text-md lg:text-lg xl:text-xl text-left p-4 rounded-bl-md rounded-br-md w-56' onMouseLeave={handleMouseLeave}>
+                    <ul className='animate-jump-in animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-out show z-20 absolute mt-4 bg-white text-orange-500 md md:text-md lg:text-lg xl:text-xl text-left p-4 rounded-bl-md rounded-br-md w-56' onMouseLeave={handleMouseLeave}>
                         <Link to={'/CursePage'}><li className='p-2 hover:font-bold'>Cursos</li></Link>
                         <Link to={'/SubjectPage'}><li className='p-2 hover:font-bold'>Disciplinas</li></Link>
                         <Link to={'/AcademicYearPage'}><li className='p-2 hover:font-bold'>Ano Ácademico</li></Link>
@@ -120,7 +120,7 @@ export default function Header({title}){
                     
                     ><span className='flex space-x-2 line-clamp-2'><p>Pessoal</p> {openSubMenu === 1 ? <ChevronUp className='w-6 h-8'/> : <ChevronDown className='w-6 h-8'/>}</span>
                     {openSubMenu === 1 &&(
-                      <ul className='z-20 absolute mt-4 text-orange-500 bg-white md md:text-md lg:text-lg xl:text-xl text-left p-4 rounded-bl-md rounded-br-md w-56' onMouseLeave={handleMouseLeave}>
+                      <ul className='animate-jump-in animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-out z-20 absolute mt-4 text-orange-500 bg-white md md:text-md lg:text-lg xl:text-xl text-left p-4 rounded-bl-md rounded-br-md w-56' onMouseLeave={handleMouseLeave}>
                         <Link to={'/StudentListPage'}><li className='p-2 hover:font-bold'>Estudantes</li></Link>
                         <Link to={'/TeacherPage'}><li className='p-2 hover:font-bold'>Professores</li></Link>
                         <Link to={'/ParentsPage'}><li className='p-2 hover:font-bold'>Criar Parentescos</li></Link>

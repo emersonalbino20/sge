@@ -270,7 +270,7 @@ const changeResource = (id)=>{
       { idAno == 0 ? <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
       <div className='w-full text-center text-4xl text-red-600 md:text-2xl lg:text-2xl'>
           <div>
-              <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+              <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
               <p>SELECIONE O ANO LECTIVO</p>
               <p className='italic font-semibold text-sm cursor-pointer'><Link to={'/AcademicYearPage'}>Selecionar agora</Link></p>
           </div>
@@ -278,8 +278,8 @@ const changeResource = (id)=>{
         </div> : (
       <div className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
       <Header title={false}/>
-       
-      <div className='flex flex-col space-y-2 justify-center w-[90%] z-10'> 
+      <div className='flex flex-col space-y-2 justify-center items-center w-full'>
+        <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
        <div className='flex flex-row space-x-2'>
          <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
              <select className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3'  onChange={handleFilter} >
@@ -300,19 +300,19 @@ const changeResource = (id)=>{
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
-        <DialogTitle>Cadastrar Classe</DialogTitle>
+      <DialogTitle className='text-sky-800 text-xl'>Cadastrar Classe</DialogTitle>
         <DialogDescription>
-        <p>preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
-        </p>
+            <p className='text-base text-gray-800'>
+            preencha o formulário do curso e em seguida click em <span className='font-bold text-sky-700'>actualizar</span> quando terminar.
+          </p>
         </DialogDescription>
       </DialogHeader>
       <Form {...formCreate} >
      <form onSubmit={formCreate.handleSubmit(handleSubmitCreate)} >
      <div className="flex flex-col w-full py-4 bg-white">
         <div className="w-full">
-          <Label htmlFor="nome" className="text-right">
-            Nome
-          </Label>
+        <Label htmlFor="nome"className='text-sky-700 text-lg font-semibold'>Nome<span className='text-red-500'>*</span>
+              </Label>
           <FormField
           control={formCreate.control}
           name="nome"
@@ -320,22 +320,23 @@ const changeResource = (id)=>{
             <FormItem>
             <Input
               id="nome"
-              type='text' {...field} className="w-full"
+              type='text' {...field} className={formCreate.formState.errors.nome?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
               />
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
         </div>
         <div className="w-full">
-        <Label htmlFor="valorMatricula" className="text-right">
-            Custo
-          </Label>
+        <Label htmlFor="custo"className='text-sky-700 text-lg font-semibold'>Custo<span className='text-red-500'>*</span>
+              </Label>
           <FormField
           control={formCreate.control}
           name="valorMatricula"
           render={({field})=>(
             <FormItem>
-            <Input id="valorMAtricula" type='number' {...field} className="w-full"
+            <Input id="custo" type='number' {...field} className={formCreate.formState.errors.valorMatricula?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+                  'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
             min="0"
             onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
             <FormMessage className='text-red-500 text-xs'/>
@@ -348,11 +349,12 @@ const changeResource = (id)=>{
           name={'cursoId'}
           render={({field})=>(
           <FormItem>
-            <Label htmlFor="curso" className="text-right">
-            Curso
-          </Label>
+            <Label htmlFor="curso"className='text-sky-700 text-lg font-semibold'>Cursos<span className='text-red-500'>*</span>
+              </Label>
               <FormControl>
-              <select id='curso' {...field} className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+              <select id='curso' {...field} className={
+                      formCreate.formState.errors.cursoId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
+                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                         <option>Selecione o curso</option>
                         {
                                     bNomeCurso.map((field)=>{
@@ -382,19 +384,19 @@ const changeResource = (id)=>{
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
-        <DialogTitle>Cadastrar Turma</DialogTitle>
-        <DialogDescription>
-        <p>preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
-        </p>
-        </DialogDescription>
+      <DialogTitle className='text-sky-800 text-xl'>Cadastrar Turma</DialogTitle>
+              <DialogDescription>
+                <p className='text-base text-gray-800'>
+                preencha o formulário e em seguida click em <span className='font-bold text-sky-700'>actualizar</span> quando terminar.
+              </p>
+              </DialogDescription>
       </DialogHeader>
       <Form {...formCreateClass} >
      <form onSubmit={formCreateClass.handleSubmit(handleSubmitCreateClass)} >
      <div className="flex flex-col w-full py-4 bg-white">
         <div className="w-full">
-          <Label htmlFor="nome" className="text-right">
-            Nome
-          </Label>
+        <Label htmlFor="nome"className='text-sky-700 text-lg font-semibold'>Nome<span className='text-red-500'>*</span>
+              </Label>
           <FormField
           control={formCreateClass.control}
           name="nome"
@@ -402,17 +404,18 @@ const changeResource = (id)=>{
             <FormItem>
             <Input
               id="nome"
-              type='text' {...field} className="w-full"
+              type='text' {...field} className={formCreateClass.formState.errors.nome?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'} 
               />
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
         </div>
         <div className="w-full">
-         <label htmlFor="curso" className="text-right">
-                Cursos
-              </label>
-              <select className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3'  onChange={(e)=>{setCursoId(parseInt(e.target.value))}}>
+        <Label htmlFor="curso"className='text-sky-700 text-lg font-semibold'>Cursos<span className='text-red-500'>*</span>
+              </Label>
+              <select className={
+                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'}   id='curso' onChange={(e)=>{setCursoId(parseInt(e.target.value))}}>
                       <option value="">Selecione o curso</option>
                       {
                             bNomeCurso.map((field)=>{
@@ -427,12 +430,13 @@ const changeResource = (id)=>{
               name={'classeId'}
               render={({field})=>(
               <FormItem>
-                <label htmlFor="classe" className="text-right">
-                Classes
-              </label>
+                 <Label htmlFor="classe"className='text-sky-700 text-lg font-semibold'>Classes<span className='text-red-500'>*</span>
+              </Label>
                   <FormControl>
-                  <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
-                      <option value="">Seleciona a classe</option>
+                  <select {...field} className={
+                      formCreateClass.formState.errors.classeId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
+                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} id='classe' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                      <option >Seleciona a classe</option>
                       {
                             cAll.map((field)=>{
                                 return <option value={`${field.id}`}>{field.nome}</option>
@@ -452,11 +456,12 @@ const changeResource = (id)=>{
               name={'turnoId'}
               render={({field})=>(
               <FormItem>
-                <Label htmlFor="turno" className="text-right">
-                Turno
+                 <Label htmlFor="turno"className='text-sky-700 text-lg font-semibold'>Turnos<span className='text-red-500'>*</span>
               </Label>
                   <FormControl>
-              <select id='turno' {...field} className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+              <select id='turno' {...field} className={
+                      formCreateClass.formState.errors.turnoId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
+                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                             <option>Selecione o turno</option>
                             {
                                     turnos.map((field)=>{
@@ -476,11 +481,12 @@ const changeResource = (id)=>{
               name={'salaId'}
               render={({field})=>(
               <FormItem>
-                <Label htmlFor="sala" className="text-right">
-                Sala
+                <Label htmlFor="sala"className='text-sky-700 text-lg font-semibold'>Salas<span className='text-red-500'>*</span>
               </Label>
                   <FormControl>
-              <select id='sala' {...field} className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+              <select id='sala' {...field} className={
+                      formCreateClass.formState.errors.salaId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
+                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                             <option>Selecione a sala</option>
                             {
                                     salas.map((field)=>{
@@ -517,7 +523,7 @@ const changeResource = (id)=>{
                  <tr className='w-96 h-32'>
                      <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                          <div>
-                             <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+                             <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
                              <p>Nenum Registro Foi Encontrado</p>
                          </div>
                      </td>
@@ -542,19 +548,20 @@ const changeResource = (id)=>{
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
                 <DialogHeader>
-                  <DialogTitle>Actualizar Classe</DialogTitle>
-                  <DialogDescription>
-                  <p>altere uma informação do registro click em <span className='font-bold text-green-500'>actualizar</span> quando terminar.</p>
-                  </DialogDescription>
+                <DialogTitle className='text-sky-800 text-xl'>Actualizar Classe</DialogTitle>
+              <DialogDescription>
+                <p className='text-base text-gray-800'>
+                altere uma informação da classe e em seguida click em <span className='font-bold text-sky-700'>actualizar</span> quando terminar.
+              </p>
+              </DialogDescription>
                 </DialogHeader>
                 <Form {...formUpdate} >
               <form onSubmit={formUpdate.handleSubmit(handleSubmitUpdate)} >
             
               <div className="flex flex-col w-full py-4 bg-white">
                 <div className="w-full">
-                <Label htmlFor="nome" className="text-right">
-                  Nome
-                </Label>
+                <Label htmlFor="nome"className='text-sky-700 text-lg font-semibold'>Nome<span className='text-red-500'>*</span>
+              </Label>
                 <FormField
                 control={formUpdate.control}
                 name="nome"
@@ -562,22 +569,23 @@ const changeResource = (id)=>{
                   <FormItem>
                   <Input
                     id="nome"
-                    type='text' {...field} className="w-full"
+                    type='text' {...field} className={formUpdate.formState.errors.nome?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+                    'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
                     />
                   <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
               )}/>
               </div>
               <div className="w-full">
-        <Label htmlFor="valorMatricula" className="text-right">
-            Custo
+          <Label htmlFor="custo"className='text-sky-700 text-lg font-semibold'>Custo<span className='text-red-500'>*</span>
           </Label>
           <FormField
           control={formUpdate.control}
           name="valorMatricula"
           render={({field})=>(
             <FormItem>
-            <Input id="valorMAtricula" type='number' {...field} className="w-full"
+            <Input id="custo" type='number' {...field} className={formUpdate.formState.errors.valorMatricula?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+                  'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
             min="0"
             onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
             <FormMessage className='text-red-500 text-xs'/>
@@ -590,18 +598,19 @@ const changeResource = (id)=>{
           name={'cursoId'}
           render={({field})=>(
           <FormItem>
-            <Label htmlFor="curso" className="text-right">
-            Curso
-          </Label>
+           <Label htmlFor="curso"className='text-sky-700 text-lg font-semibold'>Cursos<span className='text-red-500'>*</span>
+              </Label>
               <FormControl>
-              <select id='curso' {...field} className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
-                        <option>Selecione o curso</option>
-                        {
-                                    bNomeCurso.map((field)=>{
-                                        return <option value={`${field.id}`}>{field.nome}</option>
-                                    })
-                         }
-                  </select>
+              <select id='curso' {...field} className={
+                      formUpdate.formState.errors.cursoId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
+                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                <option>Selecione o curso</option>
+                {
+                    bNomeCurso.map((field)=>{
+                        return <option value={`${field.id}`}>{field.nome}</option>
+                    })
+                  }
+              </select>
               </FormControl>
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>)
@@ -658,7 +667,7 @@ const changeResource = (id)=>{
          </tfoot>
          </table>
      </div>
-    
+    </div>
      </div>
 
 {showModal &&

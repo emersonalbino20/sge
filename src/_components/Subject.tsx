@@ -41,6 +41,8 @@ import { MyDialog, MyDialogContent } from './my_dialog'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import Header from './Header'
 
+
+
 const TFormCreate =  z.object({
   nome: nomeCursoZod,
   descricao: descricaoZod
@@ -232,7 +234,8 @@ export default function Subject(){
     return (
       <div className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
        <Header title={false}/>
-      <div className='flex flex-col space-y-2 justify-center w-[90%] z-10'> 
+       <div className='flex flex-col space-y-2 justify-center items-center w-full'>
+        <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
        <div className='flex flex-row space-x-2'>
          <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
              <Search className='absolute text-gray-300'/>            
@@ -247,28 +250,28 @@ export default function Subject(){
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
-        <DialogTitle>Cadastrar Disciplina</DialogTitle>
+      <DialogTitle className='text-sky-800 text-xl'>Cadastrar Disciplina</DialogTitle>
         <DialogDescription>
-        <p>preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
-        </p>
-        </DialogDescription>
+                <p className='text-base text-gray-800'>
+                preencha o formulário e em seguida click em <span className='font-bold text-sky-700'>cadastrar</span> quando terminar.
+              </p>
+              </DialogDescription>
       </DialogHeader>
       <Form {...formCreate} >
      <form onSubmit={formCreate.handleSubmit(handleSubmitCreate)} >
      <div className="flex flex-col w-full py-4 bg-white">
         <div className="w-full">
-          <Label htmlFor="name" className="text-right">
-            Nome
+        <Label htmlFor="nome"className='text-sky-700 text-lg font-semibold'>Nome<span className='text-red-500'>*</span>
           </Label>
-		
           <FormField
           control={formCreate.control}
           name="nome"
           render={({field})=>(
             <FormItem>
             <Input
-              id="name"
-              className="w-full" {...field}
+              id="nome"
+              className={formCreate.formState.errors.nome?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'} {...field}
             />
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
@@ -276,15 +279,15 @@ export default function Subject(){
           
         </div>
         <div className="w-full">
-          <Label htmlFor="username" className="text-right">
-            Descrição
+        <Label htmlFor="descricao"className='text-sky-700 text-lg font-semibold'>Descrição<span className='text-red-500'>*</span>
           </Label>
           <FormField
           control={formCreate.control}
           name="descricao"
           render={({field})=>(
             <FormItem>
-             <Textarea className='w-full border-gray-300 placeholder:text-gray-500' placeholder="Dê uma descrição ao curso." {...field}/>
+             <Textarea id='descricao' className={formCreate.formState.errors.descricao?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'} placeholder="Dê uma descrição ao curso." {...field}/>
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
@@ -312,7 +315,7 @@ export default function Subject(){
                  <tr className='w-96 h-32'>
                      <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                          <div>
-                             <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+                             <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
                              <p>Nenum Registro Foi Encontrado</p>
                          </div>
                      </td>
@@ -334,26 +337,28 @@ export default function Subject(){
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
                 <DialogHeader>
-                  <DialogTitle>Actualizar Disciplina</DialogTitle>
-                  <DialogDescription>
-                  <p>altere uma informação do registro click em <span className='font-bold text-green-500'>actualizar</span> quando terminar.</p>
-                  </DialogDescription>
+                <DialogTitle className='text-sky-800 text-xl'>Actualizar Disciplina</DialogTitle>
+              <DialogDescription>
+                <p className='text-base text-gray-800'>
+                altere uma informação da disciplina e em seguida click em <span className='font-bold text-sky-700'>actualizar</span> quando terminar.
+              </p>
+              </DialogDescription>
                 </DialogHeader>
                 <Form {...formUpdate} >
               <form onSubmit={formUpdate.handleSubmit(handleSubmitUpdate)} >
               <div className="flex flex-col w-full py-4 bg-white">
               <div className="w-full">
-                <Label htmlFor="name" className="text-right">
-                  Nome
-                </Label>
+              <Label htmlFor="nome"className='text-sky-700 text-lg font-semibold'>Nome<span className='text-red-500'>*</span>
+          </Label>
                 <FormField
                 control={formUpdate.control}
                 name="nome"
                 render={({field})=>(
                   <FormItem>
                   <Input
-                    id="name"
-                    className="w-full" {...field}
+                    id="nome"
+                    className={formUpdate.formState.errors.nome?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+                   'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'} {...field}
                   />
                   <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
@@ -361,15 +366,15 @@ export default function Subject(){
                 
               </div>
               <div className="w-full">
-                <Label htmlFor="username" className="text-right">
-                  Descrição
-                </Label>
+              <Label htmlFor="descricao"className='text-sky-700 text-lg font-semibold'>Descrição<span className='text-red-500'>*</span>
+          </Label>
                 <FormField
                 control={formUpdate.control}
                 name="descricao"
                 render={({field})=>(
                   <FormItem>
-                  <Textarea className='w-full border-gray-300 placeholder:text-gray-500' placeholder="Dê uma descrição ao curso." {...field}/>
+                  <Textarea id='descricao' className={formUpdate.formState.errors.descricao?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+                  'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'} placeholder="Dê uma descrição ao curso." {...field}/>
                   <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
               )}/>
@@ -478,7 +483,7 @@ export default function Subject(){
          </tfoot>
          </table>
      </div>
-    
+    </div>
      </div>
 
 {showModal &&

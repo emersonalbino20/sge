@@ -24,6 +24,7 @@ import InputMask from 'react-input-mask'
 import { AroundDiv, CombineButton, EditButton, InfoButton, LibraryButton, TrashButton, UserPlusButton } from './MyButton'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import Header from './Header'
+import { useHookFormMask, withMask } from 'use-mask-input'
 
 const TForm =  z.object({
   nomeCompleto: nomeCompletoZod,
@@ -72,10 +73,14 @@ export default function Teacher (){
     resolver: zodResolver(TForm)
    })
 
+   const {formState:{ errors }, register} = form;
+   const registerWithMask = useHookFormMask(register);
+
    const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
     mode: 'all', 
     resolver: zodResolver(TFormUpdate)
    })
+   const upWithMask = useHookFormMask(formUpdate.register)
 
    const formConnect  = useForm<z.infer<typeof TFormConnect>>({
     mode: 'all', 
@@ -401,7 +406,8 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
     return(<section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
     <Header title={false}/>
        
-         <div className='flex flex-col space-y-2 justify-center w-[90%] z-10 '> 
+         <div className='flex flex-col space-y-2 justify-center items-center w-full'> 
+         <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
           <div className='flex flex-row space-x-2'>
             <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
                 <Search className='absolute text-gray-300'/>            
@@ -417,10 +423,10 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
-        <DialogTitle>Cadastrar Registro</DialogTitle>
+        <DialogTitle className='text-sky-800 text-xl'>Cadastrar Registro</DialogTitle>
         <DialogDescription>
-          <p>
-          preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
+          <p className='text-base text-gray-800'>
+          preencha o formulário e em seguida click em <span className='font-bold text-sky-700'>cadastrar</span> quando terminar.
         </p>
         </DialogDescription>
       </DialogHeader>
@@ -428,8 +434,7 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
      <form onSubmit={form.handleSubmit(handleSubmitCreate)} >
       <div className="flex flex-col w-full py-4 bg-white">
         <div className="w-full">
-          <Label htmlFor="name" className="text-right">
-            Nome
+          <Label htmlFor="name"className='text-sky-700 text-lg font-semibold'>Nome Completo<span className='text-red-500'>*</span>
           </Label>
           <FormField
           control={form.control}
@@ -437,34 +442,30 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
           render={({field})=>(
           <FormItem>
            <FormControl>
-          <Input 
-            id="name"
-            className="w-full"
-            {...field}
-          />
+           <Input type='text' {...field} 
+            className={errors.nomeCompleto?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
           </FormControl>
-          <FormMessage className='text-red-500 text-xs'/>
+          <FormMessage className='text-red-500 text-base'/>
           </FormItem>
         )}
-           />
-          <Label htmlFor="date" className="text-right">
-            Data de Nasc
+           />         
+          <Label htmlFor="date"className='text-sky-700 text-lg font-semibold'>Data de Nasc.<span className='text-red-500'>*</span>
           </Label>
-         
             <FormField
           control={form.control}
           name="dataNascimento"
           render={({field})=>(
             <FormItem>
             <FormControl>
-          <Input id="date" type='date' {...field} className="w-full" max="2002-12-31" min="1960-01-01"/>
+            <Input  id="date" type='date' {...field}  
+            className={errors.dataNascimento?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
           </FormControl>
-          <FormMessage className='text-red-500 text-xs'/>
+          <FormMessage className='text-red-500 text-base'/>
           </FormItem>
         )}/>
-        
-        <Label htmlFor="email" className="text-right">
-            @Email
+          <Label htmlFor="email"className='text-sky-700 text-xl font-semibold'>Email<span className='text-red-500'>*</span>
           </Label>
       <FormField
           control={form.control}
@@ -472,16 +473,15 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
           render={({field})=>(
             <FormItem>
             <FormControl>
-          <Input
-            id="email"
-            className="w-full"
-          {...field}/>
+            <Input  id="email" type='email' {...field}
+            className={errors.email?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
+          
           </FormControl>
-          <FormMessage className='text-red-500 text-xs'/>
+          <FormMessage className='text-red-500 text-base'/>
           </FormItem>
         )}/>
-         <Label htmlFor="tel" className="text-right">
-            Telefone
+          <Label htmlFor="tel"className='text-sky-700 text-lg font-semibold'>Telefone<span className='text-red-500'>*</span>
           </Label>
       <FormField
           control={form.control}
@@ -489,22 +489,10 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
           render={({field})=>(
             <FormItem>
             <FormControl>
-            <InputMask
-                mask="999999999"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-            >
-                {(inputProps) => (
-                    <Input
-                        {...inputProps}
-                        className={'placeholder-gray-200 placeholder-opacity-55'
-                        }
-                        type="text"
-                    />
-                )}
-            </InputMask></FormControl>
-          <FormMessage className='text-red-500 text-xs'/>
+            <Input {...registerWithMask('telefone',['999999999'], {required: true})} className={errors.telefone?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
+            </FormControl>
+          <FormMessage className='text-red-500 text-base'/>
           </FormItem>
         )}/>
         </div>
@@ -514,9 +502,8 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
               name="disciplinas"
               render={({field})=>(
               <FormItem>
-                <Label htmlFor="disciplina" className="text-right">
-                Leciona
-              </Label>
+                <Label htmlFor="disciplina"className='text-sky-700 text-lg font-semibold'>Leciona<span className='text-red-500'>*</span>
+          </Label>
                   <FormControl>
                   <Select
                   name="disciplinas"
@@ -527,7 +514,7 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
                   classNamePrefix="select"
                 />
                   </FormControl>
-                <FormMessage className='text-red-500 text-xs'/>
+                <FormMessage className='text-red-500 text-base'/>
               </FormItem>)
               }
               />
@@ -556,7 +543,7 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
                     <tr className='w-96 h-32'>
                         <td rowSpan={4} colSpan={4} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                             <div>
-                                <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
+                                <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
                                 <p>Nenum Registro Foi Encontrado</p>
                             </div>
                         </td>
@@ -577,11 +564,13 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
                                       </DialogTrigger>
                                       <DialogContent className="sm:max-w-[425px] bg-white">
                                         <DialogHeader>
-                                          <DialogTitle>Actualizar Registro</DialogTitle>
-                                          <DialogDescription>
-                                          <p>altere uma informação do registro click em <span className='font-bold text-green-500'>actualizar</span> quando terminar.</p>
-                                          </DialogDescription>
-                                        </DialogHeader>
+                                        <DialogTitle className='text-sky-800 text-xl'>Actualizar Registro</DialogTitle>
+                                  <DialogDescription>
+                                    <p className='text-base text-gray-800'>
+                                    altere uma informação do registro click em <span className='font-bold text-sky-700'>actualizar</span> quando terminar.
+                                  </p>
+                                  </DialogDescription>
+                                    </DialogHeader>
                                         <Form {...formUpdate} >
                                       <form onSubmit={formUpdate.handleSubmit(handleSubmitUpdate)} >
                                       <FormField
@@ -591,7 +580,8 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
                                               <FormControl>
                                             <Input 
                                             type='hidden'
-                                              className="w-full"
+                                            
+                                              className={"w-full"}
                                               
                                               {...field} 
                                               
@@ -604,44 +594,42 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
                                     
                                         <div className="flex flex-col w-full py-4 bg-white">
                                           <div className="w-full">
-                                            <Label htmlFor="name" className="text-right">
-                                              Nome
-                                            </Label>
-                                            <FormField
-                                            control={formUpdate.control}
-                                            name="nomeCompleto"
-                                            render={({field})=>(
-                                            <FormItem>
-                                            <FormControl>
-                                            <Input 
-                                              id="name"
-                                              className="w-full"
-                                              {...field}
-                                            />
-                                            </FormControl>
-                                            <FormMessage className='text-red-500 text-xs'/>
-                                            </FormItem>
-                                          )}
-                                            />
-                                            <Label htmlFor="date" className="text-right">
-                                              Data de Nasc
-                                            </Label>
-                                          
-                                              <FormField
-                                            control={formUpdate.control}
-                                            name="dataNascimento"
-                                            render={({field})=>(
-                                              <FormItem>
-                                              <FormControl>
-                                            <Input id="date" type='date' {...field} className="w-full" max="2002-12-31" min="1960-01-01"/>
-                                            </FormControl>
-                                            <FormMessage className='text-red-500 text-xs'/>
-                                            </FormItem>
-                                          )}/>
-                                          
-                                          <Label htmlFor="email" className="text-right">
-                                              @Email
-                                            </Label>
+                                  <Label htmlFor="name"className='text-sky-700 text-lg font-semibold'>Nome Completo<span className='text-red-500'>*</span>
+                                  </Label>
+                                  <FormField
+                                  control={formUpdate.control}
+                                  name="nomeCompleto"
+                                  render={({field})=>(
+                                  <FormItem>
+                                  <FormControl>
+                                  <Input 
+                                    id="name"
+                                    className={formUpdate.formState.errors.nomeCompleto?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+                                    'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+                                    {...field}
+                                  />
+                                  </FormControl>
+                                  <FormMessage className='text-red-500 text-xs'/>
+                                  </FormItem>
+                                )}
+                                  />
+                                   <Label htmlFor="date"className='text-sky-700 text-lg font-semibold'>Data de Nasc.<span className='text-red-500'>*</span>
+                                    </Label>
+                                  
+                                      <FormField
+                                    control={formUpdate.control}
+                                    name="dataNascimento"
+                                    render={({field})=>(
+                                      <FormItem>
+                                      <FormControl>
+                                    <Input id="date" type='date' {...field} className={formUpdate.formState.errors.dataNascimento?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+                                    'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
+                                    </FormControl>
+                                    <FormMessage className='text-red-500 text-xs'/>
+                                    </FormItem>
+                                  )}/>
+                                      <Label htmlFor="email"className='text-sky-700 text-lg font-semibold'>Email<span className='text-red-500'>*</span>
+                                    </Label>
                                         <FormField
                                             control={formUpdate.control}
                                             name="email"
@@ -650,36 +638,23 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
                                               <FormControl>
                                             <Input
                                               id="email" type='text'
-                                              className="w-full"
+                                          className={formUpdate.formState.errors.email?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+                                              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
                                             {...field}/>
                                             </FormControl>
                                             <FormMessage className='text-red-500 text-xs'/>
                                             </FormItem>
                                           )}/>
-                                          <Label htmlFor="tel" className="text-right">
-                                              Telefone
-                                            </Label>
-                                        <FormField
-                                            control={formUpdate.control}
-                                            name="telefone"
-                                            render={({field})=>(
-                                              <FormItem>
-                                              <FormControl>
-                                              <InputMask
-                                                  mask="999999999"
-                                                  value={field.value}
-                                                  onChange={field.onChange}
-                                                  onBlur={field.onBlur}
-                                              >
-                                                  {(inputProps) => (
-                                                      <Input
-                                                          {...inputProps}
-                                                          className={'placeholder-gray-200 placeholder-opacity-55'
-                                                          }
-                                                          type="text"
-                                                      />
-                                                  )}
-                                              </InputMask>
+                          <Label htmlFor="tel"className='text-sky-700 text-lg font-semibold'>Telefone<span className='text-red-500'>*</span>
+                                    </Label>
+                        <FormField
+                            control={formUpdate.control}
+                            name="telefone"
+                            render={({field})=>(
+                              <FormItem>
+                              <FormControl>
+                              <Input {...upWithMask('telefone',['999999999'], {required: true})} className={formUpdate.formState.errors.telefone?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
+                              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
                                             </FormControl>
                                             <FormMessage className='text-red-500 text-xs'/>
                                             </FormItem>
@@ -698,49 +673,51 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
                                 <LibraryButton/>
                             </div>
                             </DialogTrigger>
-                            <DialogContent className="sm:max-w-[685px] overflow-y-scroll h-[640px] bg-white">
+                            <DialogContent className="sm:max-w-[485px] overflow-y-scroll h-[570px] bg-white">
                               <DialogHeader>
-                                <DialogTitle>Inserir na Classe</DialogTitle>
-                                <DialogDescription>
-                                <p>Adiciona as classes que um professor lecionará no ano acádemico corrente.
-                                </p>
-                                </DialogDescription>
-                             retr
+                              <DialogTitle className='text-sky-800 text-xl'>Delegar Turma</DialogTitle>
+                                  <DialogDescription>
+                                    <p className='text-base text-gray-800'>
+                                    Adicione nessa secção as turmas que um professor poderá lecionar.
+                                  </p>
+                                  </DialogDescription>
                             </DialogHeader>
                               <Form {...formClasse} >
                             <form onSubmit={formClasse.handleSubmit(handleSubmitClasse)} >
-                            <fieldset>
-                                    <legend className='bg-blue-600 w-full h-9 pl-2 mr-2 text-white flex items-center'><p>Informações Essenciais</p></legend>
-                                    <div className='flex flex-col space-y-3 mb-5'>
-                                        <div className='flex flex-col'>
-                                        <FormLabel>Cursos*</FormLabel>
-                                            <select className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={handleGrade}>
-                                              <option >Selecione o curso</option>
-                                              {
-                                                    dataApiCursos.map((field)=>{
-                                                        return <option >{field.nome}</option>
-                                                    })
-                                              }
-                                          </select>
-                                              
-                                        </div>
-                                        <div className='flex flex-col w-full'>
-                                            <FormField
-                                            control={formClasse.control}
-                                            name='classeId'
-                                            render={({field})=>(
-                                            <FormItem>
-                                                <FormLabel>Classes*</FormLabel>
-                                                <FormControl>
-                                                  <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))
-                                                    setIdClasse(parseInt(e.target.value, 10) || 0)
-                                                  }}>
-                                                <option >Selecione a classe</option>
-                                                {
-                                                      grade.map((field)=>{
-                                                          return <option value={`${field.id}`}>{field.nome}</option>
-                                                      })
-                                                }
+                            <div className='flex flex-col space-y-3 mb-5'>
+                                <div className='flex flex-col'>
+                                  <Label htmlFor="curso"className='text-sky-700 text-lg font-semibold'>Cursos<span className='text-red-500'>*</span>
+                              </Label>
+                              <select id='cursos' className={'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} onChange={handleGrade}>
+                                    <option >Selecione o curso</option>
+                                    {
+                                          dataApiCursos.map((field)=>{
+                                              return <option >{field.nome}</option>
+                                          })
+                                    }
+                                </select>
+                                    
+                              </div>
+                              <div className='flex flex-col w-full'>
+                              <FormField
+                              control={formClasse.control}
+                              name='classeId'
+                              render={({field})=>(
+                              <FormItem>
+                               <Label htmlFor="classe"className='text-sky-700 text-lg font-semibold'>Classes<span className='text-red-500'>*</span>
+                                    </Label>
+                                  <FormControl>
+                                    <select id='classe' {...field} className={
+                      formClasse.formState.errors.classeId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
+                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                                      setIdClasse(parseInt(e.target.value, 10) || 0)
+                                    }}>
+                                  <option >Selecione a classe</option>
+                                  {
+                                        grade.map((field)=>{
+                                            return <option value={`${field.id}`}>{field.nome}</option>
+                                        })
+                                  }
                                             </select>
                                                 </FormControl>
                                                 <FormMessage className='text-red-500 text-xs'/>
@@ -749,56 +726,59 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
                                             />
                                             </div>
                                             <div className='flex flex-col w-full'>
-                                            <FormField
-                                            control={formClasse.control}
-                                            name='turmaId'
-                                            render={({field})=>(
-                                            <FormItem>
-                                                <FormLabel>Turmas*</FormLabel>
-                                                <FormControl>
-                                                <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
-                                                <option >Selecione a turma</option>
-                                                {
-                                                      turma.map((field)=>{
-                                                          return <option value={`${field.id}`}>{field.nome}</option>
-                                                      })
-                                                }
-                                            </select>
-                                                </FormControl>
-                                                <FormMessage className='text-red-500 text-xs'/>
-                                            </FormItem>)
-                                            }
-                                            />
-                                            </div>
-                                            <div className="w-full">
-                                            <FormField
-                                      control={formClasse.control}
-                                      name="disciplinaId"
-                                      render={({field})=>(
-                                      <FormItem>
-                                        <Label htmlFor="disciplina" className="text-right">
-                                        Disciplinas Curricular
-                                      </Label>
-                                          <FormControl>
-                                          <FormControl>
-                                                <select {...field} className='w-full py-3 rounded-sm ring-1 ring-gray-300 bg-white text-gray-500 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
-                                                <option >Selecione a disciplina</option>
-                                                {
-                                                      disciplinaProf.map((field)=>{
-                                                          return <option value={`${field.id}`}>{field.nome}</option>
-                                                      })
-                                                }
-                                            </select>
-                                                </FormControl>
-                                          </FormControl>
-                                        <FormMessage className='text-red-500 text-xs'/>
-                                      </FormItem>)
-                                      }
-                                      />
+                                <FormField
+                                control={formClasse.control}
+                                name='turmaId'
+                                render={({field})=>(
+                                <FormItem>
+                                    <Label htmlFor="turma"className='text-sky-700 text-lg font-semibold'>Turmas<span className='text-red-500'>*</span>
+                                    </Label>
+                                    <FormControl>
+                                    <select id='turma' {...field} className={
+                      formClasse.formState.errors.turmaId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
+                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                                    <option >Selecione a turma</option>
+                                    {
+                                          turma.map((field)=>{
+                                              return <option value={`${field.id}`}>{field.nome}</option>
+                                          })
+                                    }
+                                </select>
+                                    </FormControl>
+                                    <FormMessage className='text-red-500 text-xs'/>
+                                </FormItem>)
+                                }
+                                />
+                               </div>
+                                <div className="w-full">
+                                <FormField
+                          control={formClasse.control}
+                          name="disciplinaId"
+                          render={({field})=>(
+                          <FormItem>
+                           <Label htmlFor="disciplina"className='text-sky-700 text-lg font-semibold'>Disciplinas Curriculares<span className='text-red-500'>*</span>
+                                    </Label>
+                              <FormControl>
+                              <FormControl>
+                                    <select id='disciplina' {...field} className={
+                      formClasse.formState.errors.disciplinaId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
+                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                                    <option >Selecione a disciplina</option>
+                                    {
+                                          disciplinaProf.map((field)=>{
+                                              return <option value={`${field.id}`}>{field.nome}</option>
+                                          })
+                                    }
+                                </select>
+                                    </FormControl>
+                              </FormControl>
+                            <FormMessage className='text-red-500 text-xs'/>
+                          </FormItem>)
+                          }
+                          />
+                          </div>
+                          
                                       </div>
-                                      
-                                        </div>
-                                        </fieldset>
                               
                               <DialogFooter>
                                 <Button className='bg-blue-600 border-blue-600 text-white hover:bg-blue-600 font-semibold w-12' onClick={()=>{ formClasse.setValue('idProfessor', item.id);}} type='submit' 
@@ -1013,7 +993,7 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
             </tfoot>
             </table>
         </div>
-       
+        </div>
         </div>
 
   {showModal &&
