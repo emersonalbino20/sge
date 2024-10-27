@@ -24,7 +24,7 @@ import InputMask from 'react-input-mask'
 import { AroundDiv, CombineButton, EditButton, InfoButton, LibraryButton, TrashButton, UserPlusButton } from './MyButton'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import Header from './Header'
-import { useHookFormMask, withMask } from 'use-mask-input'
+import { useHookFormMask } from 'use-mask-input'
 
 const TForm =  z.object({
   nomeCompleto: nomeCompletoZod,
@@ -564,36 +564,36 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
                                       </DialogTrigger>
                                       <DialogContent className="sm:max-w-[425px] bg-white">
                                         <DialogHeader>
-                                        <DialogTitle className='text-sky-800 text-xl'>Actualizar Registro</DialogTitle>
+                                    <DialogTitle className='text-sky-800 text-xl'>Actualizar Registro</DialogTitle>
                                   <DialogDescription>
                                     <p className='text-base text-gray-800'>
                                     altere uma informação do registro click em <span className='font-bold text-sky-700'>actualizar</span> quando terminar.
                                   </p>
                                   </DialogDescription>
-                                    </DialogHeader>
-                                        <Form {...formUpdate} >
-                                      <form onSubmit={formUpdate.handleSubmit(handleSubmitUpdate)} >
-                                      <FormField
-                                            control={formUpdate.control}
-                                            name="id"
-                                            render={({field})=>(
-                                              <FormControl>
-                                            <Input 
-                                            type='hidden'
-                                            
-                                              className={"w-full"}
-                                              
-                                              {...field} 
-                                              
-                                              onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
-                                            
-                                            />
-                                            </FormControl>
-                                          )}
-                                            />
+                           </DialogHeader>
+                                <Form {...formUpdate} >
+                              <form onSubmit={formUpdate.handleSubmit(handleSubmitUpdate)} >
+                              <FormField
+                                    control={formUpdate.control}
+                                    name="id"
+                                    render={({field})=>(
+                                      <FormControl>
+                                    <Input 
+                                    type='hidden'
                                     
-                                        <div className="flex flex-col w-full py-4 bg-white">
-                                          <div className="w-full">
+                                      className={"w-full"}
+                                      
+                                      {...field} 
+                                      
+                                      onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
+                                    
+                                    />
+                                    </FormControl>
+                                  )}
+                                    />
+                            
+                                <div className="flex flex-col w-full py-4 bg-white">
+                                  <div className="w-full">
                                   <Label htmlFor="name"className='text-sky-700 text-lg font-semibold'>Nome Completo<span className='text-red-500'>*</span>
                                   </Label>
                                   <FormField
