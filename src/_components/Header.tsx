@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { ArrowDown, ArrowRight, ChevronDown, ChevronUp, Clock, HomeIcon } from 'lucide-react';
-import IPPUImage from '../assets /_images/IPPU.png'
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import IPPUImage from './../assets/images/IPPU.png'
 import {Link, useNavigate} from 'react-router-dom'
-import { getCookies, removeCookies } from '@/_cookies/Cookies';
-import { Navigate } from "react-router-dom";
+import { removeCookies } from '@/_cookies/Cookies';
 
 export default function Header({title}){
 
@@ -12,41 +11,17 @@ export default function Header({title}){
         removeCookies('user')
         nav('/');
     }
-    const listMarked = "relative flex flex-flex items-center  cursor-pointer pr-3 pl-3  bg-[#1c64f2] hover:bg-[#2e6fee] p-2 rounded-md font-semibold capitalize text-base md:text-lg text-xl hover:underline ";
-    const list = "bg-transparent p-2 rounded-md font-medium cursor-pointer hover:bg-[#293a52] text-base md:text-lg text-xl";
-    const subList = "bg-transparent p-2 rounded-md font-medium cursor-pointer hover:bg-[#424e5f] text-base md:text-lg text-xl";
-    const dropdown = "bg-transparent p-2 rounded-md font-medium flex flex-row justify-between pr-2 cursor-pointer hover:bg-[#293a52] text-base md:text-lg text-xl";
+   
 
     const [openPessoal, setOpenPessoal] = React.useState(false);
     const [openAcade, setOpenAcade] = React.useState(false);
     const [openTurma, setOpenTurma] = React.useState(false);
-    const [openMenu, setOpenMenu] = React.useState(false);
 
-    const [time, setTime] = React.useState(new Date())
     
-    React.useEffect(() =>{
+    
+    
 
-      const intervalId = setInterval(()=>{
-        setTime(new Date())
-      },1000);
-
-      return ()=>{
-        clearInterval(intervalId)
-      }
-
-    }, [])
-    function formatDate() {
-      let hours = time.getHours();
-      let minutes = time.getMinutes();
-      let seconds = time.getSeconds();
-      let turno = ''
-      
-      return `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)} ${turno}`
-    }
-
-    function padZero(number) {
-      return (number < 10 ? '0' : '') + number
-    }
+  
     const [openSubMenu, setOpenSubMenu] = React.useState(null);
 
     const handleMouseEnter = (menu) => {
@@ -85,7 +60,7 @@ export default function Header({title}){
                     setOpenAcade(false)
                     setOpenPessoal(false)
                     }}
-                    onMouseEnter={() => handleMouseEnter(3)} 
+                    onMouseEnter={() => {return handleMouseEnter(3)}} 
                     className='font-semibold text-orange-500'><span className='flex space-x-1 line-clamp-2'><p>Gestão de Turma</p> {openSubMenu === 3 ? <ChevronUp className='w-6 h-8'/> : <ChevronDown className='w-6 h-8'/>}</span>
                       {openSubMenu === 3 &&(
                     <ul className='animate-jump-in animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-out show z-20 absolute mt-4 bg-white text-orange-500 md md:text-md lg:text-lg xl:text-xl text-left p-4 rounded-bl-md rounded-br-md w-56' onMouseLeave={handleMouseLeave}>
@@ -100,7 +75,7 @@ export default function Header({title}){
                     setOpenPessoal(false)
                     setOpenTurma(false)
                     }} 
-                    onMouseEnter={() => handleMouseEnter(2)}
+                    onMouseEnter={() => {return handleMouseEnter(2)}}
                     className='font-semibold text-orange-500'>
                       <span className='flex space-x-1 line-clamp-2'><p>Gestão Ácademica</p> {openSubMenu === 2 ? <ChevronUp className='w-6 h-8'/> : <ChevronDown className='w-6 h-8'/>}</span>
                       {openSubMenu === 2 &&(
@@ -116,7 +91,7 @@ export default function Header({title}){
                     setOpenAcade(false)
                     setOpenTurma(false)
                     }} className='font-semibold text,-orange-500'
-                    onMouseEnter={() => handleMouseEnter(1)} 
+                    onMouseEnter={() => {return handleMouseEnter(1)}} 
                     
                     ><span className='flex space-x-2 line-clamp-2'><p>Pessoal</p> {openSubMenu === 1 ? <ChevronUp className='w-6 h-8'/> : <ChevronDown className='w-6 h-8'/>}</span>
                     {openSubMenu === 1 &&(
@@ -132,7 +107,7 @@ export default function Header({title}){
                 </div>
                 
             </nav>
-            {title && !openMenu && 
+            {(title && false) && 
             <div className='w-full flex justify-center'>
             <div className='w-[90%] bg-slate-700 md:bg-gray-300 rounded-b-lg h-10
             md:pt-4 lg:pt-4 md:h-14 lg:h-14'>

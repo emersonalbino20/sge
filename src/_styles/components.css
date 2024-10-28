@@ -16,8 +16,3 @@
 .buttonGreen:active{
     @apply ring-2 ring-greenRing
 }
-
-/*.input-std
-{
-    @apply rounded-md focus:ring-blue-400 focus:ring-1 focus:border-blue-400
-}*/

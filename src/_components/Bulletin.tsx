@@ -1,7 +1,6 @@
 import { AlertCircleIcon, AlertTriangle, Check, CheckCircleIcon, Edit, InfoIcon, Save, SaveIcon, Search } from 'lucide-react';
 import * as React from 'react';
 import { tdStyle, thStyle, trStyle } from './table';
-import Select from 'react-select';
 import { idZod } from '@/_zodValidations/validations';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Link } from 'react-router-dom';
 import Header from './Header';
-import IPPUImage from '../assets /_images/IPPU.png'
+import IPPUImage from './../assets/images/IPPU.png'
 import './stepper.css';
 
 const TForm = z.object({

@@ -189,6 +189,7 @@ const handleSubmitCreate = async (dados: z.infer<typeof TFormCreate>) => {
             setModalMessage(null);
         } else {
             const errorData = await response.json();
+            
             console.error('Erro ao gerar PDF:', response.statusText, errorData);
             let index = Object.values(errorData.errors.aluno)
             let conv = parseInt(String(Object.keys(index)))

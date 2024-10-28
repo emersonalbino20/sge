@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import IPPUImage from '../assets /_images/IPPU.png'
+import IPPUImage from './../assets/images/IPPU.png'
 import Footer from './Footer'
 import Cards from './Cards'
 import Header from './Header'
