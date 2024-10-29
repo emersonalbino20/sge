@@ -33,6 +33,7 @@ import { table } from 'console'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import { Link } from 'react-router-dom'
 import Header from './Header'
+import { animateBounce } from '@/AnimationPackage/Animates'
 
 
 const TFormCreate =  z.object(
@@ -282,7 +283,7 @@ const changeResource = (id)=>{
         <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
        <div className='flex flex-row space-x-2'>
          <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
-             <select className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3'  onChange={handleFilter} >
+             <select className='pl-3'  onChange={handleFilter} >
               <option>Selecione o curso</option>
               {
                   dataApi.map((field)=>{
@@ -523,8 +524,8 @@ const changeResource = (id)=>{
                  <tr className='w-96 h-32'>
                      <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                          <div>
-                             <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
-                             <p>Nenum Registro Foi Encontrado</p>
+                         <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
+                              <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
                          </div>
                      </td>
                  </tr>

@@ -34,6 +34,7 @@ import { MyDialog, MyDialogContent } from './my_dialog'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import { Link } from 'react-router-dom'
 import Header from './Header'
+import { animateBounce } from '@/AnimationPackage/Animates'
 
 const TFormCreate =  z.object({
   nome: nomeCursoZod,
@@ -280,9 +281,9 @@ React.useEffect(()=>{
       { idAno == 0 ? <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
       <div className='w-full text-center text-4xl text-red-600 md:text-2xl lg:text-2xl'>
           <div >
-              <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
-              <p>SELECIONE O ANO LECTIVO</p>
-              <p className='italic font-semibold text-sm cursor-pointer'><Link to={'/AcademicYearPage'}>Selecionar agora</Link></p>
+              <AlertTriangle className={`${animateBounce} inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12`}/>
+              <p className='text-red-500'>SELECIONE O ANO LECTIVO</p>
+              <p className='text-red-500 italic font-semibold text-sm cursor-pointer'><Link to={'/AcademicYearPage'}>Selecionar agora</Link></p>
           </div>
       </div>
         </div> : (
@@ -294,8 +295,8 @@ React.useEffect(()=>{
           
        <div className='flex flex-row space-x-2'>
          <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
-             <Search className='absolute text-gray-300'/>            
-             <input className=' pl-6 rounded-md border-2 border-gray-400 placeholder:text-gray-400 placeholder:font-bold outline-none py-2 w-full indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
+             <Search className='absolute text-gray-300 w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7'/>            
+             <Input className=' pl-6  indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
          </div>
          <Dialog>
     <DialogTrigger asChild>
@@ -386,8 +387,8 @@ React.useEffect(()=>{
                  <tr className='w-96 h-32'>
                      <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                          <div>
-                             <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
-                             <p>Nenum Registro Foi Encontrado</p>
+                         <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
+                              <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
                          </div>
                      </td>
                  </tr>
@@ -615,19 +616,19 @@ React.useEffect(()=>{
                           <PopoverContent className="w-80 bg-white">
                             <div className="grid gap-4">
                               <div className="space-y-2">
-                                <h4 className="font-medium leading-none">Dados do Curso</h4>
+                                <h4 className="font-medium leading-none text-gray-800">Dados do Curso</h4>
                                 <p className="text-sm text-muted-foreground">
                                   Inspecione os dados do curso
                                 </p>
                               </div>
                               <div className="grid gap-2">
                                 
+                              <div className="">
+                            <label htmlFor="height">Descrição</label>
+                            <p className='indent-2 text-justify text-xs text-pretty'>{descricao}</p>
+                            </div>
                                 <div className="grid grid-cols-3 items-center gap-4">
-                                  <Label htmlFor="height">Descrição</Label>
-                                  <p className='text-xs'>{descricao}</p>
-                                </div>
-                                <div className="grid grid-cols-3 items-center gap-4">
-                                  <Label htmlFor="height">Duração</Label>
+                                  <label htmlFor="height">Duração</label>
                                   <p className='text-xs'>{duracao} Anos</p>
                                 </div>
                               </div>

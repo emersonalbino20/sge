@@ -5,6 +5,7 @@ import Footer from './Footer'
 import Cards from './Cards'
 import Header from './Header'
 import SideBar from './SideBar'
+import { animateFadeLeft } from '@/AnimationPackage/Animates'
 
 export default function HomeBody() {
     const scrollRef = React.useRef(null);
@@ -26,7 +27,7 @@ export default function HomeBody() {
   
     return (<><section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
       <Header title={false}/>
-          <div className="w-full pt-32 items-center justify-center px-4 mx-auto max-w-screen-xl text-center">
+          <div className="w-full pt-14 items-center justify-center px-4 mx-auto max-w-screen-xl text-center">
             <div className="flex flex-col justify-center items-center w-full">
               <img src={IPPUImage} className="md:h-20 md:w-20 lg:h-32 lg:w-32 xl:h-36 xl:w-36" alt="IPPU Logo" />
               <h1 className="animate-fade-up animate-duration-[750ms] animate-delay-200 animate-ease-in mb-2 md:text-md lg:text-lg xl:text-[2rem] capitalize font-medium tracking-wide text-gray-700 ">
@@ -37,10 +38,10 @@ export default function HomeBody() {
               Aqui na IPPU focamos em melhorar, ensinar e orientar nossos estudantes, com o mais alto escalão de ensino, com nossos profissionais vamos longe!
             </p>
   
-            <div className="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0">
+            <div className={`${animateFadeLeft} flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0`}>
               <Link to="/StudentInsertPage">
-                <button className="inline-flex justify-center items-center 
-                md:py-1 md:px-2 lg:py-1 lg:px-3 xl:py-2 xl:px-4 text-base font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900 ">
+                <button className=" inline-flex justify-center items-center sm:text-sm md:text-[10px] lg:text-[12px] xl:text-[16px]
+                md:py-1 md:px-2 lg:py-1 lg:px-3 xl:py-2 xl:px-4 text-base font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300">
                   Dar início
                   <svg
                     className="w-3.5 h-3.5 ms-2 rtl:rotate-180"
@@ -59,7 +60,7 @@ export default function HomeBody() {
                   </svg>
                 </button>
               </Link>
-              <button className="inline-flex justify-center hover:text-gray-900 items-center md:py-1 md:px-2 lg:py-2 lg:px-3 xl:py-3 xl:px-4  text-base font-medium text-center text-black rounded-lg border border-white hover:bg-white focus:ring-4 focus:ring-gray-400">
+              <button className="inline-flex justify-center hover:text-gray-900 items-center sm:text-sm md:text-[10px] lg:text-[12px] xl:text-[16px] xl:px-4  text-base font-medium text-center text-black rounded-lg border border-white hover:bg-white focus:ring-4 focus:ring-gray-400">
                 Saber mais
               </button>
             </div>
@@ -68,10 +69,10 @@ export default function HomeBody() {
               ref={scrollRef}
               className="flex flex-row space-x-2 overflow-x-auto w-full mt-8 mb-5"
             >
-              <Cards bgColor="bg-blue-600" textColor="text-white" titleColor="text-yellow-300" />
+              {/*<Cards bgColor="bg-blue-600" textColor="text-white" titleColor="text-yellow-300" />
               <Cards bgColor="bg-red-600" textColor="text-white" titleColor="text-yellow-300" />
               <Cards bgColor="bg-green-600" textColor="text-white" titleColor="text-yellow-300" />
-              <Cards bgColor="bg-pink-600" textColor="text-white" titleColor="text-yellow-300" />
+              <Cards bgColor="bg-pink-600" textColor="text-white" titleColor="text-yellow-300" />*/}
             </div>
           </div>
           

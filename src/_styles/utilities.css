@@ -1,0 +1,12 @@
+.input-confirm{
+    @apply border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500;
+}
+.input-error{
+    @apply border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500;
+}
+.select-error{
+    @apply border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500;
+}
+.icon-size{
+    @apply h-5 w-5 sm:h-4 sm:w-4 md:h-6 md:w-6 lg:w-7 lg:h-7 xl:h-9 xl:w-9; 
+}

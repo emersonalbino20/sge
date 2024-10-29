@@ -2,9 +2,9 @@ import * as React from 'react';
 import { AroundDiv, EditButton, InfoButton, TrashButton } from './MyButton';
 import { AlertTriangle, Search } from 'lucide-react';
 
-export const trStyle = "text-base md:text-lg lg:text-xl text-blue-500 h-14 bg-gradient-to-r from-gray-300 via-gray-300 to-gray-200 md:h-14";
-export const thStyle = "text-base md:text-lg lg:text-xl py-2 px-4 border-b border-gray-200 text-left";
-export const tdStyle = "text-base md:text-lg lg:text-xl py-2 px-4 border-b border-gray-200";
+export const trStyle = "text-base sm:text-xs md:text-[14px] lg:text-[16px] xl:text-lg text-blue-500 bg-gradient-to-r from-gray-300 via-gray-300 to-gray-200 ";
+export const thStyle = "text-base md:text-[14px] lg:text-[16px] xl:text-[18px] py-2 px-4 border-b border-gray-200 text-left";
+export const tdStyle = "text-base sm:text-xs md:text-[14px] lg:text-[16px] xl:text-lg py-2 px-4 border-b border-gray-200";
 export const tdStyleButtons = "w-full py-2 px-4 border-b border-gray-200 lg:justify-center md:justify-center flex lg:flex-row md:flex-row lg:space-x-2 md:space-x-2 lg:space-y-0 md:space-y-0 flex-col items-center space-y-2";
 
 const Tabela = () => {

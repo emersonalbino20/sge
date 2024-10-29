@@ -40,6 +40,7 @@ import Select from 'react-select';
 import { MyDialog, MyDialogContent } from './my_dialog'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import Header from './Header'
+import { animateBounce } from '@/AnimationPackage/Animates'
 
 
 
@@ -238,8 +239,8 @@ export default function Subject(){
         <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
        <div className='flex flex-row space-x-2'>
          <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
-             <Search className='absolute text-gray-300'/>            
-             <input className=' pl-6 rounded-md border-2 border-gray-400 placeholder:text-gray-400 placeholder:font-bold outline-none py-2 w-full indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
+             <Search className='absolute text-gray-300 w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7'/>            
+             <Input className=' pl-6 indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
          </div>
          <Dialog >
     <DialogTrigger asChild>
@@ -315,9 +316,9 @@ export default function Subject(){
                  <tr className='w-96 h-32'>
                      <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                          <div>
-                             <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
-                             <p>Nenum Registro Foi Encontrado</p>
-                         </div>
+                         <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
+                              <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
+                              </div>
                      </td>
                  </tr>
                  ) : dados.map((item, index) => (
@@ -455,15 +456,15 @@ export default function Subject(){
                       <PopoverContent className="w-80 bg-white">
                         <div className="grid gap-4">
                           <div className="space-y-2">
-                            <h4 className="font-medium leading-none">Dados da Disiciplina</h4>
+                            <h4 className="font-medium leading-none text-gray-800">Dados da Disiciplina</h4>
                             <p className="text-sm text-muted-foreground">
                               Inspecione os dados da displina
                             </p>
                           </div>
                           <div className="grid gap-2">
-                            <div className="w-full flex space-x-2">
-                              <Label htmlFor="maxWidth" className='font-semibold'>Descrição:</Label>
-                              <p className='text-sm lowercase'>{descricao}</p>
+                          <div className="">
+                            <label htmlFor="height">Descrição</label>
+                            <p className='indent-2 text-justify text-xs text-pretty'>{descricao}</p>
                             </div>
                           </div>
                         </div>

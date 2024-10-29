@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 import Header from './Header';
 import IPPUImage from './../assets/images/IPPU.png'
 import './stepper.css';
+import { animateBounce, animateFadeLeft, animatePing, animateShake } from '@/AnimationPackage/Animates';
 
 const TForm = z.object({
   alunoId: idZod,
@@ -121,23 +122,12 @@ export default function Bulletin() {
   const columnsClasse = ['Id', 'Nome', 'Nota', 'Acção'];
   React.useEffect(() => {
     const search = async () => {
-      const URL = "http://localhost:8000/api/professores/45/classes";
+      const URL = "http://localhost:8000/api/professores/48/classes";
       const response = await fetch(URL);
       const responseJson = await response.json();
-      
-      // Filtra cursos únicos pelo nome
-      const uniqueCursos = responseJson.data.reduce((acc, current) => {
-        const x = acc.find(item => item.curso.nome === current.curso.nome);
-        if (!x) {
-          return acc.concat([current]);
-        } else {
-          return acc;
-        }
-      }, []);
-      
-      setCursos(uniqueCursos);
+      setCursos(responseJson.data);
 
-      const URLDISC = "http://localhost:8000/api/professores/45/disciplinas";
+      const URLDISC = "http://localhost:8000/api/professores/48/disciplinas";
       const responseDisc = await fetch(URLDISC);
       const responseDiscJson = await responseDisc.json();
       setDisciplinas(responseDiscJson.data);
@@ -242,20 +232,19 @@ const clickBuscarNotas = async (idAluno) => {
 
   return (<>
       
-    { idAno == 0 ?  <section className="w-screen min-h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
-      <Header title={false}/> 
+    { idAno == 0 ? <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
       <div className='w-full text-center text-4xl text-red-600 md:text-2xl lg:text-2xl'>
-          <div>
-              <AlertTriangle className="inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
-              <p>SELECIONE O ANO LECTIVO</p>
-              <p className='italic font-semibold text-sm cursor-pointer'><Link to={'/AcademicYearPage'}>Selecionar agora</Link></p>
+          <div >
+          <AlertTriangle className={`${animateBounce} inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12`}/>
+              <p className='text-red-500'>SELECIONE O ANO LECTIVO</p>
+              <p className='text-red-500 italic font-semibold text-sm cursor-pointer'><Link to={'/AcademicYearPage'}>Selecionar agora</Link></p>
           </div>
       </div>
-        </section> : (
+        </div> : (
       <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
          <Header title={false}/> 
          <div className='flex flex-col space-y-2 justify-center items-center w-full'>
-         <div className='flex justify-center items-center '>
+         <div className='flex justify-center items-center text-sm'>
             <div className='flex justify-between'>{
             step?.map((step, i) => 
                 (
@@ -263,45 +252,39 @@ const clickBuscarNotas = async (idAluno) => {
                         <div className='step'>{ 
                         (i + 1 < currentStep || complete) ?
                         <Check/> : i + 1 }</div>
-                        <p className='text-gray-500'>{step}</p>
+                        <p className='text-gray-500 text-base sm:text-xs md:text-[14px] lg:text-[16px] xl:text-lg'>{step}</p>
                     </div>
                     
                 )
                 )}
               </div>
             </div>
-            {currentStep === 1 && ( <div className="animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in w-full max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
+            {currentStep === 1 && ( <div className={`${animateFadeLeft} max-w-md sm:w-[260px] md:w-[300px] lg:w-[380px] xl:w-[400px] p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8`}>
             <Form {...formStepOne} >
         <form >
-                
-                <div className="space-y-6">
-                    <div>
-                <img src={IPPUImage} className="h-20 w-20" alt="Ulumbo Logo" />
-                    <h5 className="text-sky-700 text-2xl font-semibold  ">Preencha A primeira Etapa</h5>
+                <div className="space-y-3 -m-2 -mt-6 -mb-4 sm:max-w-[425px]">
+                    <div className='flex justify-between -mb-6'>
+                      <h1></h1>
+                      <img src={IPPUImage} className="h-20 w-20" alt="Ulumbo Logo" />
                     </div>
-                    <div>
-                     <FormField
+                    <div >
+                        <FormField
                      control={formStepOne.control}
-                    name='cursoId'
+                    name='trimestreId'
                     render={({field})=>(
                     <FormItem>
-                         <label className="text-sky-600 text-lg font-semibold">Cursos<span className='text-red-500'>*</span></label>
+                         <label>Trimestres<span className='text-red-500'>*</span></label>
                         <FormControl>
                     <select {...field}
-                
                     className={
-                      errors.cursoId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} 
-                        onChange={(e)=>{
-                        field.onChange(parseInt(e.target.value))
-                        buscarClasses(e.target.value)
+                      errors.trimestreId?.message && `${animateShake} select-error`}
+                      onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                        setTrimestreId(parseInt(e.target.value, 10) || 0)
                       }}>
-                        <option >Selecione o curso</option>
+                        <option >Selecione o trimestre</option>
                         {
-                            
-                        cursos.map((field)=>{
-                            return (<option value={`${field.curso.id}`}>{field.curso.nome}
-                            </option>
+                        trimestres.map((field)=>{
+                            return (<option value={`${field.id}`}>{field.numero}° Trimestre</option>
                             )
                         })
                                     
@@ -312,22 +295,21 @@ const clickBuscarNotas = async (idAluno) => {
                     </FormItem>)
                     }
                     />
-                    </div>
-                    <div>
+                        </div>
+                        <div>
                     <FormField
                      control={formStepOne.control}
                     name='disciplinaId'
                     render={({field})=>(
                     <FormItem>
-                         <label className="text-sky-600 text-lg font-semibold">Disciplinas<span className='text-red-500'>*</span></label>
+                         <label >Disciplinas<span className='text-red-500'>*</span></label>
                         <FormControl>
                     <select {...field}
                    onChange={(e)=>{field.onChange(parseInt(e.target.value))
                     selecionarDisciplina(e)
                   }}
                     className={
-                      errors.disciplinaId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'}>
+                      errors.disciplinaId?.message && `${animateShake} select-error`}>
                         <option >Selecione a disciplina</option>
                         {
                             
@@ -345,26 +327,24 @@ const clickBuscarNotas = async (idAluno) => {
                     }
                     />
                         </div>
-                        <div>
-                        <FormField
+                    <div>
+                     <FormField
                      control={formStepOne.control}
-                    name='trimestreId'
+                    name='cursoId'
                     render={({field})=>(
                     <FormItem>
-                         <label className="text-sky-600 text-lg font-semibold">Trimestres<span className='text-red-500'>*</span></label>
+                         <label >Classes<span className='text-red-500'>*</span></label>
                         <FormControl>
                     <select {...field}
+                
                     className={
-                      errors.trimestreId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'}
+                      errors.cursoId?.message && `${animateShake} select-error`} 
                       onChange={(e)=>{field.onChange(parseInt(e.target.value))
-                        setTrimestreId(parseInt(e.target.value, 10) || 0)
+                        buscarTurmas(e.target.value)
                       }}>
-                        <option >Selecione o trimestre</option>
                         {
-                            
-                        trimestres.map((field)=>{
-                            return (<option value={`${field.id}`}>{field.inicio} / {field.termino}
+                        cursos.map((field)=>{
+                            return (<option value={`${field.id}`}>{field.nome} Classe ({field.curso.nome})
                             </option>
                             )
                         })
@@ -376,55 +356,21 @@ const clickBuscarNotas = async (idAluno) => {
                     </FormItem>)
                     }
                     />
-                        </div>
-                        <div>
-                        <FormField
-                     control={formStepOne.control}
-                    name='classeId'
-                    render={({field})=>(
-                    <FormItem>
-                         <label className="text-sky-600 text-lg font-semibold">Classes<span className='text-red-500'>*</span></label>
-                        <FormControl>
-                    <select {...field}
-                    onChange={(e)=>{field.onChange(parseInt(e.target.value))
-                      buscarTurmas(e.target.value)
-                    }}
-                    className={
-                      errors.classeId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'}
-                     >
-                        <option >Selecione a classe</option>
-                        {
-                            
-                        classes.map((field)=>{
-                            return (<option value={`${field.id}`}>{field.nome}
-                            </option>
-                            )
-                        })
-                                    
-                        }
-                    </select>
-                        </FormControl>
-                        <FormMessage className='text-red-500 text-xs'/>
-                    </FormItem>)
-                    }
-                    />
-                        </div>
-                        <div>
+                    </div>
+                    <div>
                         <FormField
                      control={formStepOne.control}
                     name='turmaId'
                     render={({field})=>(
                     <FormItem>
-                         <label className="text-sky-600 text-lg font-semibold">Turmas<span className='text-red-500'>*</span></label>
+                         <label >Turmas<span className='text-red-500'>*</span></label>
                         <FormControl>
                     <select {...field}
                     onChange={(e)=>{field.onChange(parseInt(e.target.value))
                     buscarAlunos(e.target.value)
                     }}
                     className={
-                      errors.turmaId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'}
+                      errors.turmaId?.message && `${animateShake} select-error`}
                      >
                         <option >Selecione a turma</option>
                         {
@@ -443,9 +389,8 @@ const clickBuscarNotas = async (idAluno) => {
                     }
                     />
                         </div>
-                        
-                      <button type='reset' onClick={()=>{
-                      const isStep1Valid = !errors.cursoId && !errors.classeId && !errors.disciplinaId && !errors.trimestreId && !errors.turmaId && fieldCursoId && fieldClasseId && fieldDisciplinaId && fieldTrimestreId && fieldTurmaId;
+                      <button type='button' onClick={()=>{
+                      const isStep1Valid = !errors.cursoId && !errors.disciplinaId && !errors.trimestreId && !errors.turmaId && fieldCursoId && fieldDisciplinaId && fieldTrimestreId && fieldTurmaId;
                       if (isStep1Valid) {
                         if (dados.length > 0)
                         {
@@ -458,7 +403,7 @@ const clickBuscarNotas = async (idAluno) => {
                         }
                       }else{setCurrentStep(1)}
                       
-                      }} className='active:animate-ping animate-once animate-duration-500 animate-delay-400 animate-ease-out bg-sky-700 hover:bg-sky-600 text-white font-semibold text-lg px-5 py-1 border-sky-700'>Próximo</button>
+                      }} className='active:animate-ping animate-once animate-duration-500 animate-delay-400 animate-ease-out bg-sky-700 hover:bg-sky-600 text-base sm:text-sm md:text-[10px] lg:text-[12px] xl:text-[16px] text-white font-semibold px-3 py-1 sm:py-[2px] lg:py-1 xl:py-2 border-sky-700'>Próximo</button>
                 </div>
                 </form>
                 </Form>
@@ -466,8 +411,8 @@ const clickBuscarNotas = async (idAluno) => {
             {currentStep === 2 && (
           <div className="animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10">
          <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96 mb-4'>
-         <Search className='absolute text-gray-300'/>            
-         <input className=' pl-6 rounded-md border-2 border-gray-400 placeholder:text-gray-400 placeholder:font-bold outline-none py-2 w-full indent-2' type='text' placeholder='Procure por registros...' />
+         <Search className='absolute text-gray-300 w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7'/>            
+         <Input className=' pl-6 indent-2' type='text' placeholder='Procure por registros...' />
      </div><div className='overflow-x-auto overflow-y-auto w-full  h-80 md:h-1/2 lg:h-[500px]'>
           <table className="w-full bg-white border border-gray-200 table-fixed">
           <thead className='sticky top-0 z-10'>
@@ -636,15 +581,15 @@ const clickBuscarNotas = async (idAluno) => {
             </tr>
           </tfoot>
         </table>
-       
-        </div>
         {currentStep > 1 && 
     <button type='button' onClick={()=>{
         currentStep === step.length && setComplete(false);
         
         currentStep > 1 && setCurrentStep(prev => prev - 1);
-    }} className='active:animate-spin animate-once animate-duration-500 animate-delay-400 animate-ease-out bg-gray-700 hover:bg-gray-600 text-white font-semibold text-lg w-20 py-1 border-gray-700'>Voltar</button>
+    }} className={`${animatePing} responsive-button bg-gray-700 hover:bg-gray-600 text-white font-semibold border-gray-700`}>Voltar</button>
     }
+        </div>
+        
         </div> )}
         <div className='w-full flex items-center justify-between'>
         </div>

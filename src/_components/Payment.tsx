@@ -31,6 +31,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import { MyDialog, MyDialogContent } from './my_dialog'
 import Header from './Header'
+import { animateBounce } from '@/AnimationPackage/Animates'
 
 const TFormMethod =  z.object({
   nome: methodPay
@@ -145,8 +146,8 @@ export default function Payment (){
         <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
        <div className='flex flex-row space-x-2'>
          <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
-             <Search className='absolute text-gray-300'/>            
-             <input className=' pl-6 rounded-md border-2 border-gray-400 placeholder:text-gray-400 placeholder:font-bold outline-none py-2 w-full indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
+             <Search className='absolute text-gray-300 w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7'/>            
+             <Input className='pl-6 indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
          </div>
          <Dialog >
     <DialogTrigger asChild >
@@ -260,8 +261,8 @@ export default function Payment (){
                  <tr className='w-96 h-32'>
                      <td rowSpan={2} colSpan={2} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                          <div>
-                             <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
-                             <p>Nenum Registro Foi Encontrado</p>
+                         <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
+                              <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
                          </div>
                      </td>
                  </tr>

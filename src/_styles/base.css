@@ -14,8 +14,31 @@ li{
     @apply font-lato font-medium 
 }
 label{
-    @apply font-robotoSlab
+    @apply text-sky-600 text-base sm:text-sm md:text-[12px] lg:text-[14px] xl:text-[18px] font-semibold;
 }
 button, h1, h2, h3{
     @apply font-merriweather
+}
+select{
+    @apply w-full border-2 border-gray-300  text-sm sm:text-xs md:text-[10px] lg:text-[12px] xl:text-[16px] h-7 md:h-8 lg:h-9 text-gray-600 focus:text-sky-600 focus:outline-none rounded-md focus:font-semibold focus:border-sky-500;
+}
+
+.legend-div{
+    @apply bg-gradient-to-r from-yellow-500 to-red-400 mb-3  w-full h-7 pl-2 mr-2 text-slate-700 font-medium flex items-center text-lg sm:text-base md:text-[16px] lg:text-lg xl:text-xl tracking-wider rounded-md;
+}
+
+.title{
+    @apply text-sky-700 text-lg sm:text-base md:text-[16px] lg:text-lg xl:text-xl;
+}
+.responsive-button {
+    @apply sm:text-sm md:text-[10px] lg:text-[12px] xl:text-[16px] py-1 sm:py-[2px] lg:py-1 xl:py-2;
+}
+.p-responsive{
+    @apply text-base sm:text-xs md:text-[14px] lg:text-[16px] xl:text-lg;
+}
+p{
+    @apply text-base sm:text-xs md:text-[14px] lg:text-[16px] xl:text-lg text-gray-800;
+}
+.triangle-alert{
+    @apply h-5 w-5 sm:h-4 sm:w-4 md:h-6 md:w-6 lg:w-7 lg:h-7 xl:h-9 xl:w-9 
 }

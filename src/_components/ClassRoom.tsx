@@ -30,6 +30,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { MyDialog, MyDialogContent } from './my_dialog'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import Header from './Header'
+import { animateBounce, animateShake } from '@/AnimationPackage/Animates'
+import { Textarea } from '@/components/ui/textarea'
 
 
 
@@ -165,8 +167,8 @@ const changeResource = (id)=>{
         <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
        <div className='flex flex-row space-x-2'>
          <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
-             <Search className='absolute text-gray-300'/>            
-             <input className=' pl-6 rounded-md border-2 border-gray-400 placeholder:text-gray-400 placeholder:font-bold outline-none py-2 w-full indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
+             <Search className='absolute text-gray-300 '/>            
+             <Input className=' pl-6 indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
          </div>
          <Dialog>
     <DialogTrigger asChild>
@@ -187,9 +189,9 @@ const changeResource = (id)=>{
       <Form {...formCreate} >
      <form onSubmit={formCreate.handleSubmit(handleSubmitCreate)} >
      <div className="flex flex-col w-full py-4 bg-white">
-        <div className="w-full">
-        <Label htmlFor="nome"className='text-sky-700 text-lg font-semibold'>Nome<span className='text-red-500'>*</span>
-        </Label>
+        <div className="w-full mb-2">
+        <label htmlFor="nome">Nome<span className='text-red-500'>*</span>
+        </label>
           <FormField
           control={formCreate.control}
           name="nome"
@@ -197,23 +199,22 @@ const changeResource = (id)=>{
             <FormItem>
             <Input
               id="nome"
-              type='text' {...field} className={formCreate.formState.errors.nome?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+              type='text' {...field} className={formCreate.formState.errors.nome?.message && `${animateShake} select-error`}
               />
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
         </div>
-        <div className="w-full">
-        <Label htmlFor="capacidade"className='text-sky-700 text-lg font-semibold'>Capacidade<span className='text-red-500'>*</span>
-        </Label>
+        <div className="w-full mb-2">
+        <label htmlFor="capacidade">Capacidade<span className='text-red-500'>*</span>
+        </label>
           <FormField
           control={formCreate.control}
           name="capacidade"
           render={({field})=>(
             <FormItem>
-            <Input id="capacidade" type='number' {...field} className={formCreate.formState.errors.capacidade?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+            <Input id="capacidade" type='number' {...field} className={formCreate.formState.errors.capacidade?.message 
+            && `${animateShake} select-error`}
             min="0"
             onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
             />
@@ -222,15 +223,14 @@ const changeResource = (id)=>{
         )}/>
         </div>
         <div className="w-full">
-        <Label htmlFor="localizacao"className='text-sky-700 text-lg font-semibold'>Localização<span className='text-red-500'>*</span>
-              </Label>
+        <label htmlFor="localizacao">Localização<span className='text-red-500'>*</span>
+              </label>
           <FormField
           control={formCreate.control}
           name="localizacao"
           render={({field})=>(
             <FormItem>
-            <Input id="localizacao" type='text' {...field} className={formCreate.formState.errors.localizacao?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+            <Textarea id="localizacao" {...field} className={formCreate.formState.errors.localizacao?.message && `${animateShake} select-error`}
             />
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
@@ -238,7 +238,7 @@ const changeResource = (id)=>{
         </div>
       </div>
       <DialogFooter>
-      <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+      <Button title='cadastrar' className='responsive -button bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7  absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -258,8 +258,8 @@ const changeResource = (id)=>{
                  <tr className='w-96 h-32'>
                      <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                          <div>
-                             <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
-                             <p>Nenum Registro Foi Encontrado</p>
+                         <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
+                              <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
                          </div>
                      </td>
                  </tr>
@@ -308,9 +308,9 @@ const changeResource = (id)=>{
            />
   
               <div className="flex flex-col w-full py-4 bg-white">
-                <div className="w-full">
-                <Label htmlFor="nome"className='text-sky-700 text-lg font-semibold'>Nome<span className='text-red-500'>*</span>
-              </Label>
+                <div className="w-full mb-2">
+                <label htmlFor="nome">Nome<span className='text-red-500'>*</span>
+              </label>
                 <FormField
                 control={formUpdate.control}
                 name="nome"
@@ -318,16 +318,15 @@ const changeResource = (id)=>{
                   <FormItem>
                   <Input
                     id="nome"
-                    type='text' {...field} className={formUpdate.formState.errors.nome?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                    'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+                    type='text' {...field} className={formUpdate.formState.errors.nome?.message && `${animateShake} input-error`}
                     />
                   <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
               )}/>
               </div>
-              <div className="w-full">
-              <Label htmlFor="capacidade"className='text-sky-700 text-lg font-semibold'>Capacidade<span className='text-red-500'>*</span>
-              </Label>
+              <div className="w-full mb-2">
+              <label htmlFor="capacidade">Capacidade<span className='text-red-500'>*</span>
+              </label>
                 <FormField
                 control={formUpdate.control}
                 name="capacidade"
@@ -335,25 +334,23 @@ const changeResource = (id)=>{
                   <FormItem>
                   <Input
                     id="capacidade"
-                    type='number' {...field} className={formUpdate.formState.errors.capacidade?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                    'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+                    type='number' {...field} className={formUpdate.formState.errors.capacidade?.message && `${animateShake} input-error`}
                     min="0"/>
                   <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
               )}/>
               </div>
               <div className="w-full">
-              <Label htmlFor="localizacao"className='text-sky-700 text-lg font-semibold'>Localização<span className='text-red-500'>*</span>
-              </Label>
+              <label htmlFor="localizacao">Localização<span className='text-red-500'>*</span>
+              </label>
                 <FormField
                 control={formUpdate.control}
                 name="localizacao"
                 render={({field})=>(
                   <FormItem>
-                  <Input
+                  <Textarea
                     id="localizacao"
-                    type='text' {...field} className={formUpdate.formState.errors.localizacao?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                    'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+                    {...field} className={formUpdate.formState.errors.localizacao?.message && `${animateShake} input-error `}
                     />
                   <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
@@ -362,7 +359,7 @@ const changeResource = (id)=>{
               </div>
       </div>
       <DialogFooter>
-      <Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+      <Button title='actualizar' className='responsive-button bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold w-12' type='submit'><SaveIcon className='w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7  absolute text-white font-extrabold'/></Button>
       </DialogFooter>
       </form></Form>
     </DialogContent>
@@ -379,19 +376,19 @@ const changeResource = (id)=>{
                     <PopoverContent className="w-80 bg-white">
                       <div className="grid gap-4">
                         <div className="space-y-2">
-                          <h4 className="font-medium leading-none">Dados da Sala</h4>
+                          <h4 className="font-medium leading-none text-gray-800">Dados da Sala</h4>
                           <p className="text-sm text-muted-foreground">
                             Inspecione os dados
                           </p>
                         </div>
                         <div className="grid gap-2">
                           <div className="grid grid-cols-3 items-center gap-4">
-                            <Label htmlFor="maxWidth">Capacidade</Label>
+                            <label htmlFor="maxWidth">Capacidade</label>
                             <p>{capacidade}</p>
                           </div>
-                          <div className="grid grid-cols-3 items-center gap-4">
-                            <Label htmlFor="height">Localização</Label>
-                            <p className='text-xs'>{localizacao}</p>
+                          <div className="">
+                            <label htmlFor="height">Localização</label>
+                            <p className='indent-2 text-justify text-xs text-pretty'>{localizacao}</p>
                           </div>
                         </div>
                       </div>

@@ -25,6 +25,7 @@ import { getCookies, removeCookies } from '@/_cookies/Cookies'
 import { Link } from 'react-router-dom'
 import Header from './Header'
 import { useHookFormMask } from 'use-mask-input'
+import { animateBounce } from '@/AnimationPackage/Animates'
 
 const TForm =  z.object({
   nomeCompleto: nomeCompletoEncarregadoZod,
@@ -247,12 +248,13 @@ export default function PersonIncharge (){
     return( <>
       {!getCookies('idAluno') ? <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
       <div className='w-full text-center text-4xl text-red-600 md:text-2xl lg:text-2xl'>
-          <div>
-              <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
-              <p>ACESSO INDEVIDO</p>
+          <div >
+          <AlertTriangle className={`${animateBounce} inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12`}/>
+              <p className='text-red-500'>ACESSO INVÁLIDO</p>
+              <p className='text-red-500 italic font-semibold text-sm cursor-pointer'><Link to={'/StudentListPage'}>Lista dos Alunos</Link></p>
           </div>
       </div>
-        </div> : (
+        </div>: (
        <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
        <Header title={false}/>
        
@@ -322,8 +324,8 @@ export default function PersonIncharge (){
                       'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                       <option >Selecione o grau</option>
                       {
-                            parentesco.map((field)=>{
-                                return <option value={`${field.id}`}>{field.nome}</option>
+                            parentesco.map((field, index)=>{
+                                return <option key={index} value={`${field.id}`}>{field.nome}</option>
                             })
                       }
                   </select>

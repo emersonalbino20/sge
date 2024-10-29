@@ -37,6 +37,7 @@ import { Link } from 'react-router-dom';
 import { getCookies, removeCookies, setCookies } from '@/_cookies/Cookies'
 import Header from './Header'
 import { useHookFormMask, withMask } from 'use-mask-input'
+import { animateBounce, animateShake } from '@/AnimationPackage/Animates'
 
 const TForm =  z.object({
     nomeCompleto: nomeCompletoZod,
@@ -316,7 +317,7 @@ React.useEffect( () => {
         const a = dataApi.filter((element) =>{ return (element.nomeCompleto.toLowerCase().includes(event.target.value.toLowerCase().trim())) });
         setDados(a)
     }
-
+    const fieldDivStyle = 'text-lg sm:text-base md:text-[14px] lg:text-[16px] xl:text-xl text-sky-600 mb-2 font-semibold';
     return (
     <>
    <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
@@ -324,8 +325,8 @@ React.useEffect( () => {
        <div className='flex flex-col space-y-2 justify-center items-center w-full'>
         <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
           <div className='relative flex  items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
-              <Search className='absolute text-gray-300'/>            
-              <input className=' pl-6 rounded-md border-2 border-gray-400 placeholder:text-gray-400 placeholder:font-bold outline-none py-2 w-full indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
+              <Search className='absolute text-gray-300 w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7'/>            
+              <Input className='pl-6 indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
           </div>
       <div ref={tableRef}  onScroll={handleScroll} className="overflow-x-auto overflow-y-auto w-full  h-80 md:h-1/2 lg:h-[500px]">
           
@@ -341,8 +342,8 @@ React.useEffect( () => {
                   <tr className='w-96 h-32'>
                       <td rowSpan={6} colSpan={6} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                           <div >
-                              <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
-                              <p>Nenum Registro Foi Encontrado</p>
+                              <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
+                              <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
                           </div>
                       </td>
                   </tr>
@@ -369,7 +370,7 @@ React.useEffect( () => {
                       </div>
                       
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[645px] overflow-y-scroll h-[640px] bg-white">
+                    <DialogContent className="max-w-[425px] sm:w-[260px] md:w-[600px] lg:w-[780px] xl:w-[400px] overflow-y-scroll h-[500px] bg-white">
                       <DialogHeader>
                       <DialogTitle className='text-sky-800 text-xl'>Actualização do Registro</DialogTitle>
                     <DialogDescription>
@@ -380,7 +381,7 @@ React.useEffect( () => {
                       </DialogHeader>
                       <Form {...form} >
                     <form onSubmit={form.handleSubmit(handleSubmitUpdate)} >
-                    <div className="w-full flex flex-col justify-between  ">
+                    <div className="w-full flex flex-col justify-between ">
                     <FormField
                           control={form.control}
                           name="id"
@@ -399,20 +400,20 @@ React.useEffect( () => {
                         )}
                           />
                         <fieldset>
-                            <legend className='text-sky-800 text-xl'>Dados Pessoal</legend>
+                            <div className={`${fieldDivStyle}`}>Dados Pessoal</div>
                             <div className='w-full flex flex-col '>
-                            <div className="w-full flex flex-row justify-between space-x-2 ">
+                            <div className="w-full flex flex-row justify-between space-x-2 mb-2">
                             <div className='w-full'>
-                            <Label htmlFor="name"className='text-sky-700 text-md font-semibold'>Nome<span className='text-red-500'>*</span></Label>
+                            <label htmlFor="nome">Nome<span className='text-red-500'>*</span></label>
                           <FormField
                           control={form.control}
                           name="nomeCompleto"
                           render={({field})=>(
                             <FormItem>
                             <FormControl>
-                          <Input 
-                            className={form.formState.errors.nomeCompleto?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+                          <Input id='nome'
+                            className={form.formState.errors.nomeCompleto?.message && 
+                              `${animateShake} input-error`}
                             
                             {...field} 
                             
@@ -424,7 +425,7 @@ React.useEffect( () => {
                           />
                         </div>
                         <div className='w-full'>
-                        <Label htmlFor="name"className='text-sky-700 text-md font-semibold'>Gênero<span className='text-red-500'>*</span></Label>
+                        <label htmlFor="genero">Gênero<span className='text-red-500'>*</span></label>
                         
                             <FormField
                           control={form.control}
@@ -433,8 +434,7 @@ React.useEffect( () => {
                             <FormItem>
                             <FormControl>
                           <select {...field} id='genero' className={
-                      form.formState.errors.genero?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'}>
+                      form.formState.errors.genero?.message && `${animateShake} select-error`}>
                               <option value="M">M</option>
                               <option value="F">F</option>
                           </select>
@@ -442,16 +442,15 @@ React.useEffect( () => {
                           <FormMessage className='text-red-500 text-xs'/>
                           </FormItem>
                         )}/></div></div>
-                        <div className="flex w-full flex-col text-left">
-                        <Label htmlFor="name"className='text-sky-700 text-md font-semibold'>Data de Nasc.<span className='text-red-500'>*</span></Label>
+                        <div className="flex w-full flex-col text-left mb-2">
+                        <label htmlFor="nasc">Data de Nasc.<span className='text-red-500'>*</span></label>
                             <FormField
                           control={form.control}
                           name="dataNascimento"
                           render={({field})=>(
                           <FormControl>
                           <FormItem>
-                          <Input type='date'  id="nasc" {...field} className={form.formState.errors.dataNascimento?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
+                          <Input type='date'  id="nasc" {...field} className={form.formState.errors.dataNascimento?.message &&`${animateShake} input-error`}/>
                           <FormMessage className='text-red-500 text-xs'/>
                           </FormItem>
                           </FormControl>
@@ -460,40 +459,37 @@ React.useEffect( () => {
                           </div>
                         <div className="w-full flex flex-row justify-between space-x-2">
                         <div className='w-full'>
-                        <Label htmlFor="name"className='text-sky-700 text-md font-semibold'>Nome do Pai<span className='text-red-500'>*</span></Label>
+                        <label htmlFor="pai">Nome do Pai<span className='text-red-500'>*</span></label>
                             <FormField
                           control={form.control}
                           name="nomeCompletoPai"
                           render={({field})=>(
                             <FormControl>
                                 <FormItem>
-                          <Input id="pai" type='text' {...field} className={form.formState.errors.nomeCompletoPai?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
+                          <Input id="pai" type='text' {...field} className={form.formState.errors.nomeCompletoPai?.message && `${animateShake} input-error`}/>
                           <FormMessage className='text-red-500 text-xs'/>
                           </FormItem>
                           </FormControl>
                         )}/></div>
                         <div className='w-full'>
-                        <Label htmlFor="name"className='text-sky-700 text-md font-semibold'>Nome da Mãe<span className='text-red-500'>*</span></Label>
+                        <label htmlFor="mae">Nome da Mãe<span className='text-red-500'>*</span></label>
                           <FormField
                           control={form.control}
                           name="nomeCompletoMae"
                           render={({field})=>(
                             <FormControl>
                             <FormItem>
-                          <Input id="mae" type='text' {...field} className={form.formState.errors.nomeCompletoMae?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
+                          <Input id="mae" type='text' {...field} className={form.formState.errors.nomeCompletoMae?.message && `${animateShake} input-error`}/>
                           <FormMessage className='text-red-500 text-xs'/>
                           </FormItem>
                           </FormControl>
                         )}/></div></div></div>
                         </fieldset>
                         <fieldset>
-                        <legend className='text-sky-800 text-xl'>
-                            Localização</legend>
+                        <div className={`${fieldDivStyle}`}>Localização</div>
                             <div className="w-full flex flex-row justify-between space-x-2">
                             <div className='w-full'>
-                            <Label htmlFor="name"className='text-sky-700 text-md font-semibold'>Bairro<span className='text-red-500'>*</span></Label>
+                            <label htmlFor="bairro">Bairro<span className='text-red-500'>*</span></label>
                         
                             <FormField
                           control={form.control}
@@ -501,37 +497,34 @@ React.useEffect( () => {
                           render={({field})=>(
                             <FormControl>
                                 <FormItem>
-                          <Input id="bairro" type='text' {...field} className={form.formState.errors.bairro?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
+                          <Input id="bairro" type='text' {...field} className={form.formState.errors.bairro?.message && `${animateShake} input-error`}/>
                           <FormMessage className='text-red-500 text-xs'/>
                           </FormItem>
                           </FormControl>
                         )}/></div>
                             <div className='w-full'>
-                            <Label htmlFor="name"className='text-sky-700 text-md font-semibold'>Rua<span className='text-red-500'>*</span></Label>
+                            <label htmlFor="name">Rua<span className='text-red-500'>*</span></label>
                             <FormField
                           control={form.control}
                           name="rua"
                           render={({field})=>(
                             <FormControl>
                         <FormItem>
-                          <Input id="rua" type='text' {...field} className={form.formState.errors.rua?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
+                          <Input id="rua" type='text' {...field} className={form.formState.errors.rua?.message && `${animateShake} input-error`}/>
                           <FormMessage className='text-red-500 text-xs'/>
                           </FormItem>
                           </FormControl>
                         )}/>
                         </div>
                         <div className='w-full'>
-                        <Label htmlFor="name"className='text-sky-700 text-md font-semibold'>Número da Residência<span className='text-red-500'>*</span></Label>
+                        <label htmlFor="name">N.Residência<span className='text-red-500'>*</span></label>
                             <FormField
                           control={form.control}
                           name="numeroCasa"
                           render={({field})=>(
                             <FormControl>
                             <FormItem>
-                          <Input id="casa" type='number' {...field} className={form.formState.errors.numeroCasa?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
+                          <Input id="casa" type='number' {...field} className={form.formState.errors.numeroCasa?.message && `${animateShake} input-error`}onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
                           <FormMessage className='text-red-500 text-xs'/>
                           </FormItem>
                           </FormControl>
@@ -539,25 +532,24 @@ React.useEffect( () => {
                         </div></div>
                         </fieldset>
                         <fieldset>
-                        <legend className='text-sky-800 text-xl'>
-                            Contacto</legend>
+                         
+                        <div className={`${fieldDivStyle}`}>Contacto</div>
                             <div className="w-full flex flex-row justify-between space-x-2">
                         <div className='w-full'>
-                        <Label htmlFor="name"className='text-sky-700 text-md font-semibold'>Telefone<span className='text-red-500'>*</span></Label>
+                        <label htmlFor="tel">Telefone<span className='text-red-500'>*</span></label>
                       <FormField
                           control={form.control}
                           name="telefone"
                           render={({field})=>(
                             <FormControl>
                                 <FormItem>
-                                <Input {...upWithMask('telefone',['999999999'], {required: true})} className={form.formState.errors.telefone?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                                'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
+                                <Input id='tel' {...upWithMask('telefone',['999999999'], {required: true})} className={form.formState.errors.telefone?.message && `${animateShake} input-error`}/>
                           <FormMessage className='text-red-500 text-xs'/>
                           </FormItem>
                           </FormControl>
                         )}/></div>
                         <div className='w-full'>
-                        <Label htmlFor="email"className='text-sky-700 text-md font-semibold'>Email</Label>
+                        <label htmlFor="email">Email</label>
                       <FormField
                           control={form.control}
                           name="email"
@@ -566,8 +558,7 @@ React.useEffect( () => {
                             <FormControl>
                           <Input
                             id="email"
-                            className={form.formState.errors.email?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+                            className={form.formState.errors.email?.message && `${animateShake} input-error`}
                           {...field} />
                           </FormControl>
                           <FormMessage className='text-red-500 text-xs'/>
@@ -577,7 +568,7 @@ React.useEffect( () => {
                         </div>
                       
                       <DialogFooter>
-                        <Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+                        <Button title='actualizar' className='responsive-button bg-green-500 border-green-500 text-white hover:bg-green-500' type='submit'><SaveIcon className='w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7 absolute text-white font-extrabold'/></Button>
                       </DialogFooter>
                       </form>
                       </Form>
@@ -591,7 +582,7 @@ React.useEffect( () => {
               <button className='h-7 px-5 bg-amber-400 text-white font-semibold hover:bg-amber-400 border-amber-400 rounded-sm' ></button>
               </div>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[485px] overflow-y-scroll h-[580px] bg-white">
+            <DialogContent className="max-w-[425px] sm:w-[260px] md:w-[600px] lg:w-[780px] xl:w-[400px] overflow-y-scroll h-[500px] -mb-2 bg-white">
               <DialogHeader>
               <DialogTitle className='text-sky-800 text-xl'>Confirmação da Matrícula</DialogTitle>
                 <DialogDescription>
@@ -610,11 +601,10 @@ React.useEffect( () => {
                             name='classeId'
                             render={({field})=>(
                             <FormItem>
-                               <Label htmlFor="curso"className='text-sky-700 text-lg font-semibold'>Classes<span className='text-red-500'>*</span>
-                                    </Label>
+                               <label htmlFor="curso">Classes<span className='text-red-500'>*</span>
+                                    </label>
                                 <FormControl>
-                                  <select {...field} className={formConfirmacao.formState.errors.classeId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                                  'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} onChange={(e)=>{
+                                  <select {...field} className={formConfirmacao.formState.errors.classeId?.message && `${animateShake} select-error`} onChange={(e)=>{
                                     field.onChange(parseInt(e.target.value))
                                     setIdClasse(parseInt(e.target.value, 10) || 0)
                                   }}>
@@ -637,11 +627,10 @@ React.useEffect( () => {
                             name='turmaId'
                             render={({field})=>(
                             <FormItem>
-                                <Label htmlFor="curso"className='text-sky-700 text-lg font-semibold'>Turmas<span className='text-red-500'>*</span>
-                                    </Label>
+                                <label htmlFor="curso">Turmas<span className='text-red-500'>*</span>
+                                    </label>
                                 <FormControl>
-                                <select {...field} className={formConfirmacao.formState.errors.turmaId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                                  'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'}onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                                <select {...field} className={formConfirmacao.formState.errors.turmaId?.message && `${animateShake} select-error`}onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                                 <option >Selecione a turma</option>
                                 {
                                       turma.map((field)=>{
@@ -661,11 +650,10 @@ React.useEffect( () => {
                             name='turnoId'
                             render={({field})=>(
                             <FormItem>
-                               <Label htmlFor="turno"className='text-sky-700 text-lg font-semibold'>Turnos<span className='text-red-500'>*</span>
-                                    </Label>
+                               <label htmlFor="turno">Turnos<span className='text-red-500'>*</span>
+                                    </label>
                                 <FormControl>
-                                <select {...field} className={formConfirmacao.formState.errors.turnoId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                                'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'}onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                                <select {...field} className={formConfirmacao.formState.errors.turnoId?.message && `${animateShake} select-error`} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                                 <option >Selecione a turma</option>
                                 {
                                       turno.map((field)=>{
@@ -685,11 +673,10 @@ React.useEffect( () => {
                             name='metodoPagamentoId'
                             render={({field})=>(
                             <FormItem>
-                                <Label htmlFor="curso"className='text-sky-700 text-lg font-semibold'>Pagar em<span className='text-red-500'>*</span>
-                                    </Label>
+                                <label htmlFor="curso">Pagar em<span className='text-red-500'>*</span>
+                                    </label>
                                 <FormControl>
-                                <select {...field} className={formConfirmacao.formState.errors.metodoPagamentoId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                                'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'}onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                                <select {...field} className={formConfirmacao.formState.errors.metodoPagamentoId?.message && `${animateShake} select-error`}onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                                 <option >Selecione o método</option>
                                 {
                                       metodo.map((field)=>{
@@ -708,7 +695,7 @@ React.useEffect( () => {
                         
               
               <DialogFooter>
-                <Button title='nova matrícula' className='bg-blue-600 border-blue-600 text-white hover:bg-blue-600 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+                <Button title='nova matrícula' className='responsive-button bg-blue-600 border-blue-600 text-white hover:bg-blue-600 font-semibold w-12' type='submit'><SaveIcon className='w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7 w-5 h-5 absolute text-white font-extrabold'/></Button>
               </DialogFooter>
               </form>
               </Form>
@@ -723,45 +710,45 @@ React.useEffect( () => {
                 </div>
                 
               </DialogTrigger>
-              <DialogContent className="h-[670px] w-[525px] overflow-y-auto bg-white">
+              <DialogContent className="max-w-[425px] sm:w-[260px] md:w-[600px] lg:w-[780px] xl:w-[400px] overflow-y-scroll h-[500px] bg-white">
                 <DialogHeader>
                   <DialogTitle>Informações sobre {item.nomeCompleto}</DialogTitle>
                   <DialogDescription >
-                  As informações relevantes do aluno, são listadas aqui! <Link to={'/PersonInchargePage'}><p className='text-red-600 font-semibold italic'>Click Aqui Pra ver os dados do encarregado</p> </Link>
+                  <p>As informações relevantes do aluno, são listadas aqui! <Link to={'/PersonInchargePage'}><p className='text-red-600 font-semibold italic'>Click Aqui Pra ver os dados do encarregado</p> </Link></p>
                   </DialogDescription>
                 </DialogHeader>
                 
                 <div className="grid gap-4 py-4 bg-white">
                   <div className="flex flex-col w-full"><fieldset>
-                      <legend className='font-robotoSlab text-sm'>Dados Pessoal</legend>
+                      <legend className='text-sm text-gray-700'>Dados Pessoal</legend>
                       <div className='w-full flex flex-col space-y-3'>
                       <div className="w-full flex flex-row justify-between px-2">
                       <div>
-                          <Label className='font-poppins'>nome completo</Label>
+                          <label >nome completo</label>
                           <p className='font-thin text-sm'>{Object.values(aluno)[1]}</p>
                       </div>
                       <div>
-                          <Label className='font-poppins'>número do bi</Label>		
+                          <label className='font-poppins'>número do bi</label>		
                             <p className='font-thin text-sm'>{Object.values(aluno)[4]}</p>
                       </div>
                       </div>
                       <div className="w-full flex flex-row justify-between px-2">
                       <div>
-                          <Label className='font-poppins'>nome do pai</Label>	
+                          <label className='font-poppins'>nome do pai</label>	
                           <p className='font-thin text-sm'>{Object.values(aluno)[2]}</p>
                       </div>
                       <div>
-                          <Label className='font-poppins'>nome da mãe</Label>
+                          <label className='font-poppins'>nome da mãe</label>
                           <p className='font-thin text-sm'>{Object.values(aluno)[3]}</p>
                       </div>
                       </div>
                       <div className="w-full flex flex-row justify-between px-2">
                       <div>
-                          <Label className='font-poppins'>gênero</Label>
+                          <label className='font-poppins'>gênero</label>
                           <p className='font-thin text-sm'>{Object.values(aluno)[6]}</p>
                       </div>
                       <div>
-                          <Label className='font-poppins'>data de nascimento</Label>
+                          <label className='font-poppins'>data de nascimento</label>
                           <p className='font-thin text-sm'>{Object.values(aluno)[5]}</p>
                       </div>
                       </div>
@@ -769,35 +756,35 @@ React.useEffect( () => {
                       
                   </fieldset>
                   <fieldset>
-                      <legend className='font-robotoSlab text-sm'>Localização</legend>
+                      <legend className=' text-sm text-gray-800'>Localização</legend>
                       <div className="w-full flex flex-row justify-between px-2">
                       <div className="w-full flex flex-row justify-between px-2">
                       <div>
-                          <Label className='font-poppins'>número da casa</Label>
+                          <label className='font-poppins'>número da casa</label>
                           <p className='font-thin text-sm'>{casa}</p>
                       </div>
                       <div>
-                          <Label className='font-poppins'>bairro</Label>
+                          <label className='font-poppins'>bairro</label>
                           <p className='font-thin text-sm'>{bairro}</p>
                       </div>
                       <div>
-                          <Label className='font-poppins'>rua</Label>
+                          <label className='font-poppins'>rua</label>
                           <p className='font-thin text-sm'>{rua}</p>
                       </div>
                       </div>
                       </div>
                   </fieldset>
                       <fieldset>
-                          <legend className='font-robotoSlab text-sm'>Contacto</legend>
+                          <legend className='font-robotoSlab text-sm text-gray-800'>Contacto</legend>
                       <div className="w-full flex flex-row justify-between px-2">
                       <div className="w-full flex flex-row justify-between px-2">
                       <div>
-                          <Label className='font-poppins'>Telefone</Label>
+                          <label className='font-poppins'>Telefone</label>
                           <p className='font-thin text-sm'>{telefone}</p>
                       </div>
                       {email && 
                       <div>
-                          <Label className='font-poppins'>email</Label>
+                          <label className='font-poppins'>email</label>
                           <p className='font-thin text-sm'>{email}</p>
                       </div>
                       }
@@ -805,7 +792,7 @@ React.useEffect( () => {
                       </div>
                       </fieldset>
                       <fieldset>
-                          <legend className='font-robotoSlab text-sm'>Histórico de matrículas</legend>
+                          <legend className='text-sm text-gray-800'>Histórico de matrículas</legend>
                       <div className="w-full flex flex-row justify-between px-2">
                       <div className="w-full flex flex-row justify-between px-2">
                       <div className='overflow-y-auto h-28 w-full'>

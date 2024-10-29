@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { AlertCircleIcon, CheckCircleIcon,  PlusIcon } from 'lucide-react'
+import { AlertCircleIcon, AlertTriangle, CheckCircleIcon,  PlusIcon } from 'lucide-react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver} from '@hookform/resolvers/zod'
@@ -14,6 +14,8 @@ import { Check } from 'lucide-react';
 import Header from './Header'
 import { useHookFormMask, withMask } from 'use-mask-input'
 import { error } from 'console'
+import { animateBounce, animateFadeLeft, animatePing, animateShake } from '@/AnimationPackage/Animates'
+import { Link } from 'react-router-dom'
 //define the data that will send for the server to be insert on database
 
 const TFormCreate =  z.object({
@@ -102,7 +104,7 @@ React.useEffect( () => {
 
           const resplectivo = await fetch ("http://localhost:8000/api/ano-lectivos");
           const resplectivoJson = await resplectivo.json();
-          var meuarray = resplectivoJson.data.find((c)=>{
+          let meuarray = resplectivoJson.data.find((c)=>{
             return c.activo === true
           })
           setAno(meuarray.nome)
@@ -221,14 +223,35 @@ const handleSubmitCreate = async (dados: z.infer<typeof TFormCreate>) => {
     const[ currentStep, setCurrentStep ] = React.useState<number>(1);
     const[ complete, setComplete ] = React.useState<boolean>(false);
     const registerWithMask = useHookFormMask(register);
+    const [idAno, setIdAno] = React.useState<number>(0);
+    React.useEffect(() => {
+      const search = async () => {
+        const resp = await fetch(`http://localhost:8000/api/ano-lectivos/`);
+          const receve = await resp.json()
+          var meuarray = receve.data.find((c)=>{
+            return c.activo === true
+          })
+          setIdAno(meuarray.id)
+      };
+      search();
+    }, []);
 return(
+    <>  { idAno == 0 ? <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
+    <div className='w-full text-center text-4xl text-red-600 md:text-2xl lg:text-2xl'>
+        <div >
+        <AlertTriangle className={`${animateBounce} inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12`}/>
+            <p className='text-red-500'>SELECIONE O ANO LECTIVO</p>
+            <p className='text-red-500 italic font-semibold text-sm cursor-pointer'><Link to={'/AcademicYearPage'}>Selecionar agora</Link></p>
+        </div>
+    </div>
+      </div> : (
     <div className='w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3'>
           <Header title={false} />
           
          <div className='w-full flex items-center justify-center'>
-        <div className='flex flex-col space-y-2 justify-center w-[866px] sm:[666px] md:w-[700px] xl:w-[1200px]'>
+        <div className='flex flex-col space-y-2 justify-center sm:[376px] md:w-[550px] lg:w-[600px]'>
         <div className='flex justify-center items-center '>
-        <div className='flex justify-between'>{
+        <div className='flex justify-between text-sm'>{
         step?.map((step, i) => 
             (
                 <div key={i} className={`step-item ${currentStep === i + 1 ? 'active' : '' } ${ (i + 1 < currentStep || complete) && 'complete'}`}>
@@ -248,21 +271,21 @@ return(
     
         <div >
         {currentStep === 1 && (<fieldset className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-inflex flex-col' >
-            <div className='bg-gradient-to-r from-yellow-500 to-red-500 mb-3  w-full h-9 pl-2 mr-2 text-white font-semibold flex items-center text-2xl tracking-wider'><p>Informações do Aluno</p></div>
-            <div className='flex flex-row space-x-3 mb-5'>
+            <div className='legend-div'><h1>Informações do Aluno</h1></div>
+            <div className='flex flex-row space-x-3 mb-2'>
                 <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
                     name="nomeCompleto"
                     render={({field})=>(
                     <FormItem>
-                        <label className='text-sky-700 text-xl font-semibold'>Nome Completo<span className='text-red-500'>*</span></label>
+                        <label>Nome Completo<span className='text-red-500'>*</span></label>
                         <FormControl>
                        
                         <Input type='text' {...field} 
                         
-                        className={errors.nomeCompleto?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
-                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'}/>
+                        className={errors.nomeCompleto?.message && 
+                        `input-error ${animateShake}`}/>
                         
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -271,18 +294,17 @@ return(
                     )}
                     />
                 </div>
-                <div className='flex flex-col mb-5'>
+                <div className='flex flex-col w-full mb-2'>
                 <FormField
                 control={form.control}
                 name="genero"
                 render={({field})=>(
                 <FormItem>
-                     <label className='text-sky-700 text-xl font-semibold'>Gênero<span className='text-red-500'>*</span></label>
-                    
+                     <label >Gênero<span className='text-red-500'>*</span></label>
                     <FormControl>
                     
-                     <select {...field} className={errors.genero?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-3 focus:outline-none rounded-md':
-                    'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:outline-none rounded-md focus:font-semibold focus:border-sky-500 py-3'}>
+                     <select {...field} className={errors.genero?.message && 
+                        `${animateShake} select-error`}>
                         <option>Selecione o gênero</option>
                         <option value="M">Masculino</option>
                         <option value="F">Feminino</option>
@@ -296,40 +318,32 @@ return(
                 />
             </div>
                 </div>
-                <div className='flex flex-row space-x-3 mb-5'>
+                <div className='flex flex-row space-x-3 mb-2'>
                 <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
                     name="numeroBi"
                     render={({field})=>(
                     <FormItem>
-                        <label className='text-sky-700 text-xl font-semibold'>Número do BI<span className='text-red-500'>*</span></label>
+                        <label >Número do BI<span className='text-red-500'>*</span></label>
                         <FormControl>
-                        <Input type='text' {...field} 
-                        
-                        className={errors.numeroBi?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
-                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'}/>
+                        <Input type='text' maxLength={14} {...field} 
+                        className={errors.numeroBi?.message && `input-error ${animateShake}`}/>
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
                     </FormItem>
                     )}
                     />
                 </div>
-                <div className='flex flex-col mb-5 w-full'>
+                <div className='flex flex-col mb-2 w-full'>
                 <FormField
                 control={form.control}
                 name="dataNascimento"
                 render={({field})=>(
                 <FormItem>
-                     <label className='text-sky-700 text-xl font-semibold'>Data de Nasc.<span className='text-red-500'>*</span></label>
-                    
+                     <label >Data de Nasc.<span className='text-red-500'>*</span></label>
                     <FormControl>
-                    
-                    {errors.dataNascimento?.message ?
-                        <Input type='date' className=' animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6' {...field} />
-                        :
-                        <Input  type='date'  {...field} className='w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'/>
-                        }
+                        <Input type='date' className={errors.dataNascimento?.message && `input-error ${animateShake}`} {...field} />
                     </FormControl>
                     <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
@@ -337,20 +351,18 @@ return(
                 />
             </div>
             </div>
-            <div className='flex flex-row space-x-3 mb-5'>
+            <div className='flex flex-row space-x-3 mb-2'>
                 <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
                     name="email"
                     render={({field})=>(
                     <FormItem>
-                         <label className='text-sky-700 text-xl font-semibold'>Email</label>
-                        
+                         <label >Email</label>
                         <FormControl>
                         <Input type='email' {...field} 
                         
-                        className={errors.email?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
-                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'}/>
+                        className={errors.email?.message && `input-error ${animateShake}`}/>
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
                     </FormItem>
@@ -363,10 +375,9 @@ return(
                     name="telefone"
                     render={({field})=>(
                     <FormItem>
-                         <label className='text-sky-700 text-xl font-semibold'>Telefone<span className='text-red-500'>*</span></label>
+                         <label >Telefone<span className='text-red-500'>*</span></label>
                         <FormControl>
-                        <Input {...registerWithMask('telefone',['999999999'], {required: true})}  className={errors.telefone?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
-                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'}/>
+                        <Input {...registerWithMask('telefone',['999999999'], {required: true})}  className={errors.telefone?.message && `input-error ${animateShake}`}/>
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
                     </FormItem>
@@ -374,23 +385,18 @@ return(
                     />
                 </div>
             </div>
-            
-           
-            <div className='flex flex-row space-x-3 mb-5'>
+            <div className='flex flex-row space-x-3 mb-2'>
                 <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
                     name="numeroCasa"
                     render={({field})=>(
                     <FormItem>
-                         <label className='text-sky-700 text-xl font-semibold'>Número da Residência<span className='text-red-500'>*</span></label>
-                       
+                         <label >Número da Residência<span className='text-red-500'>*</span></label>
                         <FormControl>
-
                         <Input type='number' {...field} 
                         
-                        className={errors.numeroCasa?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
-                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'} min={0} {...field} onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
+                        className={errors.numeroCasa?.message && `input-error ${animateShake}`} min={0} {...field} onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
                         
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -404,13 +410,11 @@ return(
                     name="bairro"
                     render={({field})=>(
                     <FormItem>
-                         <label className='text-sky-700 text-xl font-semibold'>Bairro<span className='text-red-500'>*</span></label>
+                         <label >Bairro<span className='text-red-500'>*</span></label>
                         
                         <FormControl>
                         <Input type='text' {...field} 
-                        
-                        className={errors.bairro?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
-                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'} />
+                        className={errors.bairro?.message &&  `input-error ${animateShake}`} />
                         
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -424,12 +428,11 @@ return(
                     name="rua"
                     render={({field})=>(
                     <FormItem>
-                         <label className='text-sky-700 text-xl font-semibold'>Rua<span className='text-red-500'>*</span></label>
+                         <label >Rua<span className='text-red-500'>*</span></label>
                         <FormControl>
                         <Input type='text' {...field} 
                         
-                        className={errors.rua?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
-                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'} />
+                        className={errors.rua?.message && `input-error ${animateShake}`} />
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
                     </FormItem>
@@ -437,20 +440,19 @@ return(
                     />
                 </div>
             </div>
-            <div className='flex flex-row space-x-3 mb-5'>
+            <div className='flex flex-row space-x-3 mb-2'>
                 <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
                     name="nomeCompletoPai"
                     render={({field})=>(
                     <FormItem>
-                         <label className='text-sky-700 text-xl font-semibold'>Nome do Pai<span className='text-red-500'>*</span></label>
+                         <label >Nome do Pai<span className='text-red-500'>*</span></label>
                         
                         <FormControl>
                         <Input type='text' {...field} 
                         
-                        className={errors.nomeCompletoPai?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
-                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'} />
+                        className={errors.nomeCompletoPai?.message && `input-error ${animateShake}`} />
                         
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -464,13 +466,12 @@ return(
                     name="nomeCompletoMae"
                     render={({field})=>(
                     <FormItem>
-                         <label className='text-sky-700 text-xl font-semibold'>Nome da Mãe<span className='text-red-500'>*</span></label>
+                         <label>Nome da Mãe<span className='text-red-500'>*</span></label>
                         
                         <FormControl>
                         <Input type='text' {...field} 
                         
-                        className={errors.nomeCompletoMae?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
-                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'} />
+                        className={errors.nomeCompletoMae?.message && `input-error ${animateShake}`} />
                         
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -484,9 +485,7 @@ return(
                 { (currentStep === 2 ) &&
                 fields.map((field, index) => {
                     return (<fieldset className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in' key={field.id}>
-                        <div className='
-                        bg-gradient-to-r from-yellow-500 to-red-500  w-full h-9 pl-2 mr-2 text-white font-semibold mb-3 flex items-center text-xl tracking-wider
-                        '><p>Informações do Encarregado</p></div>
+                    <div className='legend-div'>Informações do Encarregado</div>
                         {
                         (index != 0)  && (
                         <div className='w-full'>
@@ -502,14 +501,13 @@ return(
                                 render={({field})=>(
                                     
                                 <FormItem>
-                                    <label className='text-sky-700 text-xl font-semibold'>Nome Completo<span className='text-red-500'>*</span></label>
+                                    <label >Nome Completo<span className='text-red-500'>*</span></label>
                                     
                                     <FormControl>
                                     <Input type='text' {...field} 
                         
                                      className={
-                                errors.responsaveis?.[index]?.nomeCompleto?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
-                                'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'} />
+                                errors.responsaveis?.[index]?.nomeCompleto?.message && `input-error ${animateShake}`} />
                                     </FormControl>
                                     <FormMessage className='text-red-500 text-xs'/>
                                 </FormItem>
@@ -523,12 +521,11 @@ return(
                             
                             render={({field})=>(
                             <FormItem>
-                                <label className='text-sky-700 text-xl font-semibold'>Parentescos<span className='text-red-500'>*</span></label>
+                                <label >Parentescos<span className='text-red-500'>*</span></label>
                                 
                                 <FormControl>
                                 <select {...field} 
-                                className={errors.responsaveis?.[index]?.parentescoId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-3 focus:outline-none rounded-md':
-                                'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-3 focus:outline-none rounded-md'}
+                                className={errors.responsaveis?.[index]?.parentescoId?.message && `${animateShake} select-error`}
                                 onChange={(e)=>{field.onChange(parseInt(e.target.value))
                             
                         }}>
@@ -547,18 +544,17 @@ return(
                         </div>
                     </div>
                     
-                        <div className='flex flex-row space-x-3 mb-5'>
+                        <div className='flex flex-row space-x-3 mb-2'>
                             <div className='flex flex-col w-full'>
                             <FormField
                             control={form.control}
                             name={`responsaveis.${index}.contacto.telefone`}
                             render={({field})=>(
                             <FormItem>
-                                <label className='text-sky-700 text-xl font-semibold'>Telefone<span className='text-red-500'>*</span></label>
+                                <label >Telefone<span className='text-red-500'>*</span></label>
                                 
                                 <FormControl>
-                                <Input {...registerWithMask(`responsaveis.${index}.contacto.telefone`,['999999999'], {required: true})}  className={errors.responsaveis?.[index]?.contacto?.telefone?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
-                                'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'}
+                                <Input {...registerWithMask(`responsaveis.${index}.contacto.telefone`,['999999999'], {required: true})}  className={errors.responsaveis?.[index]?.contacto?.telefone?.message && `input-error ${animateShake}`}
                                 />
                                 </FormControl>
                                 <FormMessage className='text-red-500 text-xs'/>
@@ -572,11 +568,9 @@ return(
                                 name={`responsaveis.${index}.contacto.email`}
                                 render={({field})=>(
                                 <FormItem>
-                                    <label className='text-sky-700 text-xl font-semibold'>Email</label>
-                                    
+                                    <label >Email</label>
                                     <FormControl>
-                                    <Input type='text' {...field} className={errors.responsaveis?.[index]?.contacto?.email?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
-                                'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'}/>
+                                    <Input type='text' {...field} className={errors.responsaveis?.[index]?.contacto?.email?.message && `input-error ${animateShake}`}/>
                                     </FormControl>
                                     <FormMessage className='text-red-500 text-xs'/>
                                 </FormItem>
@@ -585,18 +579,17 @@ return(
                             </div>
                     </div>
                     
-                        <div className='flex flex-row space-x-3 mb-5' >
+                        <div className='flex flex-row space-x-3 mb-2' >
                         <div className='flex flex-col w-full'>
                             <FormField
                             control={form.control}
                             name={`responsaveis.${index}.endereco.numeroCasa`}
                             render={({field})=>(
                             <FormItem>
-                                <label className='text-sky-700 text-xl font-semibold'>Número da Residência<span className='text-red-500'>*</span></label>
+                                <label >Número da Residência<span className='text-red-500'>*</span></label>
                                 
                                 <FormControl>
-                                <Input type='number' min={1} {...field}  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}} className={errors.responsaveis?.[index]?.endereco?.numeroCasa?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
-                                'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'}/>
+                                <Input type='number' min={1} {...field}  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}} className={errors.responsaveis?.[index]?.endereco?.numeroCasa?.message && `input-error ${animateShake}`}/>
                                 </FormControl>
                                 <FormMessage className='text-red-500 text-xs'/>
                             </FormItem>
@@ -609,10 +602,9 @@ return(
                         name={`responsaveis.${index}.endereco.bairro`}
                         render={({field})=>(
                         <FormItem>
-                            <label className='text-sky-700 text-xl font-semibold'>Bairro<span className='text-red-500'>*</span></label>
+                            <label >Bairro<span className='text-red-500'>*</span></label>
                             <FormControl>
-                            <Input type='text' {...field} className={errors.responsaveis?.[index]?.endereco?.bairro?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
-                                'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'} />
+                            <Input type='text' {...field} className={errors.responsaveis?.[index]?.endereco?.bairro?.message && `input-error ${animateShake}`} />
                             </FormControl>
                             <FormMessage className='text-red-500 text-xs'/>
                         </FormItem>
@@ -625,10 +617,9 @@ return(
                     name={`responsaveis.${index}.endereco.rua`}
                     render={({field})=>(
                     <FormItem>
-                        <label className='text-sky-700 text-xl font-semibold'>Rua<span className='text-red-500'>*</span></label>
+                        <label >Rua<span className='text-red-500'>*</span></label>
                         <FormControl>
-                        <Input type='text' {...field} className={errors.responsaveis?.[index]?.endereco?.rua?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-6':
-                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-6'}/>
+                        <Input type='text' {...field} className={errors.responsaveis?.[index]?.endereco?.rua?.message && `input-error ${animateShake}`}/>
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
                     </FormItem>
@@ -658,23 +649,21 @@ return(
           </div>
             {currentStep === 3 &&
             <fieldset className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in'>
-            <div className='bg-gradient-to-r from-yellow-500 to-red-500  w-full h-9 pl-2 mr-2 text-white font-semibold mb-3 flex items-center text-xl tracking-wider '><p>Informações Essenciais</p></div>
-            <div className='flex flex-col space-y-3 mb-5'>
-                <div className='flex flex-row space-x-3 mb-5'>
+            <div className='legend-div'>Informações Essenciais</div>
+            <div className='flex flex-col space-y-3 mb-2'>
+                <div className='flex flex-row space-x-3 mb-2'>
                 <div className='flex flex-col w-full'>
                     <FormField
                     name=''
                     render={({field})=>(
                     <FormItem>
-                        <label className='text-sky-700 text-xl font-semibold'>Cursos<span className='text-red-500'>*</span></label>
+                        <label >Cursos<span className='text-red-500'>*</span></label>
                         <FormControl>
                     <select {...field} onChange={(e) => {
                         field.onChange(
                             parseInt(e.target.value, 10),
                             setIdCurso(parseInt(e.target.value, 10) || 0))
-                        }
-                                } className={
-                    'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-3 focus:outline-none rounded-md'}>
+                        }}>
                         <option >Selecione o curso</option>
                         {
                             
@@ -698,10 +687,9 @@ return(
                     name='classeId'
                     render={({field})=>(
                     <FormItem>
-                        <label className='text-sky-700 text-xl font-semibold'>Classes<span className='text-red-500'>*</span></label>
+                        <label>Classes<span className='text-red-500'>*</span></label>
                         <FormControl>
-                        <select {...field} className={errors.classeId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-3 focus:outline-none rounded-md':
-                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-3 focus:outline-none rounded-md'}onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                        <select {...field} className={errors.classeId?.message && `${animateShake} select-error`}onChange={(e)=>{field.onChange(parseInt(e.target.value))
                             setIdClasse(parseInt(e.target.value, 10) || 0)
                           }}>
                         <option >Selecione a classe</option>
@@ -718,17 +706,16 @@ return(
                     />
                     </div>
                     </div>
-                    <div className='flex flex-row space-x-3 mb-5'>
+                    <div className='flex flex-row space-x-3 mb-2'>
                     <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
                     name='turmaId'
                     render={({field})=>(
                     <FormItem>
-                        <label className='text-sky-700 text-xl font-semibold'>Turmas<span className='text-red-500'>*</span></label>
+                        <label >Turmas<span className='text-red-500'>*</span></label>
                         <FormControl>
-                        <select {...field} className={errors.turmaId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-3 focus:outline-none rounded-md':
-                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-3 focus:outline-none rounded-md'}onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                        <select {...field} className={errors.turmaId?.message && `${animateShake} select-error`}onChange={(e)=>{field.onChange(parseInt(e.target.value))
                           }}>
                         <option >Selecione a turma</option>
                         {
@@ -749,10 +736,9 @@ return(
                     name='turnoId'
                     render={({field})=>(
                     <FormItem>
-                        <label className='text-sky-700 text-xl font-semibold'>Turnos<span className='text-red-500'>*</span></label>
+                        <label >Turnos<span className='text-red-500'>*</span></label>
                         <FormControl>
-                        <select {...field} className={errors.turmaId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-3 focus:outline-none rounded-md':
-                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-3 focus:outline-none rounded-md'}onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                        <select {...field} className={errors.turmaId?.message && `${animateShake} select-error`}onChange={(e)=>{field.onChange(parseInt(e.target.value))
                             
                           }}>
                         <option >Selecione a turno</option>
@@ -778,8 +764,7 @@ return(
                     <FormItem>
                         
                         <FormControl>
-                        <select {...field} className={errors.metodoId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-xl border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-3 focus:outline-none rounded-md':
-                        'w-full text-xl border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-3 focus:outline-none rounded-md'}onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                        <select {...field} className={errors.metodoId?.message && `${animateShake} select-error`}onChange={(e)=>{field.onChange(parseInt(e.target.value))
                             setIdClasse(parseInt(e.target.value, 10) || 0)
                           }}>
                         <option >Pagar Em<span className='text-red-500'>*</span></option>
@@ -805,7 +790,7 @@ return(
         currentStep === step.length && setComplete(false);
         
         currentStep > 1 && setCurrentStep(prev => prev - 1);
-    }} className='bg-gray-700 hover:bg-gray-600 text-white font-semibold text-xl px-7 py-2 border-gray-700'>Voltar</button>
+    }} className={`${animatePing} responsive-button bg-gray-700 hover:bg-gray-600 text-white font-semibold border-gray-700`}>Voltar</button>
     }
     
     {(currentStep === step.length) ? <div>{ (!errors.classeId && !errors.turmaId && !errors.turnoId && !errors.metodoId && fieldClasseId && fieldTurmaId && fieldTurnoId && fieldMetodoId) &&
@@ -813,7 +798,8 @@ return(
         currentStep === step.length ?
         setComplete(true) :
         setCurrentStep(prev => prev + 1);
-    }} className={`${currentStep === 3 && complete ? 'animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in bg-green-700 hover:bg-green-600 border-green-700': 'animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in  bg-sky-700 hover:bg-sky-600 border-sky-700'} text-white font-semibold text-xl px-7 py-2 `} disabled={!isValid}>{!isValid}Cadastrar</button> }</div>: 
+    }} className={`${currentStep === 3 && complete ? `${animateFadeLeft} bg-green-700 hover:bg-green-600 border-green-700`: `${animateFadeLeft}  bg-sky-700 hover:bg-sky-600 border-sky-700`} text-white font-semibold sm:text-sm md:text-[10px] lg:text-[12px] xl:text-[16px]
+    py-1 sm:py-[2px] lg:py-1 xl:py-2 `} disabled={!isValid}>{!isValid}Cadastrar</button> }</div>: 
     <button type='button' onClick={()=>{
     const isStep1Valid = !errors.nomeCompleto && !errors.numeroBi && !errors.genero &&
     !errors.telefone && !errors.dataNascimento && !errors.numeroCasa &&
@@ -845,7 +831,7 @@ return(
     // Retorne ao Step 1 caso as condições de validação não estejam atendidas
     setCurrentStep(1);
   }
-    }} className='active:animate-ping animate-once animate-duration-500 animate-delay-400 animate-ease-out bg-sky-700 hover:bg-sky-600 text-white font-semibold text-xl px-7 py-2 border-sky-700' >Próximo</button>}
+    }} className={`${animatePing} responsive-button bg-sky-700 hover:bg-sky-600 text-white font-semibold border-sky-700`} >Próximo</button>}
 
     
         </div>
@@ -906,6 +892,6 @@ return(
         </MyDialog>
    }
      </div>
-     
+ )}</>    
 )
 }

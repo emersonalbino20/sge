@@ -16,3 +16,6 @@
 .buttonGreen:active{
     @apply ring-2 ring-greenRing
 }
+.icon-size{
+    @apply h-5 w-5 sm:h-4 sm:w-4 md:h-6 md:w-6 lg:w-7 lg:h-7 xl:h-9 xl:w-9; 
+}
