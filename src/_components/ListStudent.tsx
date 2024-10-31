@@ -1,372 +1,438 @@
-import * as React from 'react'
-import { useEffect } from 'react'
-import { AlertCircleIcon, AlertTriangle, CheckCircleIcon, EditIcon, SaveIcon, Search } from 'lucide-react'
-import { FolderOpenIcon } from '@heroicons/react/24/outline'
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-  } from "@/components/ui/dialog"
-import {FolderOpenIcon as Relatorios} from '@heroicons/react/24/outline';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from '@/components/ui/button'
-import { InfoIcon } from 'lucide-react'
-import { UserPlus } from 'lucide-react'
-import { Form, FormControl, FormField, FormItem, 
-FormLabel, 
-FormMessage} from '@/components/ui/form'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { AlertCircleIcon, AlertTriangle, Check, CheckCircleIcon, Edit, EditIcon, FolderOpenIcon, InfoIcon, Save, SaveIcon, Search } from 'lucide-react';
+import * as React from 'react';
+import { tdStyle, thStyle, trStyle } from './table';
+import { bairroZod, dataNascimentoZod, emailZod, generoZod, idZod, nomeCompletoZod, ruaZod, telefoneZod } from '@/_zodValidations/validations';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form'
-import { zodResolver} from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import {nomeCompletoZod,  dataNascimentoZod, generoZod,bairroZod, ruaZod, telefoneZod, emailZod, idZod, numeroCasaZod} from '../_zodValidations/validations'
-import { MyDialog, MyDialogContent } from './my_dialog'
-import InputMask from 'react-input-mask'
-import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { MyDialog, MyDialogContent } from './my_dialog';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Link } from 'react-router-dom';
-import { getCookies, removeCookies, setCookies } from '@/_cookies/Cookies'
-import Header from './Header'
-import { useHookFormMask, withMask } from 'use-mask-input'
-import { animateBounce, animateShake } from '@/AnimationPackage/Animates'
+import Header from './Header';
+import IPPUImage from './../assets/images/IPPU.png'
+import './stepper.css';
+import { animateBounce, animateFadeLeft, animatePing, animateShake } from '@/AnimationPackage/Animates';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getCursos } from '@/_tanstack/Cursos';
+import { getClassesId } from '@/_tanstack/Classes';
+import { getTurmasId } from '@/_tanstack/Turmas';
+import { getTrimestres } from '@/_tanstack/Trimestres';
+import { collectErrorMessages, confirmacaoAluno, getAlunosClassesMatriculasCurso, getAlunosId, getAlunosMatriculas, getAlunosNotas, getAlunosPorTurma, putAlunos } from '@/_tanstack/Alunos';
+import { getAnoAcademico } from '@/_tanstack/AnoAcademico';
+import { getPagamentos } from '@/_tanstack/Pagamentos';
+import { getTurnos } from '@/_tanstack/Turnos';
+import { useHookFormMask } from 'use-mask-input'
+import axios from 'axios';
+import { setCookies } from '@/_cookies/Cookies';
 
 const TForm =  z.object({
-    nomeCompleto: nomeCompletoZod,
-    nomeCompletoPai: nomeCompletoZod,
-    nomeCompletoMae: nomeCompletoZod,
-    dataNascimento: dataNascimentoZod,
-    genero: generoZod,
-    bairro: bairroZod,
-    rua: ruaZod,
-    numeroCasa: z.number(),
-    telefone: telefoneZod,
-    email: emailZod,
-    id: z.number()
-  })
+  nomeCompleto: nomeCompletoZod,
+  nomeCompletoPai: nomeCompletoZod,
+  nomeCompletoMae: nomeCompletoZod,
+  dataNascimento: dataNascimentoZod,
+  genero: z.string(),
+  bairro: bairroZod,
+  rua: ruaZod,
+  numeroCasa: z.number(),
+  telefone: telefoneZod,
+  email: emailZod,
+  id: z.number()
+})
 
-  const TFormConfirmacao =  z.object({
-    classeId: idZod,
-    turmaId: idZod,
-    turnoId: idZod,
-    metodoPagamentoId: idZod
-  })
+const TFormConfirmacao =  z.object({
+  classeId: idZod,
+  turmaId: idZod,
+  turnoId: idZod,
+  metodoPagamentoId: idZod,
+  id: z.number()
+})
 
-  type FormProps =  z.infer<typeof TForm>;
-  type FormPropsConfirmacao =  z.infer<typeof TFormConfirmacao>;
+const TFormStepOne = z.object({
+  cursoId: idZod,
+  classeId: idZod,
+  disciplinaId: idZod,
+  trimestreId: idZod,
+  turmaId: idZod
+})
 
-export default function ListStudent(){
-    
-    const form  = useForm<z.infer<typeof TForm>>({
-        mode: 'all', 
-        resolver: zodResolver(TForm)
-       })
+
+export default function ListStudent() {
+   const formStepOne = useForm<z.infer<typeof TFormStepOne>>({
+    mode: 'all', 
+    resolver: zodResolver(TFormStepOne)
+   })
+   const { watch, formState:{ errors, isValid }, register} = formStepOne;
+   
+   const form  = useForm<z.infer<typeof TForm>>({
+    mode: 'all', 
+    resolver: zodResolver(TForm)
+   })
 
   const upWithMask = useHookFormMask(form.register)
-
-    const formConfirmacao  = useForm<z.infer<typeof TFormConfirmacao>>({
-        mode: 'all', 
-        resolver: zodResolver(TFormConfirmacao),
-       })
-
-       const [showModal, setShowModal] = React.useState(false);
-       const [modalMessage, setModalMessage] = React.useState('');  
-       const [updateTable, setUpdateTable] = React.useState(false)
-        const handleSubmitUpdate = async (data: z.infer<typeof TForm>,e) => {
-          
-          const dados = 	{
-            nomeCompleto: data.nomeCompleto,
-            nomeCompletoPai: data.nomeCompletoPai,
-            nomeCompletoMae: data.nomeCompletoMae,
-            dataNascimento: data.dataNascimento,
-            genero: data.genero,
-            endereco: {
-              bairro: data.bairro,
-              rua: data.rua,
-              numeroCasa: data.numeroCasa
-            },
-            contacto: {
-              telefone: data.telefone,
-              email: data.email
-            }
-          }
-          await fetch(`http://localhost:8000/api/alunos/${data.id}`,{
-                  method: 'PUT',
-                  headers: {
-                      'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify(dados)
-              })
-              .then((resp => resp.json()))
-              .then((resp) =>{ 
-                setShowModal(true);
-                if (resp.message != null) {
-                  setModalMessage(resp.message);  
-                }else{
-                  setModalMessage(resp.message);
-                }
-              })
-              .catch((error) => console.log(`error: ${error}`))
-              setUpdateTable(!updateTable)
-          }
-
-      const[idAluno, setIdAluno] = React.useState([]);
-      const handleSubmitCreateConfirmacao = async (data: z.infer<typeof TFormConfirmacao>,e) => {
-        try {
-          const response = await fetch(`http://localhost:8000/api/alunos/${idAluno}/matriculas`, {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(data),
-          });
-          setShowModal(true);
-          if (response.ok) {
-              const blob = await response.blob(); 
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'matricula.pdf';
-              document.body.appendChild(a);
-              a.click();
-              a.remove();
-              setModalMessage(null);
-          } else {
-              const errorData = await response.json();
-              console.error('Erro ao gerar PDF:', response.statusText, errorData.message);
-              setModalMessage(errorData.message);
-          }
-      } catch (error) {
-          console.error('Erro na requisição:', error);
-      }
-
-        }
-
-    const[buscar, setBuscar] = React.useState(2);
-    const[bairro,setBairro] = React.useState();
-    const[rua,setRua] = React.useState();
-    const[casa,setCasa] = React.useState();
-    const[telefone,setTelefone] = React.useState();
-    const[email,setEmail] = React.useState();
-    const[estado, setEstado] = React.useState(false);
-    const[aluno, setAluno] = React.useState([])
-    React.useEffect(()=>{
-        const search = async () => {
-            const resp = await fetch(`http://localhost:8000/api/alunos/${buscar}`);
-            const receve = await resp.json()
-            const conv = JSON.stringify(receve)
-            const conv1 = JSON.parse(conv)
-            setAluno(conv1)
-            setBairro(receve.endereco.bairro)
-            setRua(receve.endereco.rua)
-            setCasa(receve.endereco.numeroCasa)
-            setTelefone(receve.contacto.telefone)
-            setEmail(receve.contacto.email)
-            form.setValue('nomeCompleto', receve.nomeCompleto)
-            form.setValue('genero', receve.genero)
-            form.setValue('dataNascimento', receve.dataNascimento)
-            form.setValue('nomeCompletoPai', receve.nomeCompletoPai)
-            form.setValue('nomeCompletoMae', receve.nomeCompletoMae)
-            form.setValue('bairro', receve.endereco.bairro)
-            form.setValue('rua', receve.endereco.rua)
-            form.setValue('numeroCasa', parseInt(receve.endereco.numeroCasa))
-            form.setValue('telefone', receve.contacto.telefone)
-            if(receve.contacto.email != null){
-            form.setValue('email', receve.contacto.email)}else{
-              form.setValue('email', '')
-            }
-            form.setValue('id', receve.id)
-            setEstado(true)
-        }
-        search()
-    },[buscar])
-
-
-  /*Área q implementa o código pra pesquisar cursos*/
-const [metodo, setMetodo] = React.useState([]);
-const [grade, setGrade] = React.useState([]);
-const [turma, setTurma] = React.useState([]);
-const [turno, setTurno] = React.useState([]);
-const [matriculas, setMatriculas] = React.useState([]);
-const [dateMatriculas, setDateMatriculas] = React.useState([]);
-const [idClasse, setIdClasse] = React.useState(0);
-
-const URLMATRICULA = `http://localhost:8000/api/alunos/${buscar}/matriculas`;
-const URLPAGAMENTO = "http://localhost:8000/api/metodos-pagamento"
-const URLTURNO = `http://localhost:8000/api/turnos/`
-React.useEffect( () => {
-    const respFetchCursos = async () => {
-          //Buscar Métodos de pagamento
-          const resppay = await fetch (URLPAGAMENTO);
-          const resppayJson = await resppay.json();
-          const convpay1 = JSON.stringify(resppayJson.data)
-          const convpay2 = JSON.parse(convpay1)
-          setMetodo(convpay2);
-          
-          //Buscar Turnos
-          const respturno = await fetch (URLTURNO);
-          const respturnoJson = await respturno.json();
-          const convturno1 = JSON.stringify(respturnoJson.data)
-          const convturno2 = JSON.parse(convturno1)
-          setTurno(convturno2)
-          
-          if(buscar > 0)
-          {
-          const respmatriculas = await fetch (URLMATRICULA);
-          const respmatriculasJson = await respmatriculas.json();
-          const convmatriculas1 = JSON.stringify(respmatriculasJson.data)
-          const convmatriculas2 = JSON.parse(convmatriculas1)
-
-          let data = convmatriculas2.map((item)=>{
-            const date = new Date(item.createdAt);
-            const formattedDate = date.toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'short' });
-            return item.createdAt = formattedDate});
-            //console.log(convmatriculas2[0].curso)
-          setDateMatriculas(data);
-          setMatriculas(convmatriculas2);
-
-          const respcurso = await fetch ("http://localhost:8000/api/cursos");
-          const json = await respcurso.json();
-          const convcurso = JSON.stringify(json.data);
-          const convcurso2 = JSON.parse(convcurso);
-          const dado = convcurso2.find((n)=>{return n.nome == convmatriculas2[0].curso})
-
-          const respclasse = await fetch (`http://localhost:8000/api/cursos/${dado.id}/classes`);
-          const respclassejson = await respclasse.json();
-          const convclasse = JSON.stringify(respclassejson.data)
-          const convclasse2 = JSON.parse(convclasse)
-          setGrade(convclasse2)
-
-          if(idClasse > 0){
-          const respturma = await fetch(`http://localhost:8000/api/classes/${idClasse}/turmas`)
-          const respturmajson = await respturma.json();
-          const convturma = JSON.stringify(respturmajson.data);
-          const convturma2 = JSON.parse(convturma);
-          setTurma(convturma2)
-        }
-        }
-    } 
-     respFetchCursos()
-},[buscar, idClasse])
-
-  const changeResource=(id)=>{
-        setBuscar(id)
-        setCookies('idAluno', id , 1, false) 
-    }
+  const queryClient = useQueryClient();
+  const {data: alunosTurma} = useQuery({ queryKey: ["alunosTurmaId", formStepOne.getValues('classeId'), formStepOne.getValues('turmaId')] , queryFn: ()=>getAlunosPorTurma(formStepOne.getValues('classeId'), formStepOne.getValues('turmaId')), enabled: !!formStepOne.getValues('classeId')
+  });
 
   
-  const [dados, setDados] = React.useState([])
-  const [loading, setLoading] = React.useState(false);
-  const [dataApi, setDataApi] = React.useState([])
-  const [cursor, setCursor] = React.useState(null);  
-  const [hasMore, setHasMore] = React.useState(10);
-
-  const tableRef = React.useRef(null);
-
-  const fetchData = async (initial = false) => {
-   if (loading) return; 
-
-   setLoading(true);
-    let pageSize = 10; 
-    const url = cursor
-      ? `http://localhost:8000/api/alunos?pageSize=${hasMore}&cursor=${cursor}`
-      : `http://localhost:8000/api/alunos?pageSize=${hasMore}`;
-
-    try {
-      const resp = await fetch(url);
-      const data = await resp.json();
-
-      if (data.data.statusCode != 500 ) {
-        setDados(data.data);
-        setCursor(data.next_cursor); 
-       setDataApi(data.data)
-        console.log(data.next_cursor);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar dados:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  React.useEffect(() => {
-    fetchData(true);  
-  }, [cursor]);
-
-  const handleScroll = () => {
-    if (!tableRef.current) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = tableRef.current;
-    if (scrollTop + clientHeight + 1 >= scrollHeight) {
-      setHasMore(hasMore + 10)
-      fetchData(true);
-      console.log("Estou no fim")
-    }
-  };
-
-    const columns = ['Id', 'Nome', 'Gênero', 'Número Bi', 'Data de Nasc.', 'Acção'];
+  const formConfirmacao  = useForm<z.infer<typeof TFormConfirmacao>>({
+    mode: 'all', 
+    resolver: zodResolver(TFormConfirmacao),
+   })
+   const fieldClassesAluno = formConfirmacao.watch('classeId');
+   
+   const {mutate: postMutationConfirmacaoAlunos} = useMutation({
+    mutationFn: confirmacaoAluno,
+    onSuccess: (response) => {
+    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
     
-   const handleFilter = (event) => {
-        const a = dataApi.filter((element) =>{ return (element.nomeCompleto.toLowerCase().includes(event.target.value.toLowerCase().trim())) });
-        setDados(a)
-    }
-    const fieldDivStyle = 'text-lg sm:text-base md:text-[14px] lg:text-[16px] xl:text-xl text-sky-600 mb-2 font-semibold';
-    return (
-    <>
-   <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
-        <Header title={false}/> 
-       <div className='flex flex-col space-y-2 justify-center items-center w-full'>
-        <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
-          <div className='relative flex  items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
-              <Search className='absolute text-gray-300 w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7'/>            
-              <Input className='pl-6 indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
+    window.open(url, '_blank');
+    
+    setShowModal(true);
+    setModalMessage(null);
+
+      queryClient.invalidateQueries({queryKey: ["alunosTurmaId", formStepOne.getValues('classeId'), formStepOne.getValues('turmaId')]});
+    },
+    onError: (error) => {
+      console.error(error)
+      if(axios.isAxiosError(error)){
+      if (error.response && error.response.data) {
+        const err = error.response.data?.message;
+        
+        setShowModal(true);
+        setModalMessage("Matricula Já existe")
+       }
+      }}
+  });
+
+   const handleSubmitCreateConfirmacao = async (data: z.infer<typeof TFormConfirmacao>,e) => {
+    e.preventDefault();
+    postMutationConfirmacaoAlunos(data)
+   }
+
+   const {mutate: putMutationAlunos} = useMutation({
+    mutationFn: putAlunos,
+    onSuccess: () => {
+      setShowModal(true);
+      setModalMessage(null)
+      queryClient.invalidateQueries({queryKey: ["alunosTurmaId", formStepOne.getValues('classeId'), formStepOne.getValues('turmaId')]});
+    },
+    onError: (error) => {
+      if(axios.isAxiosError(error)){
+      if (error.response && error.response.data) {
+        const err = error.response.data?.errors;
+        const errorMessages = collectErrorMessages(err);
+        setShowModal(true);
+        setModalMessage(errorMessages[0])
+       }
+      }}
+  });
+
+   const handleSubmitUpdate = async (data: z.infer<typeof TForm>,e) => {
+    e.preventDefault();
+    putMutationAlunos(data);
+  }
+
+   const [fieldCursoId, fieldClasseId, fieldTrimestreId, fieldTurmaId] = watch(["cursoId", "classeId", "trimestreId", "turmaId"])
+
+   const [showModal, setShowModal] = React.useState(false);
+   const [modalMessage, setModalMessage] = React.useState('');  
+
+  const { data: trimestres } = useQuery({ queryKey: ["trimestres"] , queryFn: ()=>getTrimestres(),
+    });
+
+  const { data: cursos } = useQuery({ queryKey: ["cursos"] , queryFn: ()=>getCursos(),
+    });
+  
+  const { data: pagamentos } = useQuery({ queryKey: ["pagamentos"] , queryFn: ()=>getPagamentos(),
+  });
+
+  const { data: turnos } = useQuery({ queryKey: ["turnos"] , queryFn: ()=>getTurnos(),
+  });
+
+  const {data: classes} = useQuery({ queryKey: ["classesId", formStepOne.getValues('cursoId')] , queryFn: ()=>getClassesId(formStepOne.getValues('cursoId')), enabled: !!formStepOne.getValues('cursoId')
+  });
+    
+  const {data: turmas} = useQuery({ queryKey: ["turmaId", formStepOne.getValues('classeId')] , queryFn: ()=>getTurmasId(formStepOne.getValues('classeId')), enabled: !!formStepOne.getValues('classeId')
+  });
+
+  const [alunoId, setAlunoId] = React.useState<number>(null);
+  const {data: alunosNotas} = useQuery({ queryKey: ["alunosNotasId", alunoId, formStepOne.getValues('trimestreId'), formStepOne.getValues('classeId')] , queryFn: ()=>getAlunosNotas(alunoId, formStepOne.getValues('trimestreId'), formStepOne.getValues('classeId')), enabled: !!alunoId
+  });
+
+  const {data: alunosPorId, isFetched: alunosIdFetched} = useQuery({ queryKey: ["alunosPorId", alunoId] , queryFn: ()=>getAlunosId(alunoId), enabled: !!alunoId
+  });
+  React.useEffect(()=>{
+      form.setValue('nomeCompleto', alunosPorId?.data.nomeCompleto)
+      form.setValue('genero', alunosPorId?.data.genero)
+      form.setValue('dataNascimento', alunosPorId?.data.dataNascimento)
+      form.setValue('nomeCompletoPai', alunosPorId?.data.nomeCompletoPai)
+      form.setValue('nomeCompletoMae', alunosPorId?.data.nomeCompletoMae)
+      form.setValue('bairro', alunosPorId?.data.endereco.bairro)
+      form.setValue('rua', alunosPorId?.data.endereco.rua)
+      form.setValue('numeroCasa', parseInt(alunosPorId?.data.endereco.numeroCasa))
+      form.setValue('telefone', alunosPorId?.data.contacto.telefone)
+      if(alunosPorId?.data.contacto.email != null){
+      form.setValue('email', alunosPorId?.data.contacto.email)}else{
+        form.setValue('email', '')
+      }
+    form.setValue('id', alunosPorId?.data.id);
+    formConfirmacao.setValue('id', alunosPorId?.data.id);
+  }, [alunoId, alunosIdFetched])
+
+const {data: alunosPorMatricula} = useQuery({ queryKey: ["alunosPorMatricula", alunoId] , queryFn: ()=>getAlunosMatriculas(alunoId), enabled: !!alunoId
+});
+
+const {data: classesAluno} = useQuery({ queryKey: ["classesAluno", formStepOne.getValues('cursoId')], queryFn: ()=>getAlunosClassesMatriculasCurso(formStepOne.getValues('cursoId')), enabled: !!formStepOne.getValues('cursoId')
+});
+
+const {data: turmasAluno} = useQuery({ queryKey: ["turmaAlunoId", fieldClassesAluno] , queryFn: ()=>getTurmasId(fieldClassesAluno), enabled: !!fieldClassesAluno
+});
+
+const changeResource=(id)=>{
+  setAlunoId(id)
+  setCookies('idAluno', id , 1, false) 
+}
+  const [idAno, setIdAno] = React.useState<number>(0);
+  React.useEffect(() => {
+    const search = async () => {
+      const resp = await fetch(`http://localhost:8000/api/ano-lectivos/`);
+        const receve = await resp.json()
+        var meuarray = receve.data.find((c)=>{
+          return c.activo === true
+        })
+        setIdAno(meuarray.id)
+    };
+    search();
+  }, []);
+
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const handleFilterChange = (event) => {
+    setSearchTerm(event.target.value.toLowerCase());
+  };
+
+  const filteredTurmas = alunosTurma?.data?.data?.filter((turma) =>
+    turma.nomeCompleto.toLowerCase().includes(searchTerm)
+  );
+
+  const step = ['Filtrar Turmas', 'Inserir Nota'];
+  const[ currentStep, setCurrentStep ] = React.useState<number>(1);
+  const[ complete, setComplete ] = React.useState<boolean>(false);
+
+  const fieldDivStyle = 'text-lg sm:text-base md:text-[14px] lg:text-[16px] xl:text-xl text-sky-600 mb-2 font-semibold';
+  return (<>
+      
+    { idAno == 0 ? <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
+      <div className='w-full text-center text-4xl text-red-600 md:text-2xl lg:text-2xl'>
+          <div >
+          <AlertTriangle className={`${animateBounce} inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12`}/>
+              <p className='text-red-500'>SELECIONE O ANO LECTIVO</p>
+              <p className='text-red-500 italic font-semibold text-sm cursor-pointer'><Link to={'/AcademicYearPage'}>Selecionar agora</Link></p>
           </div>
-      <div ref={tableRef}  onScroll={handleScroll} className="overflow-x-auto overflow-y-auto w-full  h-80 md:h-1/2 lg:h-[500px]">
-          
+      </div>
+        </div> : (
+      <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
+         <Header title={false}/> 
+         <div className='flex flex-col space-y-2 justify-center items-center w-full'>
+         <div className='flex justify-center items-center text-sm'>
+            <div className='flex justify-between'>{
+            step?.map((step, i) => 
+                (
+                    <div key={i} className={`step-item ${currentStep === i + 1 ? 'active' : '' } ${ (i + 1 < currentStep || complete) && 'complete'}`}>
+                        <div className='step'>{ 
+                        (i + 1 < currentStep || complete) ?
+                        <Check/> : i + 1 }</div>
+                        <p className='text-gray-500 text-base sm:text-xs md:text-[14px] lg:text-[16px] xl:text-lg'>{step}</p>
+                    </div>
+                    
+                )
+                )}
+              </div>
+            </div>
+            {currentStep === 1 && ( <div className={`${animateFadeLeft} max-w-md sm:w-[260px] md:w-[300px] lg:w-[380px] xl:w-[400px] p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8`}>
+            <Form {...formStepOne} >
+        <form >
+                <div className="space-y-3 -m-2 -mt-6 -mb-4 sm:max-w-[425px]">
+                    <div className='flex justify-between -mb-6'>
+                      <h1></h1>
+                      <img src={IPPUImage} className="h-20 w-20" alt="Ulumbo Logo" />
+                    </div>
+                    <div >
+                        <FormField
+                     control={formStepOne.control}
+                    name='trimestreId'
+                    render={({field})=>(
+                    <FormItem>
+                         <label>Trimestres<span className='text-red-500'>*</span></label>
+                        <FormControl>
+                    <select {...field}
+                    className={
+                      errors.trimestreId?.message && `${animateShake} select-error`}
+                      onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                      }}>
+                        <option >Selecione o trimestre</option>
+                        {
+                        trimestres?.data?.data.map((field)=>{
+                            return (<option value={`${field.id}`}>{field.numero}° Trimestre</option>
+                            )
+                        })
+                                    
+                        }
+                    </select>
+                        </FormControl>
+                        <FormMessage className='text-red-500 text-xs'/>
+                    </FormItem>)
+                    }
+                    />
+                        </div>
+                    <div>
+                     <FormField
+                     control={formStepOne.control}
+                    name='cursoId'
+                    render={({field})=>(
+                    <FormItem>
+                         <label >Cursos<span className='text-red-500'>*</span></label>
+                        <FormControl>
+                    <select {...field}
+                
+                    className={
+                      errors.cursoId?.message && `${animateShake} select-error`} 
+                      onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                      }}>
+                        {
+                        cursos?.data?.data.map((field)=>{
+                            return (<option value={`${field.id}`}>{field.nome} 
+                            </option>
+                            )
+                        })
+                                    
+                        }
+                    </select>
+                        </FormControl>
+                        <FormMessage className='text-red-500 text-xs'/>
+                    </FormItem>)
+                    }
+                    />
+                    </div>
+                    <div>
+                     <FormField
+                     control={formStepOne.control}
+                    name='classeId'
+                    render={({field})=>(
+                    <FormItem>
+                         <label >Classes<span className='text-red-500'>*</span></label>
+                        <FormControl>
+                    <select {...field}
+                
+                    className={
+                      errors.classeId?.message && `${animateShake} select-error`} 
+                      onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                      }}>
+                         <option >Selecione a classe</option>
+                        {
+                        classes?.data?.data?.map((field)=>{
+                            return (<option value={`${field.id}`}>{field.nome} Classe
+                            </option>
+                            )
+                        })
+                                    
+                        }
+                    </select>
+                        </FormControl>
+                        <FormMessage className='text-red-500 text-xs'/>
+                    </FormItem>)
+                    }
+                    />
+                    </div>
+                    <div>
+                        <FormField
+                     control={formStepOne.control}
+                    name='turmaId'
+                    render={({field})=>(
+                    <FormItem>
+                         <label >Turmas<span className='text-red-500'>*</span></label>
+                        <FormControl>
+                    <select {...field}
+                    onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                    }}
+                    className={
+                      errors.turmaId?.message && `${animateShake} select-error`}
+                     >
+                        <option >Selecione a turma</option>
+                        {
+                            
+                        turmas?.data?.data.map((field)=>{
+                            return (<option value={`${field.id}`}>{field.nome}
+                            </option>
+                            )
+                        })
+                                    
+                        }
+                    </select>
+                        </FormControl>
+                        <FormMessage className='text-red-500 text-xs'/>
+                    </FormItem>)
+                    }
+                    />
+                        </div>
+                      <button type='button' onClick={()=>{
+                      const isStep1Valid = !errors.cursoId && !errors.trimestreId && !errors.turmaId && !errors.classeId && fieldCursoId && fieldTrimestreId && fieldTurmaId && fieldClasseId;
+                      if (isStep1Valid) {
+                        if (alunosTurma?.data?.data.length > 0)
+                        {
+                        currentStep === step.length ?
+                        setComplete(true) :
+                        setCurrentStep(prev => prev + 1);
+                        }else{
+                          setShowModal(true);
+                          setModalMessage("A Turma Selecionada Não Possui Alunos Cadastrados")
+                        }
+                      }else{setCurrentStep(1)}
+                      
+                      }} className={`${animatePing} responsive-button bg-sky-700 hover:bg-sky-600 border-sky-700`}>Próximo</button>
+                </div>
+                </form>
+                </Form>
+            </div>)}
+            {currentStep === 2 && (
+          <div className="animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10">
+         <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96 mb-4'>
+         <Search className='absolute text-gray-300 w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7'/>            
+         <Input className=' pl-6 indent-2' type='text' value={searchTerm} onChange={handleFilterChange} placeholder='Procure por registros...' />
+     </div><div className='overflow-x-auto overflow-y-auto w-full  h-80 md:h-1/2 lg:h-[500px]'>
           <table className="w-full bg-white border border-gray-200 table-fixed">
-              
-              <thead className='sticky top-0 z-10'>
-                  <tr className={trStyle}>
-                      {columns.map((element, index) =>{ return( <th key={index} className={thStyle} >{element}</th>) })}
-                  </tr>
-              </thead>
-              <tbody >
-                  {dados.length == 0 ? (
-                  <tr className='w-96 h-32'>
-                      <td rowSpan={6} colSpan={6} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
-                          <div >
-                              <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
+          <thead className='sticky top-0 z-10'>
+            <tr className={trStyle}>
+                <th  className={thStyle}>Id</th>
+                <th  className={thStyle}>Nome</th>
+                <th  className={thStyle}>Acção</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredTurmas.length === 0 ? (
+              <tr className='w-96 h-32'>
+                <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
+                  <div>
+                  <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
                               <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
-                          </div>
-                      </td>
-                  </tr>
-                  ) : dados.map((item, index) => (
-                      <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-200"}>
-                          <td className={tdStyle}>{item.id}</td>
-                          <td className={tdStyle}>{item.nomeCompleto}</td>
-                          <td className={tdStyle}>{item.genero == 'M' ? 'Rapaz' : 'Menina' }</td>
-                          <td className={tdStyle}>{item.numeroBi}</td>
-                          <td className={tdStyle}>{item.dataNascimento}</td>
-                          <td className={tdStyleButtons}    onClick={()=>{
-                            changeResource(item.id)
-                            if(estado){
-                              setIdAluno(item.id)
-                              setEstado(false);
-                              
-                            }
-                          }}>
-                      <Dialog >
+                  </div>
+                </td>
+              </tr>
+            ) : filteredTurmas.map((item, index) => (
+              <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-200"}>
+               
+                <td className={tdStyle}>{item.id}</td>
+                <td className={tdStyle}>{item.nomeCompleto}</td>
+                <td className={tdStyle}  onClick={()=>{changeResource(item.id)}}>
+                  <div className='flex flex-row space-x-2'>
+
+                  <Dialog >
                     <DialogTrigger asChild >
                     <div title='actualizar' className='relative flex justify-center items-center' >
                     <EditIcon className='w-5 h-4 absolute text-white font-extrabold'/>
-                      <Button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'  ></Button>
+                      <Button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm' ></Button>
                       </div>
                       
                     </DialogTrigger>
@@ -573,9 +639,9 @@ React.useEffect( () => {
                       </form>
                       </Form>
                     </DialogContent>
-                      </Dialog>
+                  </Dialog>
 
-                    <Dialog >
+                  <Dialog >
             <DialogTrigger asChild >
             <div title='confirmação' className='relative flex justify-center items-center' >
             <FolderOpenIcon className='w-5 h-4 absolute text-white font-extrabold'/>
@@ -587,7 +653,7 @@ React.useEffect( () => {
               <DialogTitle className='text-sky-800 text-xl'>Confirmação da Matrícula</DialogTitle>
                 <DialogDescription>
                   <p className='text-base text-gray-800'>
-                  confirma a matrícula {Object.values(aluno)[6] == 'M' ? 'do aluno' : 'da aluna'} <span className='font-bold uppercase'>{Object.values(aluno)[1]}</span> n. bi: <span className='font-bold'>{Object.values(aluno)[4]}</span> para o ano corrente.</p>
+                  confirma a matrícula {alunosPorId?.data?.genero == 'M' ? 'do aluno' : 'da aluna'} <span className='font-bold uppercase'>{alunosPorId?.data?.nomeCompleto}</span> n. bi: <span className='font-bold'>{alunosPorId?.data?.numeroBi}</span> para o ano corrente.</p>
                 </DialogDescription>
               </DialogHeader>
             
@@ -601,17 +667,14 @@ React.useEffect( () => {
                             name='classeId'
                             render={({field})=>(
                             <FormItem>
-                               <label htmlFor="curso">Classes<span className='text-red-500'>*</span>
+                               <label htmlFor="classe">Classes<span className='text-red-500'>*</span>
                                     </label>
                                 <FormControl>
-                                  <select {...field} className={formConfirmacao.formState.errors.classeId?.message && `${animateShake} select-error`} onChange={(e)=>{
-                                    field.onChange(parseInt(e.target.value))
-                                    setIdClasse(parseInt(e.target.value, 10) || 0)
-                                  }}>
+                                  <select {...field} className={formConfirmacao.formState.errors.classeId?.message && `${animateShake} select-error`} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                                 <option >Selecione a classe</option>
                                 {
-                                      grade.map((field)=>{
-                                          return <option value={`${field.id}`}>{field.nome}</option>
+                                      classesAluno?.data?.data.map((field)=>{
+                                          return <option value={`${field.id}`}>{field.nome} Classes</option>
                                       })
                                 }
                             </select>
@@ -627,13 +690,13 @@ React.useEffect( () => {
                             name='turmaId'
                             render={({field})=>(
                             <FormItem>
-                                <label htmlFor="curso">Turmas<span className='text-red-500'>*</span>
+                                <label htmlFor="turma">Turmas<span className='text-red-500'>*</span>
                                     </label>
                                 <FormControl>
                                 <select {...field} className={formConfirmacao.formState.errors.turmaId?.message && `${animateShake} select-error`}onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                                 <option >Selecione a turma</option>
                                 {
-                                      turma.map((field)=>{
+                                      turmasAluno?.data?.data.map((field)=>{
                                           return <option value={`${field.id}`}>{field.nome}</option>
                                       })
                                 }
@@ -656,7 +719,7 @@ React.useEffect( () => {
                                 <select {...field} className={formConfirmacao.formState.errors.turnoId?.message && `${animateShake} select-error`} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                                 <option >Selecione a turma</option>
                                 {
-                                      turno.map((field)=>{
+                                      turnos?.data?.data.map((field)=>{
                                           return <option value={`${field.id}`}>{field.nome}</option>
                                       })
                                 }
@@ -673,13 +736,13 @@ React.useEffect( () => {
                             name='metodoPagamentoId'
                             render={({field})=>(
                             <FormItem>
-                                <label htmlFor="curso">Pagar em<span className='text-red-500'>*</span>
+                                <label htmlFor="pagamento">Pagar em<span className='text-red-500'>*</span>
                                     </label>
                                 <FormControl>
-                                <select {...field} className={formConfirmacao.formState.errors.metodoPagamentoId?.message && `${animateShake} select-error`}onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                                <select id='pagamento' {...field} className={formConfirmacao.formState.errors.metodoPagamentoId?.message && `${animateShake} select-error`}onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                                 <option >Selecione o método</option>
                                 {
-                                      metodo.map((field)=>{
+                                      pagamentos?.data?.data.map((field)=>{
                                           return <option value={`${field.id}`}>{field.nome}</option>
                                       })
                                 }
@@ -701,8 +764,7 @@ React.useEffect( () => {
               </Form>
             </DialogContent>
                     </Dialog> 
-  
-                    <Dialog >
+                  <Dialog >
               <DialogTrigger asChild>
               <div title='ver dados' className='relative flex justify-center items-center'>
               <InfoIcon className='w-5 h-4 absolute text-white font-extrabold'/>
@@ -725,31 +787,31 @@ React.useEffect( () => {
                       <div className="w-full flex flex-row justify-between px-2">
                       <div>
                           <label >nome completo</label>
-                          <p className='font-thin text-sm'>{Object.values(aluno)[1]}</p>
+                          <p className='font-thin text-sm'>{alunosPorId?.data?.nomeCompleto}</p>
                       </div>
                       <div>
                           <label className='font-poppins'>número do bi</label>		
-                            <p className='font-thin text-sm'>{Object.values(aluno)[4]}</p>
+                            <p className='font-thin text-sm'>{alunosPorId?.data?.numeroBi}</p>
                       </div>
                       </div>
                       <div className="w-full flex flex-row justify-between px-2">
                       <div>
                           <label className='font-poppins'>nome do pai</label>	
-                          <p className='font-thin text-sm'>{Object.values(aluno)[2]}</p>
+                          <p className='font-thin text-sm'>{alunosPorId?.data?.nomeCompletoPai}</p>
                       </div>
                       <div>
                           <label className='font-poppins'>nome da mãe</label>
-                          <p className='font-thin text-sm'>{Object.values(aluno)[3]}</p>
+                          <p className='font-thin text-sm'>{alunosPorId?.data?.nomeCompletoMae}</p>
                       </div>
                       </div>
                       <div className="w-full flex flex-row justify-between px-2">
                       <div>
                           <label className='font-poppins'>gênero</label>
-                          <p className='font-thin text-sm'>{Object.values(aluno)[6]}</p>
+                          <p className='font-thin text-sm'>{alunosPorId?.data?.genero}</p>
                       </div>
                       <div>
                           <label className='font-poppins'>data de nascimento</label>
-                          <p className='font-thin text-sm'>{Object.values(aluno)[5]}</p>
+                          <p className='font-thin text-sm'>{alunosPorId?.data?.dataNascimento}</p>
                       </div>
                       </div>
                       </div>
@@ -761,15 +823,15 @@ React.useEffect( () => {
                       <div className="w-full flex flex-row justify-between px-2">
                       <div>
                           <label className='font-poppins'>número da casa</label>
-                          <p className='font-thin text-sm'>{casa}</p>
+                          <p className='font-thin text-sm'>{alunosPorId?.data?.endereco.numeroCasa}</p>
                       </div>
                       <div>
                           <label className='font-poppins'>bairro</label>
-                          <p className='font-thin text-sm'>{bairro}</p>
+                          <p className='font-thin text-sm'>{alunosPorId?.data?.endereco.bairro}</p>
                       </div>
                       <div>
                           <label className='font-poppins'>rua</label>
-                          <p className='font-thin text-sm'>{rua}</p>
+                          <p className='font-thin text-sm'>{alunosPorId?.data?.endereco.rua}</p>
                       </div>
                       </div>
                       </div>
@@ -780,12 +842,12 @@ React.useEffect( () => {
                       <div className="w-full flex flex-row justify-between px-2">
                       <div>
                           <label className='font-poppins'>Telefone</label>
-                          <p className='font-thin text-sm'>{telefone}</p>
+                          <p className='font-thin text-sm'>{alunosPorId?.data?.contacto.telefone}</p>
                       </div>
-                      {email && 
+                      {alunosPorId?.data?.email && 
                       <div>
                           <label className='font-poppins'>email</label>
-                          <p className='font-thin text-sm'>{email}</p>
+                          <p className='font-thin text-sm'>{alunosPorId?.data?.contacto.email}</p>
                       </div>
                       }
                       </div>
@@ -798,14 +860,41 @@ React.useEffect( () => {
                       <div className='overflow-y-auto h-28 w-full'>
                           {
                             
-                          matriculas.map((item)=>{return (
+                            alunosPorMatricula?.data?.data.map((item)=>{
+                              const formattedDate = new Date(item.createdAt).toLocaleString('pt-BR', { 
+                                dateStyle: 'full', 
+                                timeStyle: 'short' 
+                              });
+                              return (
                           <ul key={item.id}>
                             <li>Curso: {item.curso}</li>
                             <li>Classe: {item.classe}</li>
                             <li>Turma: {item.turma}</li>
-                            <li>Data: {item.createdAt}</li>
+                            <li>Data: {formattedDate}</li>
                             <li>-----------------</li>
                             </ul>)})}
+                      </div>
+                      </div>
+                      </div>
+                      </fieldset>
+
+                      <fieldset>
+                          <legend className='text-sm text-gray-800'>Todas Notas</legend>
+                      <div className="w-full flex flex-row justify-between px-2">
+                      <div className="w-full flex flex-row justify-between px-2">
+                      <div className='overflow-y-auto h-28 w-full'>
+                          {
+                            
+                           alunosNotas?.data?.data.length > 0 ? alunosNotas?.data?.data.map((item, index)=>{return (
+                          <ul key={index}>
+                            <li>Trimestre: {item.trimestre}</li>
+                            <li>Disciplina: {item.disciplina}</li>
+                            <li>Nota: {item.nota}</li>
+                            <li>-----------------</li>
+                            </ul>)}) :  <div className='text-red-500 flex flex-col justify-center items-center'>
+                            <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
+                              <p className='text-red-500'>Nenhuma Nota Registrada Neste Trimestre</p>
+                            </div>}
                       </div>
                       </div>
                       </div>
@@ -817,24 +906,36 @@ React.useEffect( () => {
                 </DialogFooter>
               </DialogContent>
                     </Dialog>
-                    
-                        </td>
-                      </tr>
-                  ))}
-              </tbody>
-              <tfoot className='sticky bottom-0 bg-white"'>
-              <tr>
-                  <td colSpan={6} className="py-2 text-blue-500">
-                      Total de registros: {dados.length}
+                    </div>
                   </td>
               </tr>
+            ))}
+          </tbody>
+          <tfoot className='sticky bottom-0 bg-white'>
+            <tr>
+              <td colSpan={3} className="py-2 text-blue-500">
+                Total de registros: {alunosTurma?.data?.data.length}
+              </td>
+            </tr>
           </tfoot>
-          </table>
-      </div>
-      </div>
-      </div>
-
-{showModal &&
+        </table>
+        {currentStep > 1 && 
+    <button type='button' onClick={()=>{
+        currentStep === step.length && setComplete(false);
+        
+        currentStep > 1 && setCurrentStep(prev => prev - 1);
+    }} className={`${animatePing} responsive-button bg-gray-700 hover:bg-gray-600 text-white font-semibold border-gray-700`}>Voltar</button>
+    }
+        </div>
+        
+        </div> )}
+        <div className='w-full flex items-center justify-between'>
+        </div>
+       </div>   
+        </section>
+       
+      )}
+      {showModal &&
 <MyDialog open={showModal} onOpenChange={setShowModal}>
 
   <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
@@ -884,7 +985,7 @@ React.useEffect( () => {
        </MyDialogContent>
 </MyDialog>
  }
- </section>
 
-    </>)
+    </>
+  );
 }

@@ -31,7 +31,7 @@ select{
     @apply text-sky-700 text-lg sm:text-base md:text-[16px] lg:text-lg xl:text-xl;
 }
 .responsive-button {
-    @apply sm:text-sm md:text-[10px] lg:text-[12px] xl:text-[16px] py-1 sm:py-[2px] lg:py-1 xl:py-2;
+    @apply sm:text-sm md:text-[10px] lg:text-[12px] xl:text-[16px] py-1 sm:py-[2px] lg:py-1 xl:py-2 text-white font-semibold;
 }
 .p-responsive{
     @apply text-base sm:text-xs md:text-[14px] lg:text-[16px] xl:text-lg;

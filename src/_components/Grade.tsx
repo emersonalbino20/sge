@@ -271,9 +271,9 @@ const changeResource = (id)=>{
       { idAno == 0 ? <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
       <div className='w-full text-center text-4xl text-red-600 md:text-2xl lg:text-2xl'>
           <div>
-              <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
-              <p>SELECIONE O ANO LECTIVO</p>
-              <p className='italic font-semibold text-sm cursor-pointer'><Link to={'/AcademicYearPage'}>Selecionar agora</Link></p>
+          <AlertTriangle className={`${animateBounce} inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12`}/>
+              <p className='text-red-500'>SELECIONE O ANO LECTIVO</p>
+              <p className='text-red-500 italic font-semibold text-sm cursor-pointer'><Link to={'/AcademicYearPage'}>Selecionar agora</Link></p>
           </div>
       </div>
         </div> : (

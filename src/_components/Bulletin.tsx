@@ -58,7 +58,7 @@ export default function Bulletin() {
     resolver: zodResolver(TFormStepOne)
    })
 
-   const {control, watch, formState:{ errors, isValid }, register} = formStepOne;
+   const { watch, formState:{ errors }} = formStepOne;
 
    const [fieldCursoId, fieldDisciplinaId, fieldClasseId, fieldTrimestreId, fieldTurmaId] = watch(["cursoId", "disciplinaId","classeId", "trimestreId", "turmaId"])
 
@@ -81,6 +81,7 @@ export default function Bulletin() {
         setModalMessage(null);
       }
       console.log(resp)
+      buscarAlunos(fieldTurmaId);
     })
     .catch((error) => console.log(`error: ${error}`))
   }
@@ -105,7 +106,7 @@ export default function Bulletin() {
       }else{
         setModalMessage(null);
       }
-      console.log(resp)
+      buscarAlunos(fieldTurmaId);
     })
     .catch((error) => console.log(`error: ${error}`))
   }
@@ -147,18 +148,7 @@ export default function Bulletin() {
     search();
   }, []);
 
-
-  
-  const [classes, setClasses] = React.useState([]);
   const [turmas, setTurmas] = React.useState([]);
-  const buscarClasses = async (id) => {
-    const URL = `http://localhost:8000/api/cursos/${id}/classes`;
-    const response = await fetch(URL);
-    const responseJson = await response.json();
-    setClasses(responseJson.data);
-    
-  }
-
   const [nomeDisciplina, setNomeDisciplina] = React.useState<string>('');  
   const selecionarDisciplina = (e) =>{
     setDisciplinaId(parseInt(e.target.value, 10) || 0)
@@ -180,6 +170,7 @@ export default function Bulletin() {
     id: number;
     nomeCompleto: string;
     estado: string;
+    condicao: string;
   };
   
   const [dados, setDados] = React.useState<ruleDados[]>([]);
@@ -194,20 +185,20 @@ export default function Bulletin() {
     const newData = await Promise.all(
       responseJsonClasse.data.map(async (item) => {
         const URL = `http://localhost:8000/api/alunos/${item.id}/notas?trimestreId=${trimestreId}&classeId=${classeId}`;
-        
         const response = await fetch(URL);
         const responseJson = await response.json();
-        
-        
         const estado = responseJson.data && responseJson.data.length > 0
           ? (responseJson.data[0].disciplina === nomeDisciplina ? responseJson.data[0].nota + 'V'  : 'indefinido')
           : 'indefinido';
+        const condicao = responseJson.data && responseJson.data.length > 0
+          ? (responseJson.data[0].nota > 9 ? 'positiva' : 'negativa')
+          : 'negativa';
   
-        return { ...item, estado };
+        return { ...item, estado, condicao };
       })
     );
+    console.log(newData)
     setDados(newData); 
-   
   };
   
  
@@ -342,6 +333,7 @@ const clickBuscarNotas = async (idAluno) => {
                       onChange={(e)=>{field.onChange(parseInt(e.target.value))
                         buscarTurmas(e.target.value)
                       }}>
+                        <option >Selecione a classe</option>
                         {
                         cursos.map((field)=>{
                             return (<option value={`${field.id}`}>{field.nome} Classe ({field.curso.nome})
@@ -437,7 +429,13 @@ const clickBuscarNotas = async (idAluno) => {
                
                 <td className={tdStyle}>{item.id}</td>
                 <td className={tdStyle}>{item.nomeCompleto}</td>
-                <td>{item.estado}</td>
+                {item.estado === 'indefinido' ?
+                <td>{item.estado}</td> :
+                item.condicao === 'positiva' ? 
+                <td className='text-green-500'>{item.estado}</td> :
+                <td className='text-red-500'>{item.estado}</td>
+                }
+                
                 <td className={tdStyle} onClick={()=>{clickBuscarNotas(item.id)}}>
                   <div className='flex flex-row space-x-2'>
                   {item.estado === 'indefinido' ?
@@ -533,41 +531,6 @@ const clickBuscarNotas = async (idAluno) => {
                 </DialogContent>
                   </Dialog>
                   }
-                  <Dialog >
-              <DialogTrigger asChild>
-              <div title='ver dados' className='relative flex justify-center items-center'>
-              <InfoIcon className='w-5 h-4 absolute text-white font-extrabold'/>
-                <button className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600' ></button>
-                </div>
-                
-              </DialogTrigger>
-              <DialogContent className="h-[470px] w-[325px] overflow-y-auto bg-white">
-                <DialogHeader>
-                  <DialogTitle>Informações sobre {item.nomeCompleto}</DialogTitle>
-                  <DialogDescription >
-                  As informações sobre as notas do aluno são listadas aqui!
-                  </DialogDescription>
-                </DialogHeader>
-                {buscarNotas.length > 0 && (buscarNotas.map((item, index) => (
-                  <ul key={index}>
-                    <li><span className='font-semibold'>Trimestre: </span>{item.trimestre}</li>
-                    <li><span className='font-semibold'>Disciplina: </span>{item.disciplina}</li>
-                    <li><span className='font-semibold'>Nota: </span>{item.nota}</li>
-                  </ul>
-                )))}
-                {buscarNotas.length === 0 && (
-                  <div className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
-                  <div>
-                    <AlertTriangle className="animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12"/>
-                    <p>Nenhuma Nota Registrada</p>
-                  </div>
-                </div>
-                )}
-                
-                <DialogFooter>
-                </DialogFooter>
-              </DialogContent>
-                  </Dialog>
                     </div>
                   </td>
               </tr>

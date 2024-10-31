@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, SaveIcon, Trash} from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, DatabaseBackupIcon, EditIcon, PrinterIcon, SaveIcon, Trash} from 'lucide-react'
 import { InfoIcon, AlertTriangle, Search } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
 import DataTable from 'react-data-table-component'
@@ -32,7 +32,8 @@ import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import Header from './Header'
 import { animateBounce, animateShake } from '@/AnimationPackage/Animates'
 import { Textarea } from '@/components/ui/textarea'
-
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getSalas, getSalasId, postSalas, putSalas } from '@/_tanstack/FetchFunction'
 
 
 const TFormCreate =  z.object(
@@ -51,113 +52,67 @@ const TFormUpdate =  z.object({
 
 export default function ClassRoom(){
 
-const formCreate  = useForm<z.infer<typeof TFormCreate>>({
-  mode: 'all', 
-  resolver: zodResolver(TFormCreate)
-})
+  const formCreate  = useForm<z.infer<typeof TFormCreate>>({
+    mode: 'all', 
+    resolver: zodResolver(TFormCreate)
+  })
 
-const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
+  const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
   mode: 'all', 
   resolver: zodResolver(TFormUpdate)
   })
 
-
-  const [updateTable, setUpdateTable] = React.useState(false)
-  const[estado, setEstado] = React.useState(false);
   const [showModal, setShowModal] = React.useState(false);
   const [modalMessage, setModalMessage] = React.useState(''); 
-const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>,e) => {
-      
-await fetch(`http://localhost:8000/api/salas/`,{
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data)
-  })
-  .then((resp => resp.json()))
-  .then((resp) =>{ 
-          setShowModal(true);  
-          if (resp.message != null) {
-            setModalMessage(resp.message);  
-          }else{
-            setModalMessage(resp.message);
-          }
-  })
-  .catch((error) => console.log(`error: ${error}`))
-  setUpdateTable(!updateTable);
-}
 
-const[buscar, setBuscar] = React.useState();
-const[nome, setNome] = React.useState();
-const[capacidade, setCapacidade] = React.useState();
-const[localizacao, setLocalizacao] = React.useState();
-const[id,setId] = React.useState();
+  const {data: salas, isError, } = useQuery({ queryKey: ["salas"] , queryFn: ()=>getSalas(),
+    });
 
-React.useEffect(()=>{
-    const search = async () => {
-        const resp = await fetch(`http://localhost:8000/api/salas/${buscar}`);
-        const receve = await resp.json()
-        setNome(receve.nome)
-        setCapacidade(receve.capacidade)
-        setLocalizacao(receve.localizacao)
-        setId(receve.id)
-        formUpdate.setValue('nome', receve.nome)
-        formUpdate.setValue('capacidade', receve.capacidade)
-        formUpdate.setValue('localizacao', receve.localizacao)
-        formUpdate.setValue('id', receve.id)
+  const[buscar, setBuscar] = React.useState<number>(null);
+
+  const {data: salasId, isSuccess: salasSuccessId, isFetched: salasFetchedId} = useQuery({ queryKey: ["salasId", buscar] , queryFn: ()=>getSalasId(buscar), enabled: !!buscar, 
+  });
+
+  if(salasFetchedId){formUpdate.setValue('nome', salasId.data.nome)
+    formUpdate.setValue('capacidade', salasId.data.capacidade)
+    formUpdate.setValue('localizacao', salasId.data.localizacao)}
+
+  const queryClient = useQueryClient();
+  const {mutate: postMutationSalas} = useMutation({
+    mutationFn: postSalas,
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['salas']});
+      setShowModal(true);
+      setModalMessage(null)
     }
-    search()
-},[buscar])
+  });
 
-const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
-  await fetch(`http://localhost:8000/api/salas/${data.id}`,{
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    })
-    .then((resp => resp.json()))
-    .then((resp) =>{
-          setShowModal(true);  
-          if (resp.message != null) {
-            setModalMessage(resp.message);  
-          }else{
-            setModalMessage(resp.message);
-          }
-    })
-    .catch((error) => console.log(`error: ${error}`))
-    setUpdateTable(!updateTable)
-}
-
-const changeResource = (id)=>{
-      setBuscar(id)
+  const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>,e) => {
+      e.preventDefault();
+      postMutationSalas(data);
     }
 
-        const [dados, setDados] = React.useState([])
-        const [dataApi, setDataApi] = React.useState([])
-        const URL = `http://localhost:8000/api/salas/`
-       
-       useEffect( () => {
-            const respFetch = async () => {
-                  const resp = await fetch (URL);
-                  const respJson = await resp.json();
-                  const conv1 = JSON.stringify(respJson.data)
-                  const conv2 = JSON.parse(conv1)
-                  conv2.sort((a, b) => a.nome.localeCompare(b.nome))
-                  setDados(conv2)
-                  setDataApi(conv2)
-            } 
-             respFetch()
-       },[updateTable])
-    
-       const columns = ['Id', 'Salas', 'Acção'];
-        
-        const handleFilter = (event) => {
-           const valores = dataApi.filter((element) =>{ return (element.nome.toLowerCase().includes(event.target.value.toLowerCase().trim())) });
-           setDados(valores)
-       }
+  const {mutate: putMutationSalas} = useMutation({
+    mutationFn: putSalas,
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['salas']});
+      setShowModal(true);
+      setModalMessage(null)
+    }
+  });
+
+  const handleSubmitUpdate = async (data: z.infer<typeof TFormCreate>,e) => {
+    e.preventDefault();
+    putMutationSalas(data);
+  }
+
+  const changeResource = (id)=>{
+    setBuscar(id); 
+  }
+  
+  const handleFilter = (event) => {
+      salas.data.filter((element) =>{ return (element.nome.toLowerCase().includes(event.target.value.toLowerCase().trim())) });
+  }
 
     return (
       <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
@@ -230,7 +185,7 @@ const changeResource = (id)=>{
           name="localizacao"
           render={({field})=>(
             <FormItem>
-            <Textarea id="localizacao" {...field} className={formCreate.formState.errors.localizacao?.message && `${animateShake} select-error`}
+            <Textarea id="localizacao" {...field} className={formCreate.formState.errors.localizacao?.message && `${animateShake} select-error active:outline-none`}
             />
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
@@ -250,11 +205,13 @@ const changeResource = (id)=>{
              
              <thead className='sticky top-0 z-10'>
                  <tr className={trStyle}>
-                     {columns.map((element, index) =>{ return( <th key={index} className={thStyle} >{element}</th>) })}
+                      <th className={thStyle} >Id</th> 
+                      <th className={thStyle} >Salas</th>
+                      <th className={thStyle} >Acção</th>
                  </tr>
              </thead>
              <tbody >
-                 {dados.length == 0 ? (
+                 { isError ? (
                  <tr className='w-96 h-32'>
                      <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                          <div>
@@ -263,13 +220,12 @@ const changeResource = (id)=>{
                          </div>
                      </td>
                  </tr>
-                 ) : dados.map((item, index) => (
+                 ) : salas?.data?.data.map((item, index) => (
                      <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-200"}>
                          <td className={tdStyle}>{item.id}</td>
                          <td className={tdStyle}>{item.nome}</td>
                          <td className={tdStyleButtons}    onClick={()=>{
                            changeResource(item.id)
-                           
                          }}>
                           <Dialog >
           <DialogTrigger asChild >
@@ -318,6 +274,7 @@ const changeResource = (id)=>{
                   <FormItem>
                   <Input
                     id="nome"
+                    
                     type='text' {...field} className={formUpdate.formState.errors.nome?.message && `${animateShake} input-error`}
                     />
                   <FormMessage className='text-red-500 text-xs'/>
@@ -384,11 +341,11 @@ const changeResource = (id)=>{
                         <div className="grid gap-2">
                           <div className="grid grid-cols-3 items-center gap-4">
                             <label htmlFor="maxWidth">Capacidade</label>
-                            <p>{capacidade}</p>
+                            <p>{salasSuccessId && salasId.data.capacidade}</p>
                           </div>
                           <div className="">
                             <label htmlFor="height">Localização</label>
-                            <p className='indent-2 text-justify text-xs text-pretty'>{localizacao}</p>
+                            <p className='indent-2 text-justify text-xs text-pretty'>{salasSuccessId && salasId.data.localizacao}</p>
                           </div>
                         </div>
                       </div>
@@ -402,7 +359,7 @@ const changeResource = (id)=>{
              <tfoot className='sticky bottom-0 bg-white"'>
              <tr>
                  <td colSpan={3} className="py-2 text-blue-500">
-                     Total de registros: {dados.length}
+                     Total de registros: 
                  </td>
              </tr>
          </tfoot>

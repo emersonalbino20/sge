@@ -25,7 +25,7 @@ import { AroundDiv, CombineButton, EditButton, InfoButton, LibraryButton, TrashB
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import Header from './Header'
 import { useHookFormMask } from 'use-mask-input'
-import { animateBounce } from '@/AnimationPackage/Animates'
+import { animateBounce, animateShake } from '@/AnimationPackage/Animates'
 
 const TForm =  z.object({
   nomeCompleto: nomeCompletoZod,
@@ -698,8 +698,8 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
                                <label htmlFor="classe">Classes<span className='text-red-500'>*</span>
                                     </label>
                                   <FormControl>
-                                    <select id='classe' {...field} className={
-                      formClasse.formState.errors.classeId?.message && 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white'} onChange={(e)=>{field.onChange(parseInt(e.target.value))
+                      <select id='classe' {...field}  className={
+                      formClasse.formState.errors.classeId?.message && `${animateShake} select-error`} onChange={(e)=>{field.onChange(parseInt(e.target.value))
                                       setIdClasse(parseInt(e.target.value, 10) || 0)
                                     }}>
                                   <option >Selecione a classe</option>
@@ -749,7 +749,7 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
                                     </label>
                               <FormControl>
                               <FormControl>
-                                    <select id='disciplina' {...field} className={
+                                    <select  id='disciplina' {...field} className={
                       formClasse.formState.errors.disciplinaId?.message &&'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white'} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                                     <option >Selecione a disciplina</option>
                                     {
@@ -782,7 +782,7 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
                                       <CombineButton/>
                                       </div>
                                       </DialogTrigger>
-                                      <DialogContent className="sm:max-w-[425px] bg-white">
+              <DialogContent className="max-w-[260px] sm:w-[260px] md:w-[260px] lg:w-[260px] xl:w-[260x] bg-white">
                                             <DialogHeader>
                                               <DialogTitle>Vincular Professor(a) {item.nomeCompleto}</DialogTitle>
                                               <DialogDescription>
@@ -794,30 +794,31 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
                                           
                                           } >
                                           <div className="flex flex-col w-full py-4 bg-white">              
-                                          <div className="w-full">
-                                          <FormField
-                                          control={formConnect.control}
-                                          name="disciplinas"
-                                          render={({field})=>(
-                                          <FormItem>
-                                            <Label htmlFor="disciplina" className="text-right">
-                                            Disciplinas
-                                          </Label>
-                                              <FormControl>
-                                              <Select
-                                              name="disciplinas"
-                                              isMulti
-                                              options={disciplinaOptions}
-                                              className="basic-multi-select"
-                                              onChange={handleChange}
-                                              classNamePrefix="select"
-                                            />
-                                              </FormControl>
-                                            <FormMessage className='text-red-500 text-xs'/>
-                                          </FormItem>)
-                                          }
-                                          />
-                                          </div>
+                            <div className="w-full">
+                            <FormField
+                            control={formConnect.control}
+                            name="disciplinas"
+                            render={({field})=>(
+                            <FormItem>
+                              <Label htmlFor="disciplina" className="text-right">
+                              Disciplinas
+                            </Label>
+                                <FormControl>
+                                <Select
+                                name="disciplinas"
+                                isMulti
+                                menuPlacement="bottom"
+                                options={disciplinaOptions}
+                                className="basic-multi-select"
+                                onChange={handleChange}
+                                classNamePrefix="Checkboxes"
+                              />
+                                </FormControl>
+                              <FormMessage className='text-red-500 text-xs'/>
+                            </FormItem>)
+                            }
+                            />
+                            </div>
                                         <div>
                                         </div>
                                       </div>
