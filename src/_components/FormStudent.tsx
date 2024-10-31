@@ -16,6 +16,7 @@ import { useHookFormMask, withMask } from 'use-mask-input'
 import { error } from 'console'
 import { animateBounce, animateFadeLeft, animatePing, animateShake } from '@/AnimationPackage/Animates'
 import { Link } from 'react-router-dom'
+import MostrarDialog from './MostrarDialog';
 //define the data that will send for the server to be insert on database
 
 const TFormCreate =  z.object({
@@ -144,6 +145,8 @@ const [showModal, setShowModal] = React.useState(false);
 const [modalMessage, setModalMessage] = React.useState('');         
 
 //Funcao de matricula
+    const [showDialog, setShowDialog] = React.useState(false);
+  const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
 const handleSubmitCreate = async (dados: z.infer<typeof TFormCreate>) => {
     const data = {
         classeId: dados.classeId,
@@ -178,7 +181,7 @@ const handleSubmitCreate = async (dados: z.infer<typeof TFormCreate>) => {
             },
             body: JSON.stringify(data)
         });
-        setShowModal(true);
+        
         if (response.ok) {
             const blob = await response.blob(); 
             const url = window.URL.createObjectURL(blob);
@@ -188,28 +191,30 @@ const handleSubmitCreate = async (dados: z.infer<typeof TFormCreate>) => {
             document.body.appendChild(a);
             a.click();
             a.remove();
-            setModalMessage(null);
+            setDialogMessage(null);
+            setShowDialog(true);
         } else {
             const errorData = await response.json();
             
+            setShowDialog(true);
             console.error('Erro ao gerar PDF:', response.statusText, errorData);
             let index = Object.values(errorData.errors.aluno)
             let conv = parseInt(String(Object.keys(index)))
             if (Object.keys(errorData.errors.aluno)[0] == "numeroBi")
             {
-                setModalMessage("Erro Nos dados do Aluno, "+Object.values(errorData.errors.aluno)[0][0])
+                setDialogMessage("Erro Nos dados do Aluno, "+Object.values(errorData.errors.aluno)[0][0])
             }
             if (Object.keys(errorData.errors.aluno)[0] == "contacto")
             {
-                setModalMessage("Erro Nos dados do Aluno, "+Object.values(Object.values(errorData.errors.aluno)[0])[0][0])
+                setDialogMessage("Erro Nos dados do Aluno, "+Object.values(Object.values(errorData.errors.aluno)[0])[0][0])
             }
             if (Object.keys(errorData.errors.aluno)[0] == "responsaveis")
             {
-                setModalMessage("Erro Nos dados do Responsavel, "+Object.values(Object.values(Object.values(Object.values(errorData.errors.aluno)[0])[0])[0])[0][0])
+                setDialogMessage("Erro Nos dados do Responsavel, "+Object.values(Object.values(Object.values(Object.values(errorData.errors.aluno)[0])[0])[0])[0][0])
             }
             if (Object.values(Object.values(errorData.errors.aluno)[0])[0] == "responsaveis não podem conter contactos duplicados.")
             {
-                setModalMessage("responsaveis não podem conter contactos duplicados.")
+                setDialogMessage("responsaveis não podem conter contactos duplicados.")
             }
 
         }
@@ -842,55 +847,8 @@ return(
       </div>
       
       </div>
-      {showModal &&
-  <MyDialog open={showModal} onOpenChange={setShowModal}>
-  
-    <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
-    {modalMessage == null &&
-        <div role="alert" className='w-full'>
-      <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-        <div>
-            <p>Sucesso</p>
-        </div>
-        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-            <p>X</p>
-          </div>
-      </div>
-      <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
-      <CheckCircleIcon className='w-28 h-20 text-green-400'/>
-      
-      <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
-      <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
-        <Button className='bg-green-400 hover:bg-green-500
-        hover:font-medium font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
-    </div>
-    </div>
-    
-      </div>
-  }
-   {modalMessage != null &&
-        <div role="alert" className='w-full'>
-      <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-        <div>
-            <p>Falhou</p>
-        </div>
-        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-            <p>X</p>
-          </div>
-      </div>
-      <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
-      <AlertCircleIcon className='w-28 h-20 text-red-400'/>
-      <p className='font-poppins uppercase'>{modalMessage}</p>
-      <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
-        <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
-    </div>
-    </div>
-    
-      </div>
-  }
-         </MyDialogContent>
-        </MyDialog>
-   }
+      <MostrarDialog show={showDialog} message={dialogMessage} onClose={() => setShowDialog(false)} />
+
      </div>
  )}</>    
 )

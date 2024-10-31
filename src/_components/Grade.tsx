@@ -33,8 +33,8 @@ import { table } from 'console'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import { Link } from 'react-router-dom'
 import Header from './Header'
-import { animateBounce } from '@/AnimationPackage/Animates'
-
+import { animateBounce, animateShake } from '@/AnimationPackage/Animates'
+import MostrarDialog from './MostrarDialog';
 
 const TFormCreate =  z.object(
 {
@@ -91,8 +91,8 @@ const formUpdateClass  = useForm<z.infer<typeof TFormUpdateClass>>({
 
 const [updateTable, setUpdateTable] = React.useState(false)
 const[estado, setEstado] = React.useState(false);
-const [showModal, setShowModal] = React.useState(false);
-const [modalMessage, setModalMessage] = React.useState(''); 
+const [showDialog, setShowDialog] = React.useState(false);
+  const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
   const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>,e) => {
 
   await fetch(`http://localhost:8000/api/ano-lectivos/${idAno}/classes`,{
@@ -104,11 +104,13 @@ const [modalMessage, setModalMessage] = React.useState('');
     })
     .then((resp => resp.json()))
     .then((resp) =>{ 
-            setShowModal(true);  
+            
             if (resp.message != null && resp.statusCode != 400) {
-              setModalMessage(resp.message);  
+              setDialogMessage(resp.message);
+              setShowDialog(true);
             }else{
-              setModalMessage(resp.message);
+              setDialogMessage(null);
+              setShowDialog(true);
             }
             console.log(resp)
     })
@@ -132,11 +134,13 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
     })
     .then((resp => resp.json()))
     .then((resp) =>{
-      setShowModal(true);  
+      
             if (resp.message != null) {
-              setModalMessage(resp.message);  
+              setDialogMessage(resp.message);
+              setShowDialog(true);
             }else{
-              setModalMessage(resp.message);
+              setDialogMessage(null);
+              setShowDialog(true);
             }
             console.log(resp)
     })
@@ -155,11 +159,13 @@ const handleSubmitCreateClass = async (data: z.infer<typeof TFormCreateClass>,e)
     })
     .then((resp => resp.json()))
     .then((resp) =>{ 
-            setShowModal(true);  
+            
             if (resp.message != null) {
-              setModalMessage(resp.message);  
+              setDialogMessage(resp.message);
+              setShowDialog(true);
             }else{
-              setModalMessage(resp.message);
+              setDialogMessage(null);
+              setShowDialog(true);
             }
     })
     .catch((error) => console.log(`error: ${error}`))
@@ -312,8 +318,8 @@ const changeResource = (id)=>{
      <form onSubmit={formCreate.handleSubmit(handleSubmitCreate)} >
      <div className="flex flex-col w-full py-4 bg-white">
         <div className="w-full">
-        <Label htmlFor="nome"className='text-sky-700 text-lg font-semibold'>Nome<span className='text-red-500'>*</span>
-              </Label>
+        <label htmlFor="nome">Nome<span className='text-red-500'>*</span>
+              </label>
           <FormField
           control={formCreate.control}
           name="nome"
@@ -321,23 +327,21 @@ const changeResource = (id)=>{
             <FormItem>
             <Input
               id="nome"
-              type='text' {...field} className={formCreate.formState.errors.nome?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+              type='text' {...field} className={formCreate.formState.errors.nome?.message && `${animateShake} input-error`}
               />
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
         </div>
         <div className="w-full">
-        <Label htmlFor="custo"className='text-sky-700 text-lg font-semibold'>Custo<span className='text-red-500'>*</span>
-              </Label>
+        <label htmlFor="custo">Custo<span className='text-red-500'>*</span>
+              </label>
           <FormField
           control={formCreate.control}
           name="valorMatricula"
           render={({field})=>(
             <FormItem>
-            <Input id="custo" type='number' {...field} className={formCreate.formState.errors.valorMatricula?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                  'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+            <Input id="custo" type='number' {...field} className={formCreate.formState.errors.valorMatricula?.message&& `${animateShake} input-error`}
             min="0"
             onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
             <FormMessage className='text-red-500 text-xs'/>
@@ -350,12 +354,11 @@ const changeResource = (id)=>{
           name={'cursoId'}
           render={({field})=>(
           <FormItem>
-            <Label htmlFor="curso"className='text-sky-700 text-lg font-semibold'>Cursos<span className='text-red-500'>*</span>
-              </Label>
+            <label htmlFor="curso">Cursos<span className='text-red-500'>*</span>
+              </label>
               <FormControl>
               <select id='curso' {...field} className={
-                      formCreate.formState.errors.cursoId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                      formCreate.formState.errors.cursoId?.message && `${animateShake}  select-error`} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                         <option>Selecione o curso</option>
                         {
                                     bNomeCurso.map((field)=>{
@@ -396,8 +399,8 @@ const changeResource = (id)=>{
      <form onSubmit={formCreateClass.handleSubmit(handleSubmitCreateClass)} >
      <div className="flex flex-col w-full py-4 bg-white">
         <div className="w-full">
-        <Label htmlFor="nome"className='text-sky-700 text-lg font-semibold'>Nome<span className='text-red-500'>*</span>
-              </Label>
+        <label htmlFor="nome">Nome<span className='text-red-500'>*</span>
+              </label>
           <FormField
           control={formCreateClass.control}
           name="nome"
@@ -405,18 +408,16 @@ const changeResource = (id)=>{
             <FormItem>
             <Input
               id="nome"
-              type='text' {...field} className={formCreateClass.formState.errors.nome?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'} 
+              type='text' {...field} className={formCreateClass.formState.errors.nome?.message && `${animateShake} input-error`} 
               />
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
         </div>
         <div className="w-full">
-        <Label htmlFor="curso"className='text-sky-700 text-lg font-semibold'>Cursos<span className='text-red-500'>*</span>
-              </Label>
-              <select className={
-                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'}   id='curso' onChange={(e)=>{setCursoId(parseInt(e.target.value))}}>
+        <label htmlFor="curso">Cursos<span className='text-red-500'>*</span>
+              </label>
+              <select   id='curso' onChange={(e)=>{setCursoId(parseInt(e.target.value))}}>
                       <option value="">Selecione o curso</option>
                       {
                             bNomeCurso.map((field)=>{
@@ -431,12 +432,11 @@ const changeResource = (id)=>{
               name={'classeId'}
               render={({field})=>(
               <FormItem>
-                 <Label htmlFor="classe"className='text-sky-700 text-lg font-semibold'>Classes<span className='text-red-500'>*</span>
-              </Label>
+                 <label htmlFor="classe">Classes<span className='text-red-500'>*</span>
+              </label>
                   <FormControl>
                   <select {...field} className={
-                      formCreateClass.formState.errors.classeId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} id='classe' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                      formCreateClass.formState.errors.classeId?.message && `${animateShake}  select-error`} id='classe' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                       <option >Seleciona a classe</option>
                       {
                             cAll.map((field)=>{
@@ -457,12 +457,11 @@ const changeResource = (id)=>{
               name={'turnoId'}
               render={({field})=>(
               <FormItem>
-                 <Label htmlFor="turno"className='text-sky-700 text-lg font-semibold'>Turnos<span className='text-red-500'>*</span>
-              </Label>
+                 <label htmlFor="turno">Turnos<span className='text-red-500'>*</span>
+              </label>
                   <FormControl>
               <select id='turno' {...field} className={
-                      formCreateClass.formState.errors.turnoId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                      formCreateClass.formState.errors.turnoId?.message && `${animateShake}  select-error`} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                             <option>Selecione o turno</option>
                             {
                                     turnos.map((field)=>{
@@ -482,12 +481,11 @@ const changeResource = (id)=>{
               name={'salaId'}
               render={({field})=>(
               <FormItem>
-                <Label htmlFor="sala"className='text-sky-700 text-lg font-semibold'>Salas<span className='text-red-500'>*</span>
-              </Label>
+                <label htmlFor="sala">Salas<span className='text-red-500'>*</span>
+              </label>
                   <FormControl>
               <select id='sala' {...field} className={
-                      formCreateClass.formState.errors.salaId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                      formCreateClass.formState.errors.salaId?.message && `${animateShake}  select-error`} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                             <option>Selecione a sala</option>
                             {
                                     salas.map((field)=>{
@@ -561,8 +559,8 @@ const changeResource = (id)=>{
             
               <div className="flex flex-col w-full py-4 bg-white">
                 <div className="w-full">
-                <Label htmlFor="nome"className='text-sky-700 text-lg font-semibold'>Nome<span className='text-red-500'>*</span>
-              </Label>
+                <label htmlFor="nome">Nome<span className='text-red-500'>*</span>
+              </label>
                 <FormField
                 control={formUpdate.control}
                 name="nome"
@@ -570,23 +568,21 @@ const changeResource = (id)=>{
                   <FormItem>
                   <Input
                     id="nome"
-                    type='text' {...field} className={formUpdate.formState.errors.nome?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                    'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+                    type='text' {...field} className={formUpdate.formState.errors.nome?.message && `${animateShake} input-error`}
                     />
                   <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
               )}/>
               </div>
               <div className="w-full">
-          <Label htmlFor="custo"className='text-sky-700 text-lg font-semibold'>Custo<span className='text-red-500'>*</span>
-          </Label>
+          <label htmlFor="custo"className='text-sky-700 text-lg font-semibold'>Custo<span className='text-red-500'>*</span>
+          </label>
           <FormField
           control={formUpdate.control}
           name="valorMatricula"
           render={({field})=>(
             <FormItem>
-            <Input id="custo" type='number' {...field} className={formUpdate.formState.errors.valorMatricula?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                  'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+            <Input id="custo" type='number' {...field} className={formUpdate.formState.errors.valorMatricula?.message && `${animateShake} input-error`}
             min="0"
             onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
             <FormMessage className='text-red-500 text-xs'/>
@@ -599,12 +595,11 @@ const changeResource = (id)=>{
           name={'cursoId'}
           render={({field})=>(
           <FormItem>
-           <Label htmlFor="curso"className='text-sky-700 text-lg font-semibold'>Cursos<span className='text-red-500'>*</span>
-              </Label>
+           <label htmlFor="curso"className='text-sky-700 text-lg font-semibold'>Cursos<span className='text-red-500'>*</span>
+              </label>
               <FormControl>
               <select id='curso' {...field} className={
-                      formUpdate.formState.errors.cursoId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                      formUpdate.formState.errors.cursoId?.message && `${animateShake}  select-error`} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                 <option>Selecione o curso</option>
                 {
                     bNomeCurso.map((field)=>{
@@ -637,21 +632,20 @@ const changeResource = (id)=>{
                           <PopoverContent className="w-80 bg-white">
                             <div className="grid gap-4">
                               <div className="space-y-2">
-                                <h4 className="font-medium leading-none">Dados do Curso</h4>
+                                <h4 className="font-medium leading-none text-gray-800">Dados do Curso</h4>
                                 <p className="text-sm text-muted-foreground">
                                   Ver todas as turmas do curso.
                                 </p>
                               </div>
                               <div className="grid gap-2">
-                                
-                                <div className="grid grid-cols-3 items-center gap-4">
-                                  <Label htmlFor="height">Turmas</Label>
+                             
+                                  <label htmlFor="height">Turmas</label>
                                   <ul className='flex flex-row space-x-2'>
                                   {classe && (classe.map((nome, id)=>{return <li key={id}>{nome.nome},</li>}))}
                                   </ul>
                                 </div>
                               </div>
-                            </div>
+                           
                           </PopoverContent>
                         </Popover>
                           </div>
@@ -671,56 +665,7 @@ const changeResource = (id)=>{
     </div>
      </div>
 
-{showModal &&
-<MyDialog open={showModal} onOpenChange={setShowModal}>
-
- <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
- {modalMessage == null &&
-     <div role="alert" className='w-full'>
-   <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-     <div>
-         <p>Sucesso</p>
-     </div>
-     <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-         <p>X</p>
-       </div>
-   </div>
-   <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
-   <CheckCircleIcon className='w-28 h-20 text-green-400'/>
-   <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
-   <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
-     <Button className='bg-green-400 hover:bg-green-500
-     hover:font-medium
-      font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
- </div>
- </div>
- 
-   </div>
-   
-}
-{modalMessage != null &&
-     <div role="alert" className='w-full'>
-   <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-     <div>
-         <p>Falhou</p>
-     </div>
-     <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-         <p>X</p>
-       </div>
-   </div>
-   <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
-   <AlertCircleIcon className='w-28 h-20 text-red-400'/>
-   <p className='font-poppins uppercase'>{modalMessage}</p>
-   <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
-     <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
- </div>
- </div>
- 
-   </div>
-}
-      </MyDialogContent>
-</MyDialog>
-}
+     <MostrarDialog show={showDialog} message={dialogMessage} onClose={() => setShowDialog(false)} />
     </div>
         )}</>
 )

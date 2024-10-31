@@ -1,13 +1,12 @@
-import { AlertCircleIcon, AlertTriangle, Check, CheckCircleIcon, Edit, EditIcon, FolderOpenIcon, InfoIcon, Save, SaveIcon, Search } from 'lucide-react';
+import { AlertTriangle, Check, EditIcon, FolderOpenIcon, InfoIcon, SaveIcon, Search } from 'lucide-react';
 import * as React from 'react';
 import { tdStyle, thStyle, trStyle } from './table';
 import { bairroZod, dataNascimentoZod, emailZod, generoZod, idZod, nomeCompletoZod, ruaZod, telefoneZod } from '@/_zodValidations/validations';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { MyDialog, MyDialogContent } from './my_dialog';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Link } from 'react-router-dom';
@@ -21,19 +20,19 @@ import { getClassesId } from '@/_tanstack/Classes';
 import { getTurmasId } from '@/_tanstack/Turmas';
 import { getTrimestres } from '@/_tanstack/Trimestres';
 import { collectErrorMessages, confirmacaoAluno, getAlunosClassesMatriculasCurso, getAlunosId, getAlunosMatriculas, getAlunosNotas, getAlunosPorTurma, putAlunos } from '@/_tanstack/Alunos';
-import { getAnoAcademico } from '@/_tanstack/AnoAcademico';
 import { getPagamentos } from '@/_tanstack/Pagamentos';
 import { getTurnos } from '@/_tanstack/Turnos';
 import { useHookFormMask } from 'use-mask-input'
 import axios from 'axios';
 import { setCookies } from '@/_cookies/Cookies';
+import MostrarDialog from './MostrarDialog';
 
 const TForm =  z.object({
   nomeCompleto: nomeCompletoZod,
   nomeCompletoPai: nomeCompletoZod,
   nomeCompletoMae: nomeCompletoZod,
   dataNascimento: dataNascimentoZod,
-  genero: z.string(),
+  genero: generoZod,
   bairro: bairroZod,
   rua: ruaZod,
   numeroCasa: z.number(),
@@ -64,7 +63,7 @@ export default function ListStudent() {
     mode: 'all', 
     resolver: zodResolver(TFormStepOne)
    })
-   const { watch, formState:{ errors, isValid }, register} = formStepOne;
+   const { watch, formState:{ errors } } = formStepOne;
    
    const form  = useForm<z.infer<typeof TForm>>({
     mode: 'all', 
@@ -76,6 +75,8 @@ export default function ListStudent() {
   const {data: alunosTurma} = useQuery({ queryKey: ["alunosTurmaId", formStepOne.getValues('classeId'), formStepOne.getValues('turmaId')] , queryFn: ()=>getAlunosPorTurma(formStepOne.getValues('classeId'), formStepOne.getValues('turmaId')), enabled: !!formStepOne.getValues('classeId')
   });
 
+  const [showDialog, setShowDialog] = React.useState(false);
+  const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
   
   const formConfirmacao  = useForm<z.infer<typeof TFormConfirmacao>>({
     mode: 'all', 
@@ -90,19 +91,19 @@ export default function ListStudent() {
     
     window.open(url, '_blank');
     
-    setShowModal(true);
-    setModalMessage(null);
+
+
 
       queryClient.invalidateQueries({queryKey: ["alunosTurmaId", formStepOne.getValues('classeId'), formStepOne.getValues('turmaId')]});
     },
     onError: (error) => {
-      console.error(error)
+      
       if(axios.isAxiosError(error)){
       if (error.response && error.response.data) {
-        const err = error.response.data?.message;
+       
         
-        setShowModal(true);
-        setModalMessage("Matricula Já existe")
+        setDialogMessage("Matricula Já existe");
+        setShowDialog(true);
        }
       }}
   });
@@ -115,17 +116,19 @@ export default function ListStudent() {
    const {mutate: putMutationAlunos} = useMutation({
     mutationFn: putAlunos,
     onSuccess: () => {
-      setShowModal(true);
-      setModalMessage(null)
+     
       queryClient.invalidateQueries({queryKey: ["alunosTurmaId", formStepOne.getValues('classeId'), formStepOne.getValues('turmaId')]});
+      setDialogMessage(null);
+      setShowDialog(true); 
     },
     onError: (error) => {
       if(axios.isAxiosError(error)){
       if (error.response && error.response.data) {
         const err = error.response.data?.errors;
         const errorMessages = collectErrorMessages(err);
-        setShowModal(true);
-        setModalMessage(errorMessages[0])
+        
+        setDialogMessage(errorMessages[0]);
+        setShowDialog(true);
        }
       }}
   });
@@ -137,8 +140,8 @@ export default function ListStudent() {
 
    const [fieldCursoId, fieldClasseId, fieldTrimestreId, fieldTurmaId] = watch(["cursoId", "classeId", "trimestreId", "turmaId"])
 
-   const [showModal, setShowModal] = React.useState(false);
-   const [modalMessage, setModalMessage] = React.useState('');  
+   
+
 
   const { data: trimestres } = useQuery({ queryKey: ["trimestres"] , queryFn: ()=>getTrimestres(),
     });
@@ -174,7 +177,7 @@ export default function ListStudent() {
       form.setValue('rua', alunosPorId?.data.endereco.rua)
       form.setValue('numeroCasa', parseInt(alunosPorId?.data.endereco.numeroCasa))
       form.setValue('telefone', alunosPorId?.data.contacto.telefone)
-      if(alunosPorId?.data.contacto.email != null){
+      if(alunosPorId?.data.contacto.email !== null){
       form.setValue('email', alunosPorId?.data.contacto.email)}else{
         form.setValue('email', '')
       }
@@ -200,7 +203,7 @@ const changeResource=(id)=>{
     const search = async () => {
       const resp = await fetch(`http://localhost:8000/api/ano-lectivos/`);
         const receve = await resp.json()
-        var meuarray = receve.data.find((c)=>{
+        const meuarray = receve.data.find((c)=>{
           return c.activo === true
         })
         setIdAno(meuarray.id)
@@ -213,8 +216,8 @@ const changeResource=(id)=>{
     setSearchTerm(event.target.value.toLowerCase());
   };
 
-  const filteredTurmas = alunosTurma?.data?.data?.filter((turma) =>
-    turma.nomeCompleto.toLowerCase().includes(searchTerm)
+  const filteredTurmas = alunosTurma?.data?.data?.filter((turma) =>{
+    return turma.nomeCompleto.toLowerCase().includes(searchTerm)}
   );
 
   const step = ['Filtrar Turmas', 'Inserir Nota'];
@@ -224,7 +227,7 @@ const changeResource=(id)=>{
   const fieldDivStyle = 'text-lg sm:text-base md:text-[14px] lg:text-[16px] xl:text-xl text-sky-600 mb-2 font-semibold';
   return (<>
       
-    { idAno == 0 ? <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
+    { idAno === 0 ? <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
       <div className='w-full text-center text-4xl text-red-600 md:text-2xl lg:text-2xl'>
           <div >
           <AlertTriangle className={`${animateBounce} inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12`}/>
@@ -275,7 +278,7 @@ const changeResource=(id)=>{
                         <option >Selecione o trimestre</option>
                         {
                         trimestres?.data?.data.map((field)=>{
-                            return (<option value={`${field.id}`}>{field.numero}° Trimestre</option>
+                            return (<option key={field.id} value={`${field.id}`}>{field.numero}° Trimestre</option>
                             )
                         })
                                     
@@ -303,7 +306,7 @@ const changeResource=(id)=>{
                       }}>
                         {
                         cursos?.data?.data.map((field)=>{
-                            return (<option value={`${field.id}`}>{field.nome} 
+                            return (<option key={field.id} value={`${field.id}`}>{field.nome} 
                             </option>
                             )
                         })
@@ -333,7 +336,7 @@ const changeResource=(id)=>{
                          <option >Selecione a classe</option>
                         {
                         classes?.data?.data?.map((field)=>{
-                            return (<option value={`${field.id}`}>{field.nome} Classe
+                            return (<option key={field.id} value={`${field.id}`}>{field.nome} Classe
                             </option>
                             )
                         })
@@ -364,7 +367,7 @@ const changeResource=(id)=>{
                         {
                             
                         turmas?.data?.data.map((field)=>{
-                            return (<option value={`${field.id}`}>{field.nome}
+                            return (<option key={field.id} value={`${field.id}`}>{field.nome}
                             </option>
                             )
                         })
@@ -386,8 +389,9 @@ const changeResource=(id)=>{
                         setComplete(true) :
                         setCurrentStep(prev => prev + 1);
                         }else{
-                          setShowModal(true);
-                          setModalMessage("A Turma Selecionada Não Possui Alunos Cadastrados")
+
+                          setDialogMessage("A Turma Selecionada Não Possui Alunos Cadastrados");
+                          setShowDialog(true);
                         }
                       }else{setCurrentStep(1)}
                       
@@ -653,7 +657,7 @@ const changeResource=(id)=>{
               <DialogTitle className='text-sky-800 text-xl'>Confirmação da Matrícula</DialogTitle>
                 <DialogDescription>
                   <p className='text-base text-gray-800'>
-                  confirma a matrícula {alunosPorId?.data?.genero == 'M' ? 'do aluno' : 'da aluna'} <span className='font-bold uppercase'>{alunosPorId?.data?.nomeCompleto}</span> n. bi: <span className='font-bold'>{alunosPorId?.data?.numeroBi}</span> para o ano corrente.</p>
+                  confirma a matrícula {alunosPorId?.data?.genero === 'M' ? 'do aluno' : 'da aluna'} <span className='font-bold uppercase'>{alunosPorId?.data?.nomeCompleto}</span> n. bi: <span className='font-bold'>{alunosPorId?.data?.numeroBi}</span> para o ano corrente.</p>
                 </DialogDescription>
               </DialogHeader>
             
@@ -674,7 +678,7 @@ const changeResource=(id)=>{
                                 <option >Selecione a classe</option>
                                 {
                                       classesAluno?.data?.data.map((field)=>{
-                                          return <option value={`${field.id}`}>{field.nome} Classes</option>
+                                          return <option key={field} value={`${field.id}`}>{field.nome} Classes</option>
                                       })
                                 }
                             </select>
@@ -697,7 +701,7 @@ const changeResource=(id)=>{
                                 <option >Selecione a turma</option>
                                 {
                                       turmasAluno?.data?.data.map((field)=>{
-                                          return <option value={`${field.id}`}>{field.nome}</option>
+                                          return <option key={field} value={`${field.id}`}>{field.nome}</option>
                                       })
                                 }
                             </select>
@@ -720,7 +724,7 @@ const changeResource=(id)=>{
                                 <option >Selecione a turma</option>
                                 {
                                       turnos?.data?.data.map((field)=>{
-                                          return <option value={`${field.id}`}>{field.nome}</option>
+                                          return <option key={field} value={`${field.id}`}>{field.nome}</option>
                                       })
                                 }
                             </select>
@@ -743,7 +747,7 @@ const changeResource=(id)=>{
                                 <option >Selecione o método</option>
                                 {
                                       pagamentos?.data?.data.map((field)=>{
-                                          return <option value={`${field.id}`}>{field.nome}</option>
+                                          return <option key={field} value={`${field.id}`}>{field.nome}</option>
                                       })
                                 }
                             </select>
@@ -921,9 +925,12 @@ const changeResource=(id)=>{
         </table>
         {currentStep > 1 && 
     <button type='button' onClick={()=>{
-        currentStep === step.length && setComplete(false);
-        
-        currentStep > 1 && setCurrentStep(prev => prev - 1);
+      if (currentStep === step.length) {
+        setComplete(false);
+      }
+      if (currentStep > 1) {
+        setCurrentStep(prev => prev - 1);
+      }
     }} className={`${animatePing} responsive-button bg-gray-700 hover:bg-gray-600 text-white font-semibold border-gray-700`}>Voltar</button>
     }
         </div>
@@ -935,57 +942,11 @@ const changeResource=(id)=>{
         </section>
        
       )}
-      {showModal &&
-<MyDialog open={showModal} onOpenChange={setShowModal}>
-
-  <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
-  {modalMessage == null &&
-      <div role="alert" className='w-full'>
-    <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-      <div>
-          <p>Sucesso</p>
-      </div>
-      <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-          <p>X</p>
-        </div>
-    </div>
-    <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
-    <CheckCircleIcon className='w-28 h-20 text-green-400'/>
-    <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
-    <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
-      <Button className='bg-green-400 hover:bg-green-500
-      hover:font-medium
-       font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
-  </div>
-  </div>
-  
-    </div>
-    
-}
- {modalMessage != null &&
-      <div role="alert" className='w-full'>
-    <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-      <div>
-          <p>Falhou</p>
-      </div>
-      <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-          <p>X</p>
-        </div>
-    </div>
-    <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
-    <AlertCircleIcon className='w-28 h-20 text-red-400'/>
-    <p className='font-poppins uppercase'>{modalMessage}</p>
-    <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
-      <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
-  </div>
-  </div>
-  
-    </div>
-}
-       </MyDialogContent>
-</MyDialog>
- }
-
+       <MostrarDialog
+  show={showDialog}
+  message={dialogMessage}
+  onClose={() => { setShowDialog(false); }}
+/>
     </>
   );
 }

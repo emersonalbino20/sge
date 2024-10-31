@@ -34,7 +34,7 @@ import { animateBounce, animateShake } from '@/AnimationPackage/Animates'
 import { Textarea } from '@/components/ui/textarea'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getSalas, getSalasId, postSalas, putSalas } from '@/_tanstack/FetchFunction'
-
+import MostrarDialog from './MostrarDialog';
 
 const TFormCreate =  z.object(
 {
@@ -62,8 +62,8 @@ export default function ClassRoom(){
   resolver: zodResolver(TFormUpdate)
   })
 
-  const [showModal, setShowModal] = React.useState(false);
-  const [modalMessage, setModalMessage] = React.useState(''); 
+  const [showDialog, setShowDialog] = React.useState(false);
+  const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
 
   const {data: salas, isError, } = useQuery({ queryKey: ["salas"] , queryFn: ()=>getSalas(),
     });
@@ -82,8 +82,8 @@ export default function ClassRoom(){
     mutationFn: postSalas,
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['salas']});
-      setShowModal(true);
-      setModalMessage(null)
+      setDialogMessage(null);
+      setShowDialog(true);
     }
   });
 
@@ -96,8 +96,8 @@ export default function ClassRoom(){
     mutationFn: putSalas,
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['salas']});
-      setShowModal(true);
-      setModalMessage(null)
+      setDialogMessage(null);
+      setShowDialog(true);
     }
   });
 
@@ -368,56 +368,7 @@ export default function ClassRoom(){
     </div>
      </div>
 
-{showModal &&
-<MyDialog open={showModal} onOpenChange={setShowModal}>
-
- <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
- {modalMessage == null &&
-     <div role="alert" className='w-full'>
-   <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-     <div>
-         <p>Sucesso</p>
-     </div>
-     <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-         <p>X</p>
-       </div>
-   </div>
-   <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
-   <CheckCircleIcon className='w-28 h-20 text-green-400'/>
-   <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
-   <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
-     <Button className='bg-green-400 hover:bg-green-500
-     hover:font-medium
-      font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
- </div>
- </div>
- 
-   </div>
-   
-}
-{modalMessage != null &&
-     <div role="alert" className='w-full'>
-   <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-     <div>
-         <p>Falhou</p>
-     </div>
-     <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-         <p>X</p>
-       </div>
-   </div>
-   <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
-   <AlertCircleIcon className='w-28 h-20 text-red-400'/>
-   <p className='font-poppins uppercase'>{modalMessage}</p>
-   <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
-     <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
- </div>
- </div>
- 
-   </div>
-}
-      </MyDialogContent>
-</MyDialog>
-}
+     <MostrarDialog show={showDialog} message={dialogMessage} onClose={() => setShowDialog(false)} />
     </section>
    
 )
