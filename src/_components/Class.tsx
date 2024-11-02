@@ -21,7 +21,6 @@ import { useEffect, useState } from 'react'
 import { AlertCircleIcon, CheckCircleIcon, EditIcon, PrinterIcon, SaveIcon, Trash, AlertTriangle, Search} from 'lucide-react'
 import { InfoIcon } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
-import DataTable from 'react-data-table-component'
 import {anoLectivo, classe, anoLectivoId, cursoId, custoMatricula, sala, capacidade, localizacao, terminoturno, inicioturno } from '@/_zodValidations/validations'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'

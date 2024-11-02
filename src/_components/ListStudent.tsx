@@ -757,7 +757,7 @@ const [idAno, setIdAno] = React.useState<number>(0);
                         
               
               <DialogFooter>
-                <Button title='nova matrícula' className='responsive-button bg-blue-600 border-blue-600 text-white hover:bg-blue-600 font-semibold w-12' type='submit'><SaveIcon className='w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7 w-5 h-5 absolute text-white font-extrabold'/></Button>
+                <Button title='nova matrícula' className='responsive-button bg-blue-600 border-blue-600 text-white hover:bg-blue-600 font-semibold w-12' type='submit'><SaveIcon className='h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7 w-5 absolute text-white font-extrabold'/></Button>
               </DialogFooter>
               </form>
               </Form>

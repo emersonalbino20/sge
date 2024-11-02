@@ -20,7 +20,6 @@ import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 import { AlertCircleIcon, AlertTriangle, CheckCircleIcon, EditIcon, SaveIcon} from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
-import DataTable from 'react-data-table-component'
 import {nomeParentescos } from '@/_zodValidations/validations'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'

@@ -8,13 +8,6 @@ import {
     DialogTitle,
     DialogTrigger,
   } from "@/components/ui/dialog"
-
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-  } from "@/components/ui/accordion"
   
 import {
     Popover,
@@ -29,7 +22,6 @@ import { EditIcon, PrinterIcon, Trash, CombineIcon, CheckCircleIcon, AlertCircle
 import { InfoIcon } from 'lucide-react'
 import { UserPlus } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
-import DataTable from 'react-data-table-component'
 import { Textarea } from '@/components/ui/textarea'
 import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, nomeCursoZod, descricaoZod, duracaoZod, cursos } from '@/_zodValidations/validations'
 import { z } from 'zod'

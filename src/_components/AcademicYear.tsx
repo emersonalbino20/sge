@@ -17,12 +17,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { AlertCircleIcon, AlertTriangle, EditIcon, Library, PrinterIcon, SaveIcon, Search, Trash} from 'lucide-react'
+import { AlertCircleIcon, AlertTriangle, CheckCircle, EditIcon, Library, PrinterIcon, SaveIcon, Search, Trash} from 'lucide-react'
 import { InfoIcon } from 'lucide-react'
 import { UserPlus } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
-import DataTable from 'react-data-table-component'
-import { CheckCircleIcon } from '@heroicons/react/24/outline'; 
 import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, nomeCursoZod, descricaoZod, duracaoZod, inicio, termino, anoLectivo, idZod } from '@/_zodValidations/validations'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -410,7 +408,7 @@ const [buscar, setBuscar] = React.useState<number>(null);
                  filteredAnos?.map((item, index) => (
                      <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-200"}>
                       {item.activo == true && 
-                         <td className={tdStyle}><CheckCircleIcon className='h-5 w-7 text-green-600'/></td>
+                         <td className={tdStyle}><CheckCircle className='h-5 w-7 text-green-600'/></td>
                         }
                         {!item.activo &&
                          <td className={tdStyle}>{item.id}</td>

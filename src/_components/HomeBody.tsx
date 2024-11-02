@@ -28,12 +28,18 @@ export default function HomeBody() {
     return (<><section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
       <Header title={false}/>
           <div className="w-full pt-14 items-center justify-center px-4 mx-auto max-w-screen-xl text-center">
-            <div className="flex flex-col justify-center items-center w-full">
-              <img src={IPPUImage} className="md:h-20 md:w-20 lg:h-32 lg:w-32 xl:h-36 xl:w-36" alt="IPPU Logo" />
-              <h1 className="animate-fade-up animate-duration-[750ms] animate-delay-200 animate-ease-in mb-2 md:text-md lg:text-lg xl:text-[2rem] capitalize font-medium tracking-wide text-gray-700 ">
-                Acreditamos no potencial dos nossos alunos
-              </h1>
-            </div>
+          <div className="flex flex-col justify-center items-center w-full">
+  <img 
+    src={IPPUImage} 
+    className="md:h-20 md:w-20 lg:h-32 lg:w-32 xl:h-36 xl:w-36 shadow-[rgba(13,_38,_76,_0.19)_0px_9px_20px] animate-ping animate-once animate-duration-[850ms] animate-delay-[400ms] animate-ease-in " 
+    alt="IPPU Logo" 
+  />
+  <h1 className="animate-fade-up animate-duration-[750ms] animate-delay-200 animate-ease-in mb-2 md:text-md lg:text-lg xl:text-[2rem] capitalize font-medium tracking-wide text-gray-700">
+    Acreditamos no potencial dos nossos alunos
+  </h1>
+</div>
+
+
             <p className="animate-fade-up animate-duration-[750ms] animate-delay-200 animate-ease-in  mb-8 text-[14px] lg:text-[16px] xl:text-xl   text-gray-600 font-medium sm:px-16 lg:px-48">
               Aqui na IPPU focamos em melhorar, ensinar e orientar nossos estudantes, com o mais alto escalão de ensino, com nossos profissionais vamos longe!
             </p>

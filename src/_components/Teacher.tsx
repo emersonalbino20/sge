@@ -20,7 +20,6 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Select from 'react-select';
 import { MyDialog, MyDialogContent } from './my_dialog'
-import InputMask from 'react-input-mask'
 import { AroundDiv, CombineButton, EditButton, InfoButton, LibraryButton, TrashButton, UserPlusButton } from './MyButton'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import Header from './Header'
