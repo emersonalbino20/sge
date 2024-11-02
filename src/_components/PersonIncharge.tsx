@@ -25,7 +25,8 @@ import { getCookies, removeCookies } from '@/_cookies/Cookies'
 import { Link } from 'react-router-dom'
 import Header from './Header'
 import { useHookFormMask } from 'use-mask-input'
-import { animateBounce } from '@/AnimationPackage/Animates'
+import { animateBounce, animateShake } from '@/AnimationPackage/Animates'
+import MostrarDialog from './MostrarDialog';
 
 const TForm =  z.object({
   nomeCompleto: nomeCompletoEncarregadoZod,
@@ -52,16 +53,13 @@ const TFormDelete = z.object({
   responsavelId: idZod
 })
 
-
 type FormProps =  z.infer<typeof TForm>;
 type FormPropsUpdate =  z.infer<typeof TFormUpdate>;
 type FormPropsDelete =  z.infer<typeof TFormDelete>;
 export default function PersonIncharge (){
   const form  = useForm<z.infer<typeof TForm>>({
     mode: 'all', 
-    resolver: zodResolver(TForm),
-    defaultValues:{
-      numeroCasa: 1}
+    resolver: zodResolver(TForm)
    })
    const { register } = form;
    const registerWithMask = useHookFormMask(register);
@@ -76,8 +74,8 @@ export default function PersonIncharge (){
    })
 
     const [updateTable, setUpdateTable] = React.useState(false)
-    const [showModal, setShowModal] = React.useState(false);
-    const [modalMessage, setModalMessage] = React.useState('');
+    const [showDialog, setShowDialog] = React.useState(false);
+    const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
    const handleSubmitCreate = async (data: z.infer<typeof TForm>,e) => {
           
     const dados = 	{
@@ -103,11 +101,13 @@ export default function PersonIncharge (){
         })
         .then((resp => resp.json()))
         .then((resp) =>{ 
-            setShowModal(true);  
+            
             if (resp.statusCode != 200) {
-              setModalMessage(resp.message);  
+              setDialogMessage(resp.message);
+              setShowDialog(true);
             }else{
-              setModalMessage(null);
+              setDialogMessage(null);
+              setShowDialog(true);
             }
         })
         .catch((error) => console.log(`error: ${error}`))
@@ -139,12 +139,14 @@ export default function PersonIncharge (){
         })
         .then((resp => resp.json()))
         .then((resp) =>{ 
-          setShowModal(true);  
+          
           if (resp.statusCode != 200)
           {
-            setModalMessage(resp.message);  
+            setDialogMessage(resp.message);
+            setShowDialog(true);
           }else{
-            setModalMessage(null);
+            setDialogMessage(null);
+            setShowDialog(true);
           }
         })
         .catch((error) => console.log(`error: ${error}`))
@@ -162,11 +164,13 @@ export default function PersonIncharge (){
           })
           .then((resp => resp.json()))
           .then((resp) =>{ 
-            setShowModal(true);  
+            
             if (resp.statusCode != 200) {
-              setModalMessage(resp.message);  
+              setDialogMessage(resp.message);
+              setShowDialog(true);
             }else{
-              setModalMessage(null);
+              setDialogMessage(null);
+              setShowDialog(true);
             }
         })
           .catch((error) => console.log(`error: ${error}`))
@@ -273,7 +277,7 @@ export default function PersonIncharge (){
       </div>
       
     </DialogTrigger>
-    <DialogContent className="sm:max-w-[645px] overflow-y-scroll h-[605px] bg-white">
+    <DialogContent className="sm:max-w-[525px]  bg-white">
       <DialogHeader>
       <DialogTitle className='text-sky-800 text-xl'>Cadastrar Regstro</DialogTitle>
         <DialogDescription>
@@ -291,7 +295,7 @@ export default function PersonIncharge (){
             <div className='w-full flex flex-col '>
             <div className="w-full flex flex-row justify-between space-x-2 ">
             <div className='w-full'>
-            <Label htmlFor="nome"className='text-sky-700 text-md font-semibold'>Nome<span className='text-red-500'>*</span></Label>
+            <label htmlFor="nome">Nome<span className='text-red-500'>*</span></label>
           <FormField
           control={form.control}
           name="nomeCompleto"
@@ -299,8 +303,9 @@ export default function PersonIncharge (){
             <FormItem>
             <FormControl>
           <Input id='nome'
-            className={form.formState.errors.nomeCompleto?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+            className={form.formState.errors.nomeCompleto?.message && 
+              `${animateShake} 
+            input-error`}
             
             {...field} 
             
@@ -312,7 +317,7 @@ export default function PersonIncharge (){
            />
         </div>
         <div className='w-full'>
-        <Label htmlFor="parentesco"className='text-sky-700 text-md font-semibold'>Parentesco<span className='text-red-500'>*</span></Label>
+        <label htmlFor="parentesco">Parentesco<span className='text-red-500'>*</span></label>
           <FormField
               control={form.control}
               name="parentescoId"
@@ -320,8 +325,8 @@ export default function PersonIncharge (){
           <FormItem>
           <FormControl>
           <select id='parentesco' {...field}  className={
-                      form.formState.errors.parentescoId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                      form.formState.errors.parentescoId?.message &&  `${animateShake} 
+                      select-error`} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                       <option >Selecione o grau</option>
                       {
                             parentesco.map((field, index)=>{
@@ -344,36 +349,36 @@ export default function PersonIncharge (){
         Localização</legend>
             <div className="w-full flex flex-row justify-between space-x-2">
             <div className='w-full'>
-            <Label htmlFor="bairro"className='text-sky-700 text-md font-semibold'>Bairro<span className='text-red-500'>*</span></Label>
+            <label htmlFor="bairro">Bairro<span className='text-red-500'>*</span></label>
             <FormField
           control={form.control}
           name="bairro"
           render={({field})=>(
             <FormControl>
                 <FormItem>
-          <Input id="bairro" type='text' {...field} className={form.formState.errors.bairro?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-          'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
+          <Input id="bairro" type='text' {...field} className={form.formState.errors.bairro?.message &&  `${animateShake} 
+            input-error`}/>
           <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
           </FormControl>
         )}/></div>
             <div className='w-full'>
-            <Label htmlFor="rua"className='text-sky-700 text-md font-semibold'>Rua<span className='text-red-500'>*</span></Label>
+            <label htmlFor="rua">Rua<span className='text-red-500'>*</span></label>
             <FormField
           control={form.control}
           name="rua"
           render={({field})=>(
             <FormControl>
         <FormItem>
-          <Input id="rua" type='text' {...field} className={form.formState.errors.rua?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
+          <Input id="rua" type='text' {...field} className={form.formState.errors.rua?.message &&  `${animateShake} 
+            input-error`}/>
           <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
           </FormControl>
         )}/>
         </div>
         <div className='w-full'>
-        <Label htmlFor="name"className='text-sky-700 text-md font-semibold'>N. da Residência<span className='text-red-500'>*</span></Label>
+        <label htmlFor="name">N. da Residência<span className='text-red-500'>*</span></label>
             <FormField
           control={form.control}
           name="numeroCasa"
@@ -381,8 +386,8 @@ export default function PersonIncharge (){
             <FormControl>
             <FormItem>
          
-          <Input id="casa" type='number' {...field} className={form.formState.errors.numeroCasa?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-          'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}  min="1"  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
+          <Input id="casa" type='number' {...field} className={form.formState.errors.numeroCasa?.message &&  `${animateShake} 
+            input-error`} onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
           <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
           </FormControl>
@@ -394,22 +399,22 @@ export default function PersonIncharge (){
         Contacto</legend>
             <div className="w-full flex flex-row justify-between space-x-2">
         <div className='w-full'>
-        <Label htmlFor="tel"className='text-sky-700 text-md font-semibold'>Telefone<span className='text-red-500'>*</span></Label>
+        <label htmlFor="tel">Telefone<span className='text-red-500'>*</span></label>
                 <FormField
           control={form.control}
           name="telefone"
           render={({field})=>(
             <FormItem>
             <FormControl>
-            <Input {...registerWithMask('telefone',['999999999'], {required: true})} className={form.formState.errors.telefone?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
+            <Input {...registerWithMask('telefone',['999999999'], {required: true})} className={form.formState.errors.telefone?.message &&  `${animateShake} 
+            input-error`}/>
           </FormControl>
           <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
         </div>
         <div className='w-full'>
-        <Label htmlFor="email"className='text-sky-700 text-md font-semibold'>Email<span className='text-red-500'>*</span></Label>
+        <label htmlFor="email">Email<span className='text-red-500'>*</span></label>
       <FormField
           control={form.control}
           name="email"
@@ -418,8 +423,8 @@ export default function PersonIncharge (){
             <FormControl>
           <Input
             id="email"
-            className={form.formState.errors.email?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+            className={form.formState.errors.email?.message && `${animateShake} 
+            input-error`}
           {...field}/>
           </FormControl>
           <FormMessage className='text-red-500 text-xs'/>
@@ -490,8 +495,8 @@ export default function PersonIncharge (){
                                     <div className='w-full flex flex-col '>
                                     <div className="w-full flex flex-row justify-between space-x-2 ">
                                     <div className='w-full'>
-                                    <Label htmlFor="nome"className='text-sky-700 text-lg font-semibold'>Nome Completo<span className='text-red-500'>*</span>
-                                  </Label>
+                                    <label htmlFor="nome">Nome Completo<span className='text-red-500'>*</span>
+                                  </label>
                                   <FormField
                                   control={formUpdate.control}
                                   name="nomeCompleto"
@@ -499,8 +504,8 @@ export default function PersonIncharge (){
                                     <FormItem>
                                     <FormControl>
                                   <Input id='nome'
-                                    className={formUpdate.formState.errors.nomeCompleto?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                                    'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+                                    className={formUpdate.formState.errors.nomeCompleto?.message &&  `${animateShake} 
+                                    input-error`}
                                     
                                     {...field} 
                                     
@@ -512,8 +517,8 @@ export default function PersonIncharge (){
                                   />
                                 </div>
                                 <div className='w-full'>
-                    <Label htmlFor="parentesco"className='text-sky-700 text-lg font-semibold'>Parentesco<span className='text-red-500'>*</span>
-                      </Label>
+                    <label htmlFor="parentesco">Parentesco<span className='text-red-500'>*</span>
+                      </label>
                       <FormField
                           control={formUpdate.control}
                           name="parentescoId"
@@ -521,8 +526,8 @@ export default function PersonIncharge (){
                       <FormItem>
                       <FormControl>
                       <select id='parentesco' {...field}  className={
-                      formUpdate.formState.errors.parentescoId?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-lg border-2 border-red-300 text-red-600 focus:text-red-700 focus:font-semibold focus:border-red-500 py-2 focus:outline-none rounded-md bg-white':
-                      'w-full bg-white text-lg border-2 border-gray-300 text-gray-600 focus:text-sky-700 focus:font-semibold focus:border-sky-500 py-2 focus:outline-none rounded-md'} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                      formUpdate.formState.errors.parentescoId?.message && `${animateShake} 
+                      select-error`} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
                                         <option >Selecione o grau</option>
                                         {
                                               parentesco.map((field)=>{
@@ -545,8 +550,8 @@ export default function PersonIncharge (){
                                 Localização</legend>
                                     <div className="w-full flex flex-row justify-between space-x-2">
                                     <div className='w-full'>
-                                    <Label htmlFor="bairro"className='text-sky-700 text-lg font-semibold'>Bairro<span className='text-red-500'>*</span>
-                                  </Label>
+                                    <label htmlFor="bairro">Bairro<span className='text-red-500'>*</span>
+                                  </label>
                                 
                                     <FormField
                                   control={formUpdate.control}
@@ -554,31 +559,30 @@ export default function PersonIncharge (){
                                   render={({field})=>(
                                     <FormControl>
                                         <FormItem>
-                                  <Input id="bairro" type='text' {...field}  className={formUpdate.formState.errors.bairro?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                                    'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
+                                  <Input id="bairro" type='text' {...field}  className={formUpdate.formState.errors.bairro?.message &&  `${animateShake} 
+                                  input-error`}/>
                                   <FormMessage className='text-red-500 text-xs'/>
                                   </FormItem>
                                   </FormControl>
                                 )}/></div>
                                     <div className='w-full'>
-                                    <Label htmlFor="rua"className='text-sky-700 text-lg font-semibold'>Rua<span className='text-red-500'>*</span>
-                                  </Label>
+                                    <label htmlFor="rua">Rua<span className='text-red-500'>*</span>
+                                  </label>
                                     <FormField
                                   control={formUpdate.control}
                                   name="rua"
                                   render={({field})=>(
                                     <FormControl>
                                 <FormItem>
-                                  <Input id="rua" type='text' {...field}  className={formUpdate.formState.errors.rua?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                                  'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
+                                  <Input id="rua" type='text' {...field}  className={formUpdate.formState.errors.rua?.message &&  `${animateShake} input-error`}/>
                                   <FormMessage className='text-red-500 text-xs'/>
                                   </FormItem>
                                   </FormControl>
                                 )}/>
                                 </div>
                                 <div className='w-full'>
-                                <Label htmlFor="name"className='text-sky-700 text-lg font-semibold'>Residên.<span className='text-red-500'>*</span>
-                                  </Label>
+                                <label htmlFor="name">Residên.<span className='text-red-500'>*</span>
+                                  </label>
                                 
                                     <FormField
                                   control={formUpdate.control}
@@ -587,8 +591,8 @@ export default function PersonIncharge (){
                                     <FormControl>
                                     <FormItem>
                                 
-                                  <Input id="numeroCasa" type='number' {...field}  className={formUpdate.formState.errors.numeroCasa?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                                    'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
+                                  <Input id="numeroCasa" type='number' {...field}  className={formUpdate.formState.errors.numeroCasa?.message &&  `${animateShake} 
+                                  input-error`}  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
                                   <FormMessage className='text-red-500 text-xs'/>
                                   </FormItem>
                                   </FormControl>
@@ -600,24 +604,24 @@ export default function PersonIncharge (){
                                 Contacto</legend>
                                     <div className="w-full flex flex-row justify-between space-x-2">
                                 <div className='w-full'>
-                                <Label htmlFor="tel"className='text-sky-700 text-lg font-semibold'>Telefone<span className='text-red-500'>*</span>
-                                  </Label>
+                                <label htmlFor="tel">Telefone<span className='text-red-500'>*</span>
+                                  </label>
                                 <FormField
                                   control={formUpdate.control}
                                   name="telefone"
                                   render={({field})=>(
                                     <FormItem>
                                     <FormControl>
-                                    <Input id='tel' {...upWithMask('telefone',['999999999'], {required: true})} className={formUpdate.formState.errors.telefone?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                                   'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}/>
+                                    <Input id='tel' {...upWithMask('telefone',['999999999'], {required: true})} className={formUpdate.formState.errors.telefone?.message &&  `${animateShake} 
+                                    input-error`}/>
                                   </FormControl>
                                   <FormMessage className='text-red-500 text-xs'/>
                                   </FormItem>
                                 )}/>
                                 </div>
                                 <div className='w-full'>
-                                <Label htmlFor="email"className='text-sky-700 text-lg font-semibold'>Email<span className='text-red-500'>*</span>
-                                  </Label>
+                                <label htmlFor="email">Email<span className='text-red-500'>*</span>
+                                  </label>
                               <FormField
                                   control={formUpdate.control}
                                   name="email"
@@ -626,8 +630,8 @@ export default function PersonIncharge (){
                                     <FormControl>
                                   <Input
                                     id="email"
-                                    className={formUpdate.formState.errors.email?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                                    'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+                                    className={formUpdate.formState.errors.email?.message &&  `${animateShake} 
+                                    input-error`}
                                   {...field}/>
                                   </FormControl>
                                   <FormMessage className='text-red-500 text-xs'/>
@@ -706,15 +710,15 @@ export default function PersonIncharge (){
                                     <div className="w-full flex flex-row justify-between px-2">
                                     <div className="w-full flex flex-row justify-between px-2">
                                     <div>
-                                        <Label className='font-poppins'>número da casa</Label>
+                                        <label className='font-poppins'>número da casa</label>
                                         <p className='font-thin text-sm'>{casa}</p>
                                     </div>
                                     <div>
-                                        <Label className='font-poppins'>bairro</Label>
+                                        <label className='font-poppins'>bairro</label>
                                         <p className='font-thin text-sm'>{bairro}</p>
                                     </div>
                                     <div>
-                                        <Label className='font-poppins'>rua</Label>
+                                        <label className='font-poppins'>rua</label>
                                         <p className='font-thin text-sm'>{rua}</p>
                                     </div>
                                     </div>
@@ -725,12 +729,12 @@ export default function PersonIncharge (){
                                     <div className="w-full flex flex-row justify-between px-2">
                                     <div className="w-full flex flex-row justify-between px-2">
                                     <div>
-                                        <Label className='font-poppins'>Telefone</Label>
+                                        <label className='font-poppins'>Telefone</label>
                                         <p className='font-thin text-sm'>{telefone}</p>
                                     </div>
                                     {email && (
                                     <div>
-                                        <Label className='font-poppins'>email</Label>
+                                        <label className='font-poppins'>email</label>
                                         <p className='font-thin text-sm'>{email}</p>
                                     </div>
                                     )}
@@ -758,57 +762,8 @@ export default function PersonIncharge (){
       </div>
       </div>
       </div>
-
-{showModal &&
-<MyDialog open={showModal} onOpenChange={setShowModal}>
-
-  <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
-  {modalMessage == null &&
-      <div role="alert" className='w-full'>
-    <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-      <div>
-          <p>Sucesso</p>
-      </div>
-      <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-          <p>X</p>
-        </div>
-    </div>
-    <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
-    <CheckCircleIcon className='w-28 h-20 text-green-400'/>
-    <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
-    <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
-      <Button className='bg-green-400 hover:bg-green-500
-      hover:font-medium
-       font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
-  </div>
-  </div>
-  
-    </div>
-    
-}
- {modalMessage != null &&
-      <div role="alert" className='w-full'>
-    <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-      <div>
-          <p>Falhou</p>
-      </div>
-      <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-          <p>X</p>
-        </div>
-    </div>
-    <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
-    <AlertCircleIcon className='w-28 h-20 text-red-400'/>
-    <p className='font-poppins uppercase'>{modalMessage}</p>
-    <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
-      <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
-  </div>
-  </div>
-  
-    </div>
-}
-       </MyDialogContent>
-</MyDialog>
- }
-      </section>)}</>
+      </section>)}
+      <MostrarDialog show={showDialog} message={dialogMessage} onClose={() => setShowDialog(false)} />
+      </>
  );
 }

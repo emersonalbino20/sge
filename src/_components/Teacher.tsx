@@ -26,6 +26,8 @@ import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import Header from './Header'
 import { useHookFormMask } from 'use-mask-input'
 import { animateBounce, animateShake } from '@/AnimationPackage/Animates'
+import { collectErrorMessages } from '@/_tanstack/Alunos'
+import MostrarDialog from './MostrarDialog';
 
 const TForm =  z.object({
   nomeCompleto: nomeCompletoZod,
@@ -99,9 +101,8 @@ export default function Teacher (){
    })
 
    const [updateTable, setUpdateTable] = React.useState(false)
-   const[estado, setEstado] = React.useState(false);
-   const [showModal, setShowModal] = React.useState(false);
-   const [modalMessage, setModalMessage] = React.useState('');
+   const [showDialog, setShowDialog] = React.useState(false);
+   const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
 
    const handleSubmitCreate = async (data: z.infer<typeof TForm>,e) => {
     const dados = {
@@ -123,11 +124,15 @@ export default function Teacher (){
         })
         .then((resp => resp.json()))
         .then((resp) =>{ 
-          setShowModal(true);  
-          if (resp.message != null) {
-            setModalMessage(resp.message);  
+          
+          const errorMessages = collectErrorMessages(resp.errors);
+          if (resp.errors !== null) {
+            setDialogMessage(errorMessages[0]);
+            setShowDialog(true);
           }else{
-            setModalMessage(resp.message);
+            setDialogMessage(null);
+            setShowDialog(true);
+    
           }
         })
         .catch((error) => console.log(`error: ${error}`))
@@ -156,7 +161,7 @@ export default function Teacher (){
                 formUpdate.setValue('email', '')
               }
             formUpdate.setValue('id', receve.id)
-            setEstado(true);
+            
         }
         search()
     },[buscar])
@@ -184,12 +189,16 @@ export default function Teacher (){
         })
         .then((resp => resp.json()))
         .then((resp) =>{
-            setShowModal(true);  
-            if (resp.message != null) {
-              setModalMessage(resp.message);  
-            }else{
-              setModalMessage(resp.message);
-            }
+          
+          const errorMessages = collectErrorMessages(resp.errors);
+          if (resp.errors !== null) {
+            setDialogMessage(errorMessages[0]);
+            setShowDialog(true);
+    
+          }else{
+            setDialogMessage(null);
+            setShowDialog(true);
+          }
           })
         .catch((error) => console.log(`error: ${error}`))
         
@@ -228,15 +237,20 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
           })
           .then((resp => resp.json()))
           .then((resp) =>{ 
-            setShowModal(true);  
+            
             if (resp.message != null) {
               let index = parseInt(Object.keys(resp.errors.disciplinas)[0]);
-              setModalMessage(resp.errors.disciplinas[index]+"\n Disciplina: "+data.nomeDisciplinas[index]);
+              
+              setDialogMessage(resp.errors.disciplinas[index]+"\n Disciplina: "+data.nomeDisciplinas[index]);
+              setShowDialog(true);
+      
             }else{
-              setModalMessage(resp.message);
+              
+              setDialogMessage(null);
+              setShowDialog(true);
             }
             console.log(resp)
-            //resp.errors.forEach((v)=> { return console.log(v)})
+            
           })
           .catch((error) => console.log(`error: ${error}`))
           setUpdateTable(!updateTable)
@@ -255,12 +269,16 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
               })
               .then((resp => resp.json()))
               .then((resp) =>{ 
-                setShowModal(true);  
+                
                 if (resp.message != null) {
                   let index = parseInt(Object.keys(resp.errors.disciplinas)[0]);
-                  setModalMessage(resp.errors.disciplinas[index]+"\n Disciplina: "+data.nomeDisciplinas[index]);
+              setDialogMessage(resp.errors.disciplinas[index]+"\n Disciplina: "+data.nomeDisciplinas[index]);
+              setShowDialog(true);
                 }else{
-                  setModalMessage(resp.message);
+
+              setDialogMessage(null);
+              setShowDialog(true);
+                  
                 }
                 console.log(resp)
               })
@@ -333,7 +351,6 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
           conv2I.forEach(element => {
             console.log("Curso: "+element.curso.nome+"\nClasse: "+element.nome)
           });
-          //console.log(conv2I);
         }
           respFetch();
     }, [formClasse.getValues('idProfessor')])
@@ -354,12 +371,14 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
             })
             .then((resp => resp.json()))
             .then((resp) =>{ 
-              setShowModal(true);  
+              
               if (resp.message != null) {
-                setModalMessage("Disciplina: "+resp.errors.disciplinaId[0]);
-                console.log(resp.errors.disciplinaId[0])
+                
+                setDialogMessage("Disciplina: "+resp.errors.disciplinaId[0]);
+              setShowDialog(true);
               }else{
-                setModalMessage(resp.message);
+                setDialogMessage(null);
+                setShowDialog(true);
               }
               
             })
@@ -414,8 +433,6 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
                 <Search className='absolute text-gray-300 w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7'/>            
                 <Input className='pl-6  indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
             </div>
-            
-        
           <Dialog >
     <DialogTrigger asChild>
     <div title='cadastrar' className={AroundDiv}>
@@ -985,56 +1002,7 @@ const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
         </div>
         </div>
 
-  {showModal &&
-  <MyDialog open={showModal} onOpenChange={setShowModal}>
-  
-    <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
-    {modalMessage == null &&
-        <div role="alert" className='w-full'>
-      <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-        <div>
-            <p>Sucesso</p>
-        </div>
-        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-            <p>X</p>
-          </div>
-      </div>
-      <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
-      <CheckCircleIcon className='w-28 h-20 text-green-400'/>
-      <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
-      <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
-        <Button className='bg-green-400 hover:bg-green-500
-        hover:font-medium
-         font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
-    </div>
-    </div>
-    
-      </div>
-      
-  }
-   {modalMessage != null &&
-        <div role="alert" className='w-full'>
-      <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-        <div>
-            <p>Falhou</p>
-        </div>
-        <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-            <p>X</p>
-          </div>
-      </div>
-      <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
-      <AlertCircleIcon className='w-28 h-20 text-red-400'/>
-      <p className='font-poppins uppercase'>{modalMessage}</p>
-      <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
-        <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
-    </div>
-    </div>
-    
-      </div>
-  }
-         </MyDialogContent>
-  </MyDialog>
-   }
+        <MostrarDialog show={showDialog} message={dialogMessage} onClose={() => setShowDialog(false)} />
    </section>
  )     
 }

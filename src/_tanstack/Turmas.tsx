@@ -7,6 +7,10 @@ import axios from 'axios';
     export const getTurmasId = (id) =>{
         return axios.get(`http://localhost:8000/api/classes/${id}/turmas`);
     }
+
+    export const getTurmasClasse = (id) =>{
+        return axios.get(`http://localhost:8000/api/classes/${id}/turmas`);
+    }
   
     export const postTurmas = (post) => {
         return (axios.post("http://localhost:8000/api/turmas/", post));

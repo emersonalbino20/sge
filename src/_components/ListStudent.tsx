@@ -13,8 +13,8 @@ import { Link } from 'react-router-dom';
 import Header from './Header';
 import IPPUImage from './../assets/images/IPPU.png'
 import './stepper.css';
-import { animateBounce, animateFadeLeft, animatePing, animateShake } from '@/AnimationPackage/Animates';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { animateBounce, animateFadeLeft, animatePing, animatePulse, animateShake } from '@/AnimationPackage/Animates';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getCursos } from '@/_tanstack/Cursos';
 import { getClassesId } from '@/_tanstack/Classes';
 import { getTurmasId } from '@/_tanstack/Turmas';
@@ -64,6 +64,8 @@ export default function ListStudent() {
     resolver: zodResolver(TFormStepOne)
    })
    const { watch, formState:{ errors } } = formStepOne;
+
+   const [fieldCursoId, fieldClasseId, fieldTrimestreId, fieldTurmaId] = watch(["cursoId", "classeId", "trimestreId", "turmaId"])
    
    const form  = useForm<z.infer<typeof TForm>>({
     mode: 'all', 
@@ -72,8 +74,6 @@ export default function ListStudent() {
 
   const upWithMask = useHookFormMask(form.register)
   const queryClient = useQueryClient();
-  const {data: alunosTurma} = useQuery({ queryKey: ["alunosTurmaId", formStepOne.getValues('classeId'), formStepOne.getValues('turmaId')] , queryFn: ()=>getAlunosPorTurma(formStepOne.getValues('classeId'), formStepOne.getValues('turmaId')), enabled: !!formStepOne.getValues('classeId')
-  });
 
   const [showDialog, setShowDialog] = React.useState(false);
   const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
@@ -88,20 +88,12 @@ export default function ListStudent() {
     mutationFn: confirmacaoAluno,
     onSuccess: (response) => {
     const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-    
     window.open(url, '_blank');
-    
-
-
-
-      queryClient.invalidateQueries({queryKey: ["alunosTurmaId", formStepOne.getValues('classeId'), formStepOne.getValues('turmaId')]});
+    queryClient.invalidateQueries({queryKey: ["alunosTurmaId", formStepOne.getValues('classeId'), formStepOne.getValues('turmaId')]});
     },
     onError: (error) => {
-      
       if(axios.isAxiosError(error)){
       if (error.response && error.response.data) {
-       
-        
         setDialogMessage("Matricula Já existe");
         setShowDialog(true);
        }
@@ -116,7 +108,6 @@ export default function ListStudent() {
    const {mutate: putMutationAlunos} = useMutation({
     mutationFn: putAlunos,
     onSuccess: () => {
-     
       queryClient.invalidateQueries({queryKey: ["alunosTurmaId", formStepOne.getValues('classeId'), formStepOne.getValues('turmaId')]});
       setDialogMessage(null);
       setShowDialog(true); 
@@ -126,7 +117,6 @@ export default function ListStudent() {
       if (error.response && error.response.data) {
         const err = error.response.data?.errors;
         const errorMessages = collectErrorMessages(err);
-        
         setDialogMessage(errorMessages[0]);
         setShowDialog(true);
        }
@@ -138,35 +128,28 @@ export default function ListStudent() {
     putMutationAlunos(data);
   }
 
-   const [fieldCursoId, fieldClasseId, fieldTrimestreId, fieldTurmaId] = watch(["cursoId", "classeId", "trimestreId", "turmaId"])
-
-   
-
-
-  const { data: trimestres } = useQuery({ queryKey: ["trimestres"] , queryFn: ()=>getTrimestres(),
-    });
-
-  const { data: cursos } = useQuery({ queryKey: ["cursos"] , queryFn: ()=>getCursos(),
-    });
-  
-  const { data: pagamentos } = useQuery({ queryKey: ["pagamentos"] , queryFn: ()=>getPagamentos(),
-  });
-
-  const { data: turnos } = useQuery({ queryKey: ["turnos"] , queryFn: ()=>getTurnos(),
-  });
-
-  const {data: classes} = useQuery({ queryKey: ["classesId", formStepOne.getValues('cursoId')] , queryFn: ()=>getClassesId(formStepOne.getValues('cursoId')), enabled: !!formStepOne.getValues('cursoId')
-  });
-    
-  const {data: turmas} = useQuery({ queryKey: ["turmaId", formStepOne.getValues('classeId')] , queryFn: ()=>getTurmasId(formStepOne.getValues('classeId')), enabled: !!formStepOne.getValues('classeId')
-  });
-
   const [alunoId, setAlunoId] = React.useState<number>(null);
-  const {data: alunosNotas} = useQuery({ queryKey: ["alunosNotasId", alunoId, formStepOne.getValues('trimestreId'), formStepOne.getValues('classeId')] , queryFn: ()=>getAlunosNotas(alunoId, formStepOne.getValues('trimestreId'), formStepOne.getValues('classeId')), enabled: !!alunoId
-  });
 
-  const {data: alunosPorId, isFetched: alunosIdFetched} = useQuery({ queryKey: ["alunosPorId", alunoId] , queryFn: ()=>getAlunosId(alunoId), enabled: !!alunoId
-  });
+  const [{data: trimestres},{data: cursos }, { data: pagamentos }, {data: turnos}, {data: classes, isLoading: classesLoading, isError: classesError, isSuccess: classesSuccess}, {data: turmas, isLoading: turmasLoading, isError: turmasError, isSuccess: turmasSuccess}, {data: alunosNotas}, {data: alunosPorId, isFetched: alunosIdFetched}, {data: alunosPorMatricula}, {data: classesAluno}, {data: turmasAluno}, {data: alunosTurma, isLoading: alunosTurmaLoading, isError: alunosTurmaError, isSuccess: alunosTurmaSuccess}] = useQueries(
+    { 
+      queries: 
+      [
+        {queryKey: ["trimestres"] , queryFn: getTrimestres},
+        {queryKey: ["cursos"], queryFn: getCursos},
+        {queryKey: ["pagamentos"], queryFn: getPagamentos},
+        {queryKey: ["turnos"], queryFn: getTurnos},
+        {queryKey: ["classesId", fieldCursoId], queryFn: ()=>getClassesId(fieldCursoId), enabled: !!fieldCursoId},
+        {queryKey: ["turmaId", fieldClasseId] , queryFn: ()=>getTurmasId(fieldClasseId), enabled: !!fieldClasseId},
+        {queryKey: ["alunosNotasId", alunoId, fieldTrimestreId, fieldClasseId] , queryFn: ()=>getAlunosNotas(alunoId, fieldTrimestreId, fieldClasseId), enabled: !!alunoId},
+        {queryKey: ["alunosPorId", alunoId] , queryFn: ()=>getAlunosId(alunoId), enabled: !!alunoId},
+        {queryKey: ["alunosPorMatricula", alunoId] , queryFn: ()=>getAlunosMatriculas(alunoId), enabled: !!alunoId},
+        {queryKey: ["classesAluno", fieldCursoId], queryFn: ()=>getAlunosClassesMatriculasCurso(fieldCursoId), enabled: !!fieldCursoId},
+        {queryKey: ["turmaAlunoId", fieldClassesAluno] , queryFn: ()=>getTurmasId(fieldClassesAluno), enabled: !!fieldClassesAluno},
+        {queryKey: ["alunosTurmaId", fieldClasseId, fieldTurmaId] , queryFn: ()=>getAlunosPorTurma(fieldClasseId, fieldTurmaId)},
+      ]
+    }
+  )
+console.log(alunosNotas)
   React.useEffect(()=>{
       form.setValue('nomeCompleto', alunosPorId?.data.nomeCompleto)
       form.setValue('genero', alunosPorId?.data.genero)
@@ -185,20 +168,12 @@ export default function ListStudent() {
     formConfirmacao.setValue('id', alunosPorId?.data.id);
   }, [alunoId, alunosIdFetched])
 
-const {data: alunosPorMatricula} = useQuery({ queryKey: ["alunosPorMatricula", alunoId] , queryFn: ()=>getAlunosMatriculas(alunoId), enabled: !!alunoId
-});
-
-const {data: classesAluno} = useQuery({ queryKey: ["classesAluno", formStepOne.getValues('cursoId')], queryFn: ()=>getAlunosClassesMatriculasCurso(formStepOne.getValues('cursoId')), enabled: !!formStepOne.getValues('cursoId')
-});
-
-const {data: turmasAluno} = useQuery({ queryKey: ["turmaAlunoId", fieldClassesAluno] , queryFn: ()=>getTurmasId(fieldClassesAluno), enabled: !!fieldClassesAluno
-});
-
-const changeResource=(id)=>{
-  setAlunoId(id)
-  setCookies('idAluno', id , 1, false) 
+function changeResource(id) {
+    setAlunoId(id);
+    setCookies('idAluno', id, 1, false);
 }
-  const [idAno, setIdAno] = React.useState<number>(0);
+  
+const [idAno, setIdAno] = React.useState<number>(0);
   React.useEffect(() => {
     const search = async () => {
       const resp = await fetch(`http://localhost:8000/api/ano-lectivos/`);
@@ -220,7 +195,7 @@ const changeResource=(id)=>{
     return turma.nomeCompleto.toLowerCase().includes(searchTerm)}
   );
 
-  const step = ['Filtrar Turmas', 'Inserir Nota'];
+  const step = ['Filtrar Turmas', 'Consultar Alunos'];
   const[ currentStep, setCurrentStep ] = React.useState<number>(1);
   const[ complete, setComplete ] = React.useState<boolean>(false);
 
@@ -272,12 +247,12 @@ const changeResource=(id)=>{
                         <FormControl>
                     <select {...field}
                     className={
-                      errors.trimestreId?.message && `${animateShake} select-error`}
+                      errors?.trimestreId?.message && `${animateShake} select-error`}
                       onChange={(e)=>{field.onChange(parseInt(e.target.value))
                       }}>
                         <option >Selecione o trimestre</option>
                         {
-                        trimestres?.data?.data.map((field)=>{
+                        trimestres?.data?.data?.map((field)=>{
                             return (<option key={field.id} value={`${field.id}`}>{field.numero}° Trimestre</option>
                             )
                         })
@@ -301,11 +276,12 @@ const changeResource=(id)=>{
                     <select {...field}
                 
                     className={
-                      errors.cursoId?.message && `${animateShake} select-error`} 
+                      errors?.cursoId?.message && `${animateShake} select-error`} 
                       onChange={(e)=>{field.onChange(parseInt(e.target.value))
                       }}>
+                        <option >Selecione o curso</option>
                         {
-                        cursos?.data?.data.map((field)=>{
+                        cursos?.data?.data?.map((field)=>{
                             return (<option key={field.id} value={`${field.id}`}>{field.nome} 
                             </option>
                             )
@@ -333,15 +309,18 @@ const changeResource=(id)=>{
                       errors.classeId?.message && `${animateShake} select-error`} 
                       onChange={(e)=>{field.onChange(parseInt(e.target.value))
                       }}>
-                         <option >Selecione a classe</option>
-                        {
-                        classes?.data?.data?.map((field)=>{
+                        {classesLoading &&
+                        (<option className={`font-semibold`}>Procurando ...</option>)
+                        }
+                        {classesError && <option className={` font-semibold`}>Não cadastrado</option>  
+                      }
+                       <option >Selecione a classe</option>
+                      {  classes?.data?.data?.map((field)=>{
                             return (<option key={field.id} value={`${field.id}`}>{field.nome} Classe
                             </option>
                             )
-                        })
+                        })}
                                     
-                        }
                     </select>
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -363,10 +342,15 @@ const changeResource=(id)=>{
                     className={
                       errors.turmaId?.message && `${animateShake} select-error`}
                      >
+                       {turmasLoading &&
+                        (<option className={` font-semibold`}>Procurando ...</option>)
+                        }
+                        {turmasError && <option className={` font-semibold`}>Não cadastrado</option>  
+                      }
                         <option >Selecione a turma</option>
                         {
                             
-                        turmas?.data?.data.map((field)=>{
+                        turmas?.data?.data?.map((field)=>{
                             return (<option key={field.id} value={`${field.id}`}>{field.nome}
                             </option>
                             )
@@ -383,7 +367,7 @@ const changeResource=(id)=>{
                       <button type='button' onClick={()=>{
                       const isStep1Valid = !errors.cursoId && !errors.trimestreId && !errors.turmaId && !errors.classeId && fieldCursoId && fieldTrimestreId && fieldTurmaId && fieldClasseId;
                       if (isStep1Valid) {
-                        if (alunosTurma?.data?.data.length > 0)
+                        if (alunosTurma?.data?.data?.length > 0)
                         {
                         currentStep === step.length ?
                         setComplete(true) :
@@ -415,16 +399,27 @@ const changeResource=(id)=>{
             </tr>
           </thead>
           <tbody>
-            {filteredTurmas.length === 0 ? (
+          {alunosTurmaLoading &&
+              
               <tr className='w-96 h-32'>
-                <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
-                  <div>
-                  <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
-                              <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
+              <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
+                  <div className={`${animatePulse}`}>
+                  Loading ...
                   </div>
-                </td>
-              </tr>
-            ) : filteredTurmas.map((item, index) => (
+              </td>
+          </tr>
+            }
+            {alunosTurmaError &&
+             <tr className='w-96 h-32'>
+             <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
+               <div>
+               <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
+                           <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
+               </div>
+             </td>
+           </tr>
+            }
+           {alunosTurmaSuccess && filteredTurmas?.map((item, index) => (
               <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-200"}>
                
                 <td className={tdStyle}>{item.id}</td>
@@ -835,7 +830,7 @@ const changeResource=(id)=>{
                       </div>
                       <div>
                           <label className='font-poppins'>rua</label>
-                          <p className='font-thin text-sm'>{alunosPorId?.data?.endereco.rua}</p>
+                          <p className='font-thin text-sm'>{alunosPorId?.data?.endereco?.rua}</p>
                       </div>
                       </div>
                       </div>
@@ -846,12 +841,12 @@ const changeResource=(id)=>{
                       <div className="w-full flex flex-row justify-between px-2">
                       <div>
                           <label className='font-poppins'>Telefone</label>
-                          <p className='font-thin text-sm'>{alunosPorId?.data?.contacto.telefone}</p>
+                          <p className='font-thin text-sm'>{alunosPorId?.data?.contacto?.telefone}</p>
                       </div>
                       {alunosPorId?.data?.email && 
                       <div>
                           <label className='font-poppins'>email</label>
-                          <p className='font-thin text-sm'>{alunosPorId?.data?.contacto.email}</p>
+                          <p className='font-thin text-sm'>{alunosPorId?.data?.contacto?.email}</p>
                       </div>
                       }
                       </div>
@@ -864,16 +859,16 @@ const changeResource=(id)=>{
                       <div className='overflow-y-auto h-28 w-full'>
                           {
                             
-                            alunosPorMatricula?.data?.data.map((item)=>{
-                              const formattedDate = new Date(item.createdAt).toLocaleString('pt-BR', { 
+                            alunosPorMatricula?.data?.data?.map((item)=>{
+                              const formattedDate = new Date(item?.createdAt).toLocaleString('pt-BR', { 
                                 dateStyle: 'full', 
                                 timeStyle: 'short' 
                               });
                               return (
-                          <ul key={item.id}>
-                            <li>Curso: {item.curso}</li>
-                            <li>Classe: {item.classe}</li>
-                            <li>Turma: {item.turma}</li>
+                          <ul key={item?.id}>
+                            <li>Curso: {item?.curso}</li>
+                            <li>Classe: {item?.classe}</li>
+                            <li>Turma: {item?.turma}</li>
                             <li>Data: {formattedDate}</li>
                             <li>-----------------</li>
                             </ul>)})}
@@ -889,11 +884,11 @@ const changeResource=(id)=>{
                       <div className='overflow-y-auto h-28 w-full'>
                           {
                             
-                           alunosNotas?.data?.data.length > 0 ? alunosNotas?.data?.data.map((item, index)=>{return (
+                           alunosNotas?.data?.data?.length > 0 ? alunosNotas?.data?.data?.map((item, index)=>{return (
                           <ul key={index}>
-                            <li>Trimestre: {item.trimestre}</li>
-                            <li>Disciplina: {item.disciplina}</li>
-                            <li>Nota: {item.nota}</li>
+                            <li>Trimestre: {item?.trimestre}</li>
+                            <li>Disciplina: {item?.disciplina}</li>
+                            <li>Nota: {item?.nota}</li>
                             <li>-----------------</li>
                             </ul>)}) :  <div className='text-red-500 flex flex-col justify-center items-center'>
                             <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
@@ -918,7 +913,7 @@ const changeResource=(id)=>{
           <tfoot className='sticky bottom-0 bg-white'>
             <tr>
               <td colSpan={3} className="py-2 text-blue-500">
-                Total de registros: {alunosTurma?.data?.data.length}
+                Total de registros: {filteredTurmas?.length}
               </td>
             </tr>
           </tfoot>
@@ -936,8 +931,6 @@ const changeResource=(id)=>{
         </div>
         
         </div> )}
-        <div className='w-full flex items-center justify-between'>
-        </div>
        </div>   
         </section>
        

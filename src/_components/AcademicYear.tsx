@@ -9,10 +9,6 @@ import {
     DialogTrigger,
   } from "@/components/ui/dialog"
 import {
-  MyDialog,
-  MyDialogContent
-} from "./my_dialog"
-import {
     Popover,
     PopoverContent,
     PopoverTrigger,
@@ -34,8 +30,12 @@ import { useForm, useFieldArray } from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import Header from './Header'
-import { animateBounce } from '@/AnimationPackage/Animates'
+import { animateBounce, animatePulse, animateShake } from '@/AnimationPackage/Animates'
 import MostrarDialog from './MostrarDialog';
+import {  useMutation, useQueries, useQueryClient } from '@tanstack/react-query'
+import { collectErrorMessages, getAnoAcademico, getAnoAcademicoId, patchAnoAcademico, postAnoAcademico, putAnoAcademico } from '@/_tanstack/AnoAcademico'
+import axios from 'axios'
+import { postTrimestres } from '@/_tanstack/Trimestres'
 
 const TFormCreate =  z.object({
   inicio: inicio,
@@ -55,8 +55,7 @@ const TFormCreateTrimestre =  z.object({
 })
 
 
-
-export default function Curse(){
+export default function AcademicYear(){
 
 const formCreate  = useForm<z.infer<typeof TFormCreate>>({
   mode: 'all', 
@@ -68,169 +67,162 @@ const formCreateTrimestre  = useForm<z.infer<typeof TFormCreateTrimestre>>({
   resolver: zodResolver(TFormCreateTrimestre)
 })
 
-const [updateTable, setUpdateTable] = React.useState(false)
-const [showDialog, setShowDialog] = React.useState(false);
-  const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
-const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>,e) => {
- 
-await fetch(`http://localhost:8000/api/ano-lectivos/`,{
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data)
-  })
-  .then((resp => resp.json()))
-  .then((resp) =>{
-          if (resp.statusCode != 200) {
-            const sms = resp.message
-            setDialogMessage(sms);
-            setShowDialog(true);
- 
-          }else{
-            setDialogMessage(null);
-            setShowDialog(true);
-
-          }
-          console.log(resp)
-  })
-  .catch((error) => console.log(`error: ${error}`))
-  setUpdateTable(!updateTable)
-    
-}
-
-const handleSubmitCreateTrimestre = async (data: z.infer<typeof TFormCreateTrimestre>) => {
-    await fetch(`http://localhost:8000/api/trimestres/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
-    .then((resp => resp.json()))
-    .then((resp) =>{
-        
-        if (resp.statusCode != 200) {
-          const sms = resp.message
-          setDialogMessage(sms);
-          setShowDialog(true); 
-        }else{
-          setDialogMessage(null);
-          setShowDialog(true);
-        }
-        console.log(resp)
-    })
-    .catch((error) => console.log(`error: ${error}`))
-  }
-
-const[buscar, setBuscar] = React.useState(0);
-const[nome, setNome] = React.useState();
-const[inicio, setInicio] = React.useState();
-const[termino, setTermino] = React.useState();
-const[activo, setActivo] = React.useState(false);
-React.useEffect(()=>{
-    const search = async () => {
-        const resp = await fetch(`http://localhost:8000/api/ano-lectivos/${buscar}`);
-        const receve = await resp.json()
-        setNome(receve.nome)
-        setInicio(receve.inicio)
-        setTermino(receve.termino)
-        setActivo(receve.activo)
-          formUpdate.setValue('inicio', receve.inicio)
-          formUpdate.setValue('termino', receve.termino)
-          formUpdate.setValue('id', receve.id)
-    }
-    search()
-},[buscar])
-
-
-const changeResource = (id)=>{
-  setBuscar(id)
-}
-
 const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
   mode: 'all', 
   resolver: zodResolver(TFormUpdate)
   })
- 
-const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
-  await fetch(`http://localhost:8000/api/ano-lectivos/${data.id}`,{
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    })
-    .then((resp => resp.json()))
-    .then((resp) =>{
-      
-      
-            if (resp.message != null) {
-            
-            setDialogMessage(resp.errors.termino[0]);
-            setShowDialog(true);
-          }else{
-            setDialogMessage(null);
-            setShowDialog(true);
-          }
-          console.log(resp)
-    })
-    .catch((error) => console.log(`error: ${error}`))
-    setUpdateTable(!updateTable)
-}
 
-const handleSubmitState = async (id, values) => {
-  const dado = {
-    activo: values
-  }
-  await fetch(`http://localhost:8000/api/ano-lectivos/${id}`,{
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dado)
-    })
-    .then((resp => resp.json()))
-    .then((resp) =>{
-      
-            if (resp.message != null) {
-              setDialogMessage(resp.errors.activo[0]);
+const [showDialog, setShowDialog] = React.useState(false);
+const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
+
+const queryClient = useQueryClient();
+const {mutate: postMutationAnoAcademico} = useMutation({
+  mutationFn: postAnoAcademico,
+  onSuccess: () => {
+    setDialogMessage(null);
+    setShowDialog(true);
+    queryClient.invalidateQueries({queryKey: ["getAnoLectivos"]});
+  },
+  onError: (error) => {
+    if(axios.isAxiosError(error)){
+      if (error.response && error.response.data) {
+        const err = error.response.data?.errors;
+        const errorMessages = collectErrorMessages(err);
+        setDialogMessage(errorMessages[0]);
+        setShowDialog(true);
+       }
+      }
+    }
+});
+
+const handleSubmitCreateAnoLectivos = async (data: z.infer<typeof TFormCreate>,e) => {
+  e.preventDefault();
+  postMutationAnoAcademico(data)
+ }
+
+const {mutate: postMutationTrimestre} = useMutation({
+  mutationFn: postTrimestres,
+  onSuccess: () => {
+    setDialogMessage(null);
+    setShowDialog(true);
+    queryClient.invalidateQueries({queryKey: ["getAnoLectivos"]});
+  },
+  onError: (error) => {
+      if(axios.isAxiosError(error)){
+        if (error.response && error.response.data) {
+          if(error.response.data?.errors)
+            {
+              const err = error.response.data?.errors;
+              const errorMessages = collectErrorMessages(err);
+            setDialogMessage(errorMessages[0]);
+            setShowDialog(true);
+            }else{
+              const errorMessages = error.response.data.message
+              setDialogMessage(errorMessages);
               setShowDialog(true);
+            }
+         }
+        }
+      }
+    }
+);
+
+const handleSubmitCreateTrimestre = async (data: z.infer<typeof TFormCreateTrimestre>,e) => {
+  e.preventDefault();
+  postMutationTrimestre(data)
+ }
+
+ const {mutate: patchMutationAnoLectivo} = useMutation({
+  mutationFn: patchAnoAcademico,
+  onSuccess: () => {
+    queryClient.invalidateQueries({queryKey: ["getAnoLectivos"]});
+  },
+  onError: (error) => {
+    console.log(error);
+    if(axios.isAxiosError(error)){
+      if (error.response && error.response.data) {
+        if(error.response.data?.errors)
+          {
+            const err = error.response.data?.errors;
+            const errorMessages = collectErrorMessages(err);
+          setDialogMessage(errorMessages[0]);
+          setShowDialog(true);
           }else{
-            setDialogMessage(resp.message);
+            const errorMessages = error.response.data.message
+            setDialogMessage(errorMessages);
             setShowDialog(true);
-
           }
-          console.log(resp)
-    })
-    .catch((error) => console.log(`error: ${error}`))
-    setUpdateTable(!updateTable)
-}
+       }
+      }
+    }
+});
 
-
-const [dados, setDados] = React.useState([])
-const [dataApi, setDataApi] = React.useState([])
-const URL = "http://localhost:8000/api/ano-lectivos"
-  
-  useEffect( () => {
-      const respFetch = async () => {
-            const resp = await fetch (URL);
-            const respJson = await resp.json();
-            const conv1 = JSON.stringify(respJson.data)
-            const conv2 = JSON.parse(conv1)
-            conv2.sort((a, b) => a.nome.localeCompare(b.nome))
-            setDados(conv2)
-            setDataApi(conv2)
-      } 
-        respFetch()
-  },[updateTable])
-
-  const columns = ['Id', 'Nome', 'Acção'];
-  const handleFilter = (event) => {
-      const valores = dataApi.filter((element) =>{ return (element.nome.toLowerCase().includes(event.target.value.toLowerCase().trim())) });
-      setDados(valores)
+const handleSubmitPatchAno = async (buscar, bool) => {
+  const dados = {
+    id: buscar,
+    values: bool 
   }
+  patchMutationAnoLectivo(dados);
+ }
+ 
+ const {mutate: putMutationAnoAcademico} = useMutation({
+  mutationFn: putAnoAcademico,
+  onSuccess: () => {
+    setDialogMessage(null);
+    setShowDialog(true);
+    queryClient.invalidateQueries({queryKey: ["getAnoLectivos"]});
+  },
+  onError: (error) => {
+    console.log(error)
+    if(axios.isAxiosError(error)){
+      if (error.response && error.response.data) {
+        const err = error.response.data?.errors;
+        const errorMessages = collectErrorMessages(err);
+        setDialogMessage(errorMessages[0]);
+        setShowDialog(true);
+       }
+      }
+    }
+});
+
+const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
+  e.preventDefault();
+  putMutationAnoAcademico(data)
+ }
+
+const [buscar, setBuscar] = React.useState<number>(null);
+  const [{data: dados, isLoading: dadosLoading, isSuccess: dadosSuccess, isError: dadosError}, {data: anoLectivos}] = useQueries(
+    { 
+      queries: 
+      [
+        {queryKey: ["getAnoLectivos"] , queryFn: getAnoAcademico},
+        {queryKey: ["getAnoLectivosId", buscar] , queryFn:()=>getAnoAcademicoId(buscar), enabled: !!buscar},
+      ]
+    })
     
+
+  React.useEffect(()=>{
+      async () => {
+            formUpdate.setValue('inicio', anoLectivos?.data?.data?.inicio)
+            formUpdate.setValue('termino', anoLectivos?.data?.data?.termino)
+            formUpdate.setValue('id', anoLectivos?.data?.data?.id)
+      }
+  },[buscar])
+
+
+
+  const changeResource = (id)=>{
+    setBuscar(id)
+  }
+
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const handleFilterChange = (event) => {
+    setSearchTerm(event.target.value.toLowerCase());
+  };
+
+  const filteredAnos = dados?.data?.data?.filter((ano) =>{
+    return ano.nome.toLowerCase().includes(searchTerm)}
+  );
 
     return (
       <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
@@ -241,7 +233,7 @@ const URL = "http://localhost:8000/api/ano-lectivos"
        <div className='flex flex-row space-x-2'>
          <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
              <Search className='absolute text-gray-300 w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7'/>            
-             <Input className=' pl-6 indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
+             <Input className=' pl-6 indent-2' type='text' value={searchTerm} onChange={handleFilterChange} placeholder='Procure por registros...' />
          </div>
          <Dialog>
     <DialogTrigger asChild >
@@ -260,11 +252,11 @@ const URL = "http://localhost:8000/api/ano-lectivos"
       </DialogDescription>
       </DialogHeader>
       <Form {...formCreate} >
-     <form onSubmit={formCreate.handleSubmit(handleSubmitCreate)} >
+     <form onSubmit={formCreate.handleSubmit(handleSubmitCreateAnoLectivos)} >
      <div className="flex flex-col w-full py-4 bg-white">
         <div className="w-full">
-        <Label htmlFor="inicio"className='text-sky-700 text-lg font-semibold'>Íncio<span className='text-red-500'>*</span>
-          </Label>
+        <label htmlFor="inicio">Íncio<span className='text-red-500'>*</span>
+          </label>
           <FormField
           control={formCreate.control}
           name="inicio"
@@ -272,9 +264,8 @@ const URL = "http://localhost:8000/api/ano-lectivos"
             <FormItem>
             <Input
               id="inicio"
-              type='date' {...field} className={formCreate.formState.errors.inicio?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
-              min="2024-01-01"/>
+              type='date' {...field} className={formCreate.formState.errors.inicio?.message && `${animateShake} input-error`}
+              />
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
@@ -287,8 +278,7 @@ const URL = "http://localhost:8000/api/ano-lectivos"
           name="termino"
           render={({field})=>(
             <FormItem>
-            <Input id="termino" type='date' {...field} className={formCreate.formState.errors.termino?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+            <Input id="termino" type='date' {...field} className={formCreate.formState.errors.termino?.message && `${animateShake} input-error`}
             min="2025-01-01"/>
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
@@ -322,8 +312,8 @@ const URL = "http://localhost:8000/api/ano-lectivos"
      <form onSubmit={formCreateTrimestre.handleSubmit(handleSubmitCreateTrimestre)} >
      <div className="flex flex-col w-full py-4 bg-white">
      <div className="w-full">
-          <Label htmlFor="numero"className='text-sky-700 text-lg font-semibold'>Número<span className='text-red-500'>*</span>
-          </Label>
+          <label htmlFor="numero">Número<span className='text-red-500'>*</span>
+          </label>
           <FormField
           control={formCreateTrimestre.control}
           name="numero"
@@ -331,16 +321,15 @@ const URL = "http://localhost:8000/api/ano-lectivos"
             <FormItem>
             <Input
               id="numero"
-              type='number' {...field} className={formCreateTrimestre.formState.errors.numero?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
+              type='number' {...field} className={formCreateTrimestre.formState.errors.numero?.message && `${animateShake} input-error`}
               onChange={(e)=>{field.onChange(parseInt(e.target.value))}}/>
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
         </div>
         <div className="w-full">
-         <Label htmlFor="inicio"className='text-sky-700 text-lg font-semibold'>Ínicio<span className='text-red-500'>*</span>
-          </Label>
+         <label htmlFor="inicio"className='text-sky-700 text-lg font-semibold'>Ínicio<span className='text-red-500'>*</span>
+          </label>
           <FormField
           control={formCreateTrimestre.control}
           name="inicio"
@@ -348,24 +337,22 @@ const URL = "http://localhost:8000/api/ano-lectivos"
             <FormItem>
             <Input
               id="inicio"
-              type='date' {...field} className={formCreateTrimestre.formState.errors.inicio?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-              'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
-              min="2024-01-01"/>
+              type='date' {...field} className={formCreateTrimestre.formState.errors.inicio?.message && `${animateShake} input-error`}
+              />
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>
         </div>
         <div className="w-full">
-        <Label htmlFor="termino"className='text-sky-700 text-lg font-semibold'>Término<span className='text-red-500'>*</span>
-          </Label>
+        <label htmlFor="termino"className='text-sky-700 text-lg font-semibold'>Término<span className='text-red-500'>*</span>
+          </label>
           <FormField
           control={formCreateTrimestre.control}
           name="termino"
           render={({field})=>(
             <FormItem>
-            <Input id="termino" type='date' {...field} className={formCreateTrimestre.formState.errors.termino?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-            'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
-            min="2025-01-01"/>
+            <Input id="termino" type='date' {...field} className={formCreateTrimestre.formState.errors.termino?.message && `${animateShake} input-error`}
+            />
             <FormMessage className='text-red-500 text-xs'/>
           </FormItem>
         )}/>  
@@ -384,11 +371,33 @@ const URL = "http://localhost:8000/api/ano-lectivos"
              
              <thead className='sticky top-0 z-10 '>
                  <tr className={trStyle}>
-                     {columns.map((element, index) =>{ return( <th key={index} className={thStyle} >{element}</th>) })}
+                   <th className={thStyle} >Id</th>
+                   <th className={thStyle} >Nome</th>
+                   <th className={thStyle} >Acção</th>
                  </tr>
              </thead>
              <tbody >
-                 {dados.length == 0 ? (
+              {dadosLoading &&
+              
+              <tr className='w-96 h-32'>
+              <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
+                  <div className={`${animatePulse}`}>
+                  Loading ...
+                  </div>
+              </td>
+          </tr>
+            }
+            {filteredAnos?.length === 0 &&
+            <tr className='w-96 h-32'>
+            <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
+                <div>
+                <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
+                     <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
+                </div>
+            </td>
+        </tr>
+            }
+            {dadosError &&
                  <tr className='w-96 h-32'>
                      <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                          <div>
@@ -396,8 +405,9 @@ const URL = "http://localhost:8000/api/ano-lectivos"
                               <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
                          </div>
                      </td>
-                 </tr>
-                 ) : dados.map((item, index) => (
+                 </tr>}
+                 { dadosSuccess &&
+                 filteredAnos?.map((item, index) => (
                      <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-200"}>
                       {item.activo == true && 
                          <td className={tdStyle}><CheckCircleIcon className='h-5 w-7 text-green-600'/></td>
@@ -409,7 +419,6 @@ const URL = "http://localhost:8000/api/ano-lectivos"
                          <td className={tdStyle}>{item.nome}</td>
                          <td className={tdStyleButtons}    onClick={()=>{
                            changeResource(item.id)
-                           
                          }}>
                          <Dialog >
           <DialogTrigger asChild >
@@ -437,11 +446,8 @@ const URL = "http://localhost:8000/api/ano-lectivos"
           <Input 
           type='hidden'
             className="w-full"
-            
-            {...field} 
-            
+            {...field} value={item.id}
             onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
-           
           />
           </FormControl>
         )}
@@ -449,8 +455,8 @@ const URL = "http://localhost:8000/api/ano-lectivos"
   
               <div className="flex flex-col w-full py-4 bg-white">
               <div className="w-full">
-              <Label htmlFor="inicio"className='text-sky-700 text-lg font-semibold'>Ínicio<span className='text-red-500'>*</span>
-          </Label>
+              <label htmlFor="inicio"className='text-sky-700 text-lg font-semibold'>Ínicio<span className='text-red-500'>*</span>
+          </label>
                 <FormField
                 control={formUpdate.control}
                 name="inicio"
@@ -458,16 +464,15 @@ const URL = "http://localhost:8000/api/ano-lectivos"
                   <FormItem>
                   <Input
                     id="inicio"
-                    type='date' {...field} className={formUpdate.formState.errors.inicio?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                    'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
-                    min="2024-01-01"/>
+                    type='date' {...field} className={formUpdate.formState.errors.inicio?.message && `${animateShake} input-error`}
+                    />
                   <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
               )}/>
               </div>
               <div className="w-full">
-              <Label htmlFor="termino"className='text-sky-700 text-lg font-semibold'>Término<span className='text-red-500'>*</span>
-              </Label>
+              <label htmlFor="termino"className='text-sky-700 text-lg font-semibold'>Término<span className='text-red-500'>*</span>
+              </label>
                 <FormField
                 control={formUpdate.control}
                 name="termino"
@@ -475,9 +480,8 @@ const URL = "http://localhost:8000/api/ano-lectivos"
                   <FormItem>
                   <Input
                     id="termino"
-                    type='date' {...field} className={formUpdate.formState.errors.termino?.message ? 'animate-shake animate-once animate-duration-150 animate-delay-100 w-full text-md border-2 border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500 py-4 mb-2':
-                    'w-full text-md border-2 border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500 py-4 mb-2'}
-                    min="2025-01-01"/>
+                    type='date' {...field} className={formUpdate.formState.errors.termino?.message && `${animateShake} input-error`}
+                    />
                   <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
               )}/>               
@@ -509,16 +513,16 @@ const URL = "http://localhost:8000/api/ano-lectivos"
                       </div>
                       <div className="grid gap-2">
                         <div className="grid grid-cols-3 items-center gap-4">
-                          <Label htmlFor="maxWidth">Ínicio</Label>
-                          <p>{inicio}</p>
+                          <label htmlFor="maxWidth">Ínicio</label>
+                          <p>{anoLectivos?.data?.inicio}</p>
                         </div>
                         <div className="grid grid-cols-3 items-center gap-4">
-                          <Label htmlFor="height">Termino</Label>
-                          <p className='text-xs'>{termino}</p>
+                          <label htmlFor="height">Termino</label>
+                          <p className='text-xs'>{anoLectivos?.data?.termino}</p>
                         </div>
                         <div className="grid grid-cols-3 items-center gap-4">
-                          <Label htmlFor="height">Estado</Label>
-                          <p className='text-xs'>{activo ? "Disponível" : "Indisponível"}
+                          <label htmlFor="height">Estado</label>
+                          <p className='text-xs'>{anoLectivos?.data?.activo ? "Disponível" : "Indisponível"}
                           </p>
                         </div>
                       </div>
@@ -526,13 +530,9 @@ const URL = "http://localhost:8000/api/ano-lectivos"
                   </PopoverContent>
                 </Popover>
                         </div>
-                      <Button title='activar' className='h-7 px-5 bg-green-300 text-white font-semibold hover:bg-green-300 rounded-sm border-green-300' onClick={()=>{
-                            setActivo(true)
-                            handleSubmitState(item.id, true)
+                      <Button title='activar' className='h-7 px-5 bg-green-300 text-white font-semibold hover:bg-green-300 rounded-sm border-green-300' onClick={()=>{handleSubmitPatchAno(item.id, true)
                       }}>Yes</Button>
-                      <Button title='desactivar' className='h-7 px-5 bg-red-300 text-white font-semibold hover:bg-red-300 rounded-sm border-red-300' onClick={()=>{
-                            setActivo(false)
-                            handleSubmitState(item.id, false)
+                      <Button title='desactivar' className='h-7 px-5 bg-red-300 text-white font-semibold hover:bg-red-300 rounded-sm border-red-300' onClick={()=>{handleSubmitPatchAno(item.id, false)
                       }}>No</Button>
                          </td>
                      </tr>
@@ -541,7 +541,7 @@ const URL = "http://localhost:8000/api/ano-lectivos"
              <tfoot className='sticky bottom-0 bg-white"'>
              <tr>
                  <td colSpan={3} className="py-2 text-blue-500">
-                     Total de registros: {dados.length}
+                     Total de registros: {filteredAnos?.length}
                  </td>
              </tr>
          </tfoot>

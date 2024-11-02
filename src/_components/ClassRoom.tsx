@@ -30,10 +30,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { MyDialog, MyDialogContent } from './my_dialog'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import Header from './Header'
-import { animateBounce, animateShake } from '@/AnimationPackage/Animates'
+import { animateBounce, animatePulse, animateShake } from '@/AnimationPackage/Animates'
 import { Textarea } from '@/components/ui/textarea'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getSalas, getSalasId, postSalas, putSalas } from '@/_tanstack/FetchFunction'
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getSalas, getSalasId, postSalas, putSalas } from '@/_tanstack/Salas'
 import MostrarDialog from './MostrarDialog';
 
 const TFormCreate =  z.object(
@@ -64,24 +64,11 @@ export default function ClassRoom(){
 
   const [showDialog, setShowDialog] = React.useState(false);
   const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
-
-  const {data: salas, isError, } = useQuery({ queryKey: ["salas"] , queryFn: ()=>getSalas(),
-    });
-
-  const[buscar, setBuscar] = React.useState<number>(null);
-
-  const {data: salasId, isSuccess: salasSuccessId, isFetched: salasFetchedId} = useQuery({ queryKey: ["salasId", buscar] , queryFn: ()=>getSalasId(buscar), enabled: !!buscar, 
-  });
-
-  if(salasFetchedId){formUpdate.setValue('nome', salasId.data.nome)
-    formUpdate.setValue('capacidade', salasId.data.capacidade)
-    formUpdate.setValue('localizacao', salasId.data.localizacao)}
-
   const queryClient = useQueryClient();
   const {mutate: postMutationSalas} = useMutation({
     mutationFn: postSalas,
     onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ['salas']});
+      queryClient.invalidateQueries({queryKey: ['getSalasMain']});
       setDialogMessage(null);
       setShowDialog(true);
     }
@@ -95,7 +82,7 @@ export default function ClassRoom(){
   const {mutate: putMutationSalas} = useMutation({
     mutationFn: putSalas,
     onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ['salas']});
+      queryClient.invalidateQueries({queryKey: ['getSalasMain']});
       setDialogMessage(null);
       setShowDialog(true);
     }
@@ -106,13 +93,36 @@ export default function ClassRoom(){
     putMutationSalas(data);
   }
 
+  const[buscar, setBuscar] = React.useState<number>(null);
+
+  const [{data: salas, isLoading: salasLoading, isError: salasError, isSuccess: salasSuccess}, {data: salasId, isSuccess: salasSuccessId}] = useQueries(
+    { 
+      queries: 
+      [
+        {queryKey: ["getSalasMain"] , queryFn: getSalas},
+        {queryKey: ["getSalasIdMain"] , queryFn: ()=> getSalasId(buscar), enabled: !!buscar},
+      ]
+    })
+
+if (salasSuccessId){
+            formUpdate.setValue('id', salasId?.data?.id)
+            formUpdate.setValue('nome', salasId?.data?.nome)
+            formUpdate.setValue('localizacao', salasId?.data?.localizacao)
+            formUpdate.setValue('capacidade', salasId?.data?.capacidade)
+      }
+
   const changeResource = (id)=>{
     setBuscar(id); 
   }
   
-  const handleFilter = (event) => {
-      salas.data.filter((element) =>{ return (element.nome.toLowerCase().includes(event.target.value.toLowerCase().trim())) });
-  }
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const handleFilterChange = (event) => {
+    setSearchTerm(event.target.value.toLowerCase());
+  };
+
+  const filteredSalas = salas?.data?.data?.filter((salas) =>{
+    return salas.nome.toLowerCase().includes(searchTerm)}
+    );
 
     return (
       <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
@@ -123,7 +133,7 @@ export default function ClassRoom(){
        <div className='flex flex-row space-x-2'>
          <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
              <Search className='absolute text-gray-300 '/>            
-             <Input className=' pl-6 indent-2' type='text' placeholder='Procure por registros...' onChange={handleFilter}/>
+             <Input className=' pl-6 indent-2' type='text' value={searchTerm} onChange={handleFilterChange} placeholder='Procure por registros...' />
          </div>
          <Dialog>
     <DialogTrigger asChild>
@@ -211,7 +221,27 @@ export default function ClassRoom(){
                  </tr>
              </thead>
              <tbody >
-                 { isError ? (
+                {salasLoading &&
+                  
+                  <tr className='w-96 h-32'>
+                  <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
+                      <div className={`${animatePulse}`}>
+                      Loading ...
+                      </div>
+                  </td>
+              </tr>
+                }
+                {filteredSalas?.length === 0 &&
+                <tr className='w-96 h-32'>
+                <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
+                    <div>
+                    <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
+                         <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
+                    </div>
+                </td>
+            </tr> 
+                }
+                 {salasError &&
                  <tr className='w-96 h-32'>
                      <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                          <div>
@@ -219,8 +249,9 @@ export default function ClassRoom(){
                               <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
                          </div>
                      </td>
-                 </tr>
-                 ) : salas?.data?.data.map((item, index) => (
+                 </tr>}
+                 { salasSuccess &&
+                 filteredSalas.map((item, index) => (
                      <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-200"}>
                          <td className={tdStyle}>{item.id}</td>
                          <td className={tdStyle}>{item.nome}</td>
@@ -341,11 +372,11 @@ export default function ClassRoom(){
                         <div className="grid gap-2">
                           <div className="grid grid-cols-3 items-center gap-4">
                             <label htmlFor="maxWidth">Capacidade</label>
-                            <p>{salasSuccessId && salasId.data.capacidade}</p>
+                            <p>{salasId?.data?.capacidade}</p>
                           </div>
                           <div className="">
                             <label htmlFor="height">Localização</label>
-                            <p className='indent-2 text-justify text-xs text-pretty'>{salasSuccessId && salasId.data.localizacao}</p>
+                            <p className='indent-2 text-justify text-xs text-pretty'>{salasId?.data?.localizacao}</p>
                           </div>
                         </div>
                       </div>
@@ -359,7 +390,7 @@ export default function ClassRoom(){
              <tfoot className='sticky bottom-0 bg-white"'>
              <tr>
                  <td colSpan={3} className="py-2 text-blue-500">
-                     Total de registros: 
+                     Total de registros: {filteredSalas?.length}
                  </td>
              </tr>
          </tfoot>

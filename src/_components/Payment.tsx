@@ -175,7 +175,7 @@ export default function Payment (){
       </div>
       
     </DialogTrigger>
-    <DialogContent className="sm:max-w-[625px] overflow-y-scroll h-[400px] bg-white">
+    <DialogContent className="bg-white">
       <DialogHeader>
         <DialogTitle>Registrar</DialogTitle>
         <DialogDescription>
@@ -206,37 +206,13 @@ export default function Payment (){
           </FormItem>
         )}
            />
-           <FormField
-          name={''}
-          render={({field})=>(
-          <FormItem>
-            <Label htmlFor="method" className="text-right">
-            Todos métodos
-          </Label>
-              <FormControl>
-              <select id='method' {...field} className='w-full py-3 rounded-md ring-1 bg-white text-gray-500 ring-gray-300 pl-3' onChange={(e)=>{field.onChange(parseInt(e.target.value))
-              }}>
-                        <option>Selecione</option>
-                        {
-                            metodo.map((field)=>{
-                                return <option value={`${field.id}`}>{field.nome}</option>
-                            })
-                      }
-                  </select>
-              </FormControl>
-            <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>)
-          }
-          />
+          
            <div className='flex flex-row space-x-2 mt-2'>
            <div className='relative flex justify-center items-center' >
                  <SaveIcon className='w-4 h-5 absolute text-white font-extrabold'/>
                  <button type='submit' title='registrar' className='py-3 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 border-green-600 rounded-sm' ></button>
           </div>
-          <div className='relative flex justify-center items-center' >
-                 <EditIcon className='w-4 h-3 absolute text-white font-extrabold'/>
-                 <button title='editar' className='py-3 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 border-blue-600 rounded-sm' ></button>
-          </div>
+        
           </div>
           </div>
            </div>

@@ -39,7 +39,7 @@ interface MostrarDialogProps {
           <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
             <Button className='bg-green-400 hover:bg-green-500
             hover:font-medium
-             font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={onClose}>Fechar</Button>
+             font-poppins text-md border-green-400 font-medium h-9 w-20 outline-none' onClick={onClose}>Fechar</Button>
         </div>
         </div>
         
@@ -60,7 +60,7 @@ interface MostrarDialogProps {
           <AlertCircleIcon className='w-28 h-20 text-red-400'/>
           <p className='font-poppins uppercase text-red-400'>{message}</p>
           <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
-            <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={onClose}>Fechar</Button>
+            <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20 outline-none' onClick={onClose}>Fechar</Button>
         </div>
         </div>
         

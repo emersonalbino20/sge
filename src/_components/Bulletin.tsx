@@ -1,4 +1,4 @@
-import { AlertCircleIcon, AlertTriangle, Check, CheckCircleIcon, Edit, InfoIcon, Save, SaveIcon, Search } from 'lucide-react';
+import { AlertTriangle, Check, Edit,Save, SaveIcon, Search } from 'lucide-react';
 import * as React from 'react';
 import { tdStyle, thStyle, trStyle } from './table';
 import { idZod } from '@/_zodValidations/validations';
@@ -7,7 +7,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { MyDialog, MyDialogContent } from './my_dialog';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Link } from 'react-router-dom';
@@ -15,6 +14,11 @@ import Header from './Header';
 import IPPUImage from './../assets/images/IPPU.png'
 import './stepper.css';
 import { animateBounce, animateFadeLeft, animatePing, animateShake } from '@/AnimationPackage/Animates';
+import MostrarDialog from './MostrarDialog';
+import { getTrimestres } from '@/_tanstack/Trimestres';
+import { useQueries } from '@tanstack/react-query';
+import { getDisciplinasProfessores, getTurmasProfessores } from '@/_tanstack/Professor';
+import { getTurmasClasse } from '@/_tanstack/Turmas';
 
 const TForm = z.object({
   alunoId: idZod,
@@ -40,7 +44,6 @@ const TFormStepOne = z.object({
   turmaId: idZod
 })
 
-
 export default function Bulletin() {
   
   const form  = useForm<z.infer<typeof TForm>>({
@@ -60,10 +63,10 @@ export default function Bulletin() {
 
    const { watch, formState:{ errors }} = formStepOne;
 
-   const [fieldCursoId, fieldDisciplinaId, fieldClasseId, fieldTrimestreId, fieldTurmaId] = watch(["cursoId", "disciplinaId","classeId", "trimestreId", "turmaId"])
+   const [fieldCursoId, fieldDisciplinaId,  fieldTrimestreId, fieldTurmaId] = watch(["cursoId", "disciplinaId", "trimestreId", "turmaId"])
 
-   const [showModal, setShowModal] = React.useState(false);
-   const [modalMessage, setModalMessage] = React.useState('');  
+   const [showDialog, setShowDialog] = React.useState(false);
+   const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
 
   const handleSubmitNota = async (data: z.infer<typeof TForm>) => {
     await fetch ("http://localhost:8000/api/notas/", {
@@ -74,14 +77,15 @@ export default function Bulletin() {
       body: JSON.stringify(data)
     }).then((resp => resp.json()))
     .then((resp) =>{ 
-      setShowModal(true);
+      
       if (resp.statusCode != 200) {
-        setModalMessage(resp.message);  
+        setDialogMessage(resp.message);
+        setShowDialog(true);
+        buscarAlunos()
       }else{
-        setModalMessage(null);
+        setDialogMessage(null);
+        setShowDialog(true);
       }
-      console.log(resp)
-      buscarAlunos(fieldTurmaId);
     })
     .catch((error) => console.log(`error: ${error}`))
   }
@@ -100,70 +104,47 @@ export default function Bulletin() {
       body: JSON.stringify(dados)
     }).then((resp => resp.json()))
     .then((resp) =>{ 
-      setShowModal(true);
+      
       if (resp.message != null) {
-        setModalMessage(resp.message);  
+        setDialogMessage(resp.message);
+        setShowDialog(true);
       }else{
-        setModalMessage(null);
+        setDialogMessage(null);
+        setShowDialog(true);
       }
-      buscarAlunos(fieldTurmaId);
+      buscarAlunos()
     })
     .catch((error) => console.log(`error: ${error}`))
   }
 
-  const [cursos, setCursos] = React.useState([]);
-  const [disciplinas, setDisciplinas] = React.useState([]);
-  
-  const [trimestres , setTrimestres] = React.useState([]);
-  const [disciplinaId, setDisciplinaId] = React.useState(null);
-  const [trimestreId, setTrimestreId] = React.useState(null);
-  
-  
   const [idAno, setIdAno] = React.useState<number>(0);
-  const columnsClasse = ['Id', 'Nome', 'Nota', 'Acção'];
   React.useEffect(() => {
     const search = async () => {
-      const URL = "http://localhost:8000/api/professores/48/classes";
-      const response = await fetch(URL);
-      const responseJson = await response.json();
-      setCursos(responseJson.data);
-
-      const URLDISC = "http://localhost:8000/api/professores/48/disciplinas";
-      const responseDisc = await fetch(URLDISC);
-      const responseDiscJson = await responseDisc.json();
-      setDisciplinas(responseDiscJson.data);
-
-      const URLTRIMESTRES = "http://localhost:8000/api/trimestres/";
-      const responseTrimestres = await fetch(URLTRIMESTRES);
-      const responseTrimestresJson = await responseTrimestres.json();
-      setTrimestres(responseTrimestresJson.data);
-
       const resp = await fetch(`http://localhost:8000/api/ano-lectivos/`);
         const receve = await resp.json()
-        var meuarray = receve.data.find((c)=>{
-          return c.activo === true
+        var meuarray = receve?.data?.find((c)=>{
+          return c?.activo === true
         })
-        setIdAno(meuarray.id)
+        setIdAno(meuarray?.id)
     };
     search();
   }, []);
 
-  const [turmas, setTurmas] = React.useState([]);
+  const [{data: trimestres}, {data: cursos}, {data: disciplinas}, {data: turmas}] = useQueries(
+    { 
+      queries: 
+      [
+        {queryKey: ["trimestresBulletin"] , queryFn: getTrimestres},
+        {queryKey: ["professoresCursosBulletin", 1], queryFn: ()=>getTurmasProfessores(1)},
+        {queryKey: ["professoresDisciplinasBulletin", 1], queryFn: ()=>getDisciplinasProfessores(1)},
+        {queryKey: ["turmasClasseBulletin", fieldCursoId], queryFn: ()=>getTurmasClasse(fieldCursoId), enabled: !!fieldCursoId},
+      ]
+    }
+  )
+
   const [nomeDisciplina, setNomeDisciplina] = React.useState<string>('');  
   const selecionarDisciplina = (e) =>{
-    setDisciplinaId(parseInt(e.target.value, 10) || 0)
-    
     setNomeDisciplina(e.target.options[e.target.selectedIndex].text);
-  }
-
-  let [classeId, setClasseId] = React.useState(null);
-  const buscarTurmas = async (id) => {
-    setClasseId(id);
-    const URL = `http://localhost:8000/api/classes/${id}/turmas`;
-
-    const response = await fetch(URL);
-    const responseJson = await response.json();
-    setTurmas(responseJson.data)
   }
 
   type ruleDados = {
@@ -171,55 +152,58 @@ export default function Bulletin() {
     nomeCompleto: string;
     estado: string;
     condicao: string;
+    disciplina: string;
   };
   
   const [dados, setDados] = React.useState<ruleDados[]>([]);
-  
-  const buscarAlunos = async (id) => {
+  async function buscarAlunos(){
     
-    const URLClasse = `http://localhost:8000/api/classes/${classeId}/alunos?turmaId=${id}`;
+    const URLClasse = `http://localhost:8000/api/classes/${fieldCursoId}/alunos?turmaId=${fieldTurmaId}`;
   
     const responseClasse = await fetch(URLClasse);
     const responseJsonClasse = await responseClasse.json();
-  
+    
     const newData = await Promise.all(
-      responseJsonClasse.data.map(async (item) => {
-        const URL = `http://localhost:8000/api/alunos/${item.id}/notas?trimestreId=${trimestreId}&classeId=${classeId}`;
+      responseJsonClasse?.data?.map(async (item) => {
+        const URL = `http://localhost:8000/api/alunos/${item.id}/notas?trimestreId=${fieldTrimestreId}&classeId=${fieldCursoId}`;
         const response = await fetch(URL);
         const responseJson = await response.json();
-        const estado = responseJson.data && responseJson.data.length > 0
-          ? (responseJson.data[0].disciplina === nomeDisciplina ? responseJson.data[0].nota + 'V'  : 'indefinido')
-          : 'indefinido';
-        const condicao = responseJson.data && responseJson.data.length > 0
-          ? (responseJson.data[0].nota > 9 ? 'positiva' : 'negativa')
+        
+        const exite = responseJson?.data?.find(item=>{
+          return item?.disciplina === nomeDisciplina
+        })
+        let estado = exite?.disciplina ? exite?.nota + 'V'  : 'indefinido';
+        let condicao = exite?.disciplina !== null
+          ? (exite?.nota > 9 ? 'positiva' : 'negativa')
           : 'negativa';
-  
-        return { ...item, estado, condicao };
+
+        let disciplina = exite?.disciplina ?  exite?.disciplina : 'Inválido';
+      
+        return { ...item, estado, condicao, disciplina };
+      
       })
     );
-    console.log(newData)
-    setDados(newData); 
+    if (newData?.length === 0){
+     const newData = await Promise.all(
+        responseJsonClasse?.data?.map(async (item) => {
+          let estado = 'indefinido';
+          let condicao = 'negativa';
+          let disciplina = 'Inválido';
+          return { ...item, estado, condicao, disciplina };
+        }))
+        setDados(newData); 
+    }else{
+      setDados(newData); 
+    }
+    console.log(dados)
+    
   };
   
- 
+  React.useEffect(()=>{buscarAlunos()},[fieldTurmaId, fieldCursoId, fieldDisciplinaId])
 
-const [buscarNotas, setBuscarNotas] = React.useState([]);
-const clickBuscarNotas = async (idAluno) => {
-    const URL = `http://localhost:8000/api/alunos/${idAluno}/notas?trimestreId=${trimestreId}&classeId=${classeId}`;
-    const response = await fetch(URL);
-    const responseJson = await response.json();
-    setBuscarNotas(responseJson.data);
-  };
-
-  
- /*
- const handleFilterClasse = (event) => {
-    const valores = dados.filter((element) =>{ return (element.nomeCompleto.toLowerCase().includes(event.target.value.toLowerCase().trim())) });
-    setDados(valores)
-}*/
-    const step = ['Filtrar Turmas', 'Inserir Nota'];
-    const[ currentStep, setCurrentStep ] = React.useState<number>(1);
-    const[ complete, setComplete ] = React.useState<boolean>(false);
+  const step = ['Filtrar Turmas', 'Inserir Nota'];
+  const[ currentStep, setCurrentStep ] = React.useState<number>(1);
+  const[ complete, setComplete ] = React.useState<boolean>(false);
 
   return (<>
       
@@ -270,11 +254,10 @@ const clickBuscarNotas = async (idAluno) => {
                     className={
                       errors.trimestreId?.message && `${animateShake} select-error`}
                       onChange={(e)=>{field.onChange(parseInt(e.target.value))
-                        setTrimestreId(parseInt(e.target.value, 10) || 0)
                       }}>
                         <option >Selecione o trimestre</option>
                         {
-                        trimestres.map((field)=>{
+                        trimestres?.data?.data?.map((field)=>{
                             return (<option value={`${field.id}`}>{field.numero}° Trimestre</option>
                             )
                         })
@@ -304,7 +287,7 @@ const clickBuscarNotas = async (idAluno) => {
                         <option >Selecione a disciplina</option>
                         {
                             
-                        disciplinas.map((field)=>{
+                        disciplinas?.data?.data?.map((field)=>{
                             return (<option value={`${field.id}`}>{field.nome}
                             </option>
                             )
@@ -331,11 +314,11 @@ const clickBuscarNotas = async (idAluno) => {
                     className={
                       errors.cursoId?.message && `${animateShake} select-error`} 
                       onChange={(e)=>{field.onChange(parseInt(e.target.value))
-                        buscarTurmas(e.target.value)
+                       
                       }}>
                         <option >Selecione a classe</option>
                         {
-                        cursos.map((field)=>{
+                        cursos?.data?.data?.map((field)=>{
                             return (<option value={`${field.id}`}>{field.nome} Classe ({field.curso.nome})
                             </option>
                             )
@@ -359,7 +342,6 @@ const clickBuscarNotas = async (idAluno) => {
                         <FormControl>
                     <select {...field}
                     onChange={(e)=>{field.onChange(parseInt(e.target.value))
-                    buscarAlunos(e.target.value)
                     }}
                     className={
                       errors.turmaId?.message && `${animateShake} select-error`}
@@ -367,7 +349,7 @@ const clickBuscarNotas = async (idAluno) => {
                         <option >Selecione a turma</option>
                         {
                             
-                        turmas.map((field)=>{
+                        turmas?.data?.data?.map((field)=>{
                             return (<option value={`${field.id}`}>{field.nome}
                             </option>
                             )
@@ -384,17 +366,16 @@ const clickBuscarNotas = async (idAluno) => {
                       <button type='button' onClick={()=>{
                       const isStep1Valid = !errors.cursoId && !errors.disciplinaId && !errors.trimestreId && !errors.turmaId && fieldCursoId && fieldDisciplinaId && fieldTrimestreId && fieldTurmaId;
                       if (isStep1Valid) {
-                        if (dados.length > 0)
+                        if (dados?.length > 0)
                         {
                         currentStep === step.length ?
                         setComplete(true) :
                         setCurrentStep(prev => prev + 1);
                         }else{
-                          setShowModal(true);
-                          setModalMessage("A Turma Selecionada Não Possui Alunos Cadastrados")
+                          setDialogMessage("A Turma Selecionada Não Possui Alunos Cadastrados");
+                          setShowDialog(true);           
                         }
                       }else{setCurrentStep(1)}
-                      
                       }} className='active:animate-ping animate-once animate-duration-500 animate-delay-400 animate-ease-out bg-sky-700 hover:bg-sky-600 text-base sm:text-sm md:text-[10px] lg:text-[12px] xl:text-[16px] text-white font-semibold px-3 py-1 sm:py-[2px] lg:py-1 xl:py-2 border-sky-700'>Próximo</button>
                 </div>
                 </form>
@@ -409,13 +390,15 @@ const clickBuscarNotas = async (idAluno) => {
           <table className="w-full bg-white border border-gray-200 table-fixed">
           <thead className='sticky top-0 z-10'>
             <tr className={trStyle}>
-              {columnsClasse.map((element, index) => (
-                <th key={index} className={thStyle}>{element}</th>
-              ))}
+                <th className={thStyle}>Id</th>
+                <th className={thStyle}>Nome</th>
+                <th className={thStyle}>Disciplina</th>
+                <th className={thStyle}>Nota</th>
+                <th className={thStyle}>Acção</th>
             </tr>
           </thead>
           <tbody>
-            {dados.length === 0 ? (
+            {dados?.length === 0 ? (
               <tr className='w-96 h-32'>
                 <td rowSpan={4} colSpan={4} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                   <div>
@@ -424,11 +407,12 @@ const clickBuscarNotas = async (idAluno) => {
                   </div>
                 </td>
               </tr>
-            ) : dados.map((item, index) => (
+            ) : dados?.map((item, index) => (
               <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-200"}>
                
                 <td className={tdStyle}>{item.id}</td>
                 <td className={tdStyle}>{item.nomeCompleto}</td>
+                <td className={tdStyle}>{item.disciplina}</td>
                 {item.estado === 'indefinido' ?
                 <td>{item.estado}</td> :
                 item.condicao === 'positiva' ? 
@@ -436,7 +420,7 @@ const clickBuscarNotas = async (idAluno) => {
                 <td className='text-red-500'>{item.estado}</td>
                 }
                 
-                <td className={tdStyle} onClick={()=>{clickBuscarNotas(item.id)}}>
+                <td className={tdStyle} >
                   <div className='flex flex-row space-x-2'>
                   {item.estado === 'indefinido' ?
                   <Dialog>
@@ -478,9 +462,9 @@ const clickBuscarNotas = async (idAluno) => {
             </div>
         <DialogFooter>
           <Button type="submit" title='vincular' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 hover:text-white w-12'  onClick={()=>{form.setValue('alunoId', item.id);
-                form.setValue('classeId', parseInt(classeId));
-                form.setValue('trimestreId', parseInt(trimestreId));
-                form.setValue('disciplinaId', parseInt(disciplinaId));
+                form.setValue('classeId', fieldCursoId);
+                form.setValue('trimestreId', fieldTrimestreId);
+                form.setValue('disciplinaId', fieldDisciplinaId);
                 }}><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
         </DialogFooter>
         </form>
@@ -499,8 +483,9 @@ const clickBuscarNotas = async (idAluno) => {
                             <DialogHeader>
                               <DialogTitle>Actualizar Nota {item.nomeCompleto}</DialogTitle>
                               <DialogDescription>
-                                Actualiza aqui a nota do boletim.
-                                <span className='text-xs'>Nota: Tome atenção nos filtros selecionados, trimestre, disciplina e classe.</span>
+                                Actualiza aqui a nota do boletim.<br/>
+                                <span className='text-xs'>
+                                 <span className='text-red-500 font-medium'>Nota:</span> Tome atenção nos filtros selecionados, trimestre, disciplina e classe.</span>
                               </DialogDescription>
                             </DialogHeader>
                             <Form {...formUpdate} >
@@ -522,9 +507,9 @@ const clickBuscarNotas = async (idAluno) => {
                   <DialogFooter>
                     <Button title='vincular' type="submit" className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 hover:text-white w-12'  onClick={()=>{
                             formUpdate.setValue('alunoId', item.id);
-                            formUpdate.setValue('classeId', parseInt(classeId));
-                            formUpdate.setValue('trimestreId', parseInt(trimestreId));
-                            formUpdate.setValue('disciplinaId', parseInt(disciplinaId));
+                            formUpdate.setValue('classeId', fieldCursoId);
+                            formUpdate.setValue('trimestreId', fieldTrimestreId);
+                            formUpdate.setValue('disciplinaId', fieldDisciplinaId);
                           }}><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
                   </DialogFooter>
                   </form></Form>
@@ -538,8 +523,8 @@ const clickBuscarNotas = async (idAluno) => {
           </tbody>
           <tfoot className='sticky bottom-0 bg-white'>
             <tr>
-              <td colSpan={4} className="py-2 text-blue-500">
-                Total de registros: {dados.length}
+              <td colSpan={5} className="py-2 text-blue-500">
+                Total de registros: {dados?.length}
               </td>
             </tr>
           </tfoot>
@@ -560,57 +545,7 @@ const clickBuscarNotas = async (idAluno) => {
         </section>
        
       )}
-      {showModal &&
-<MyDialog open={showModal} onOpenChange={setShowModal}>
-
-  <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
-  {modalMessage == null &&
-      <div role="alert" className='w-full'>
-    <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-      <div>
-          <p>Sucesso</p>
-      </div>
-      <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-          <p>X</p>
-        </div>
-    </div>
-    <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
-    <CheckCircleIcon className='w-28 h-20 text-green-400'/>
-    <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
-    <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
-      <Button className='bg-green-400 hover:bg-green-500
-      hover:font-medium
-       font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
-  </div>
-  </div>
-  
-    </div>
-    
-}
- {modalMessage != null &&
-      <div role="alert" className='w-full'>
-    <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
-      <div>
-          <p>Falhou</p>
-      </div>
-      <div className='cursor-pointer' onClick={() => setShowModal(false)}>
-          <p>X</p>
-        </div>
-    </div>
-    <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
-    <AlertCircleIcon className='w-28 h-20 text-red-400'/>
-    <p className='font-poppins uppercase'>{modalMessage}</p>
-    <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
-      <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
-  </div>
-  </div>
-  
-    </div>
-}
-       </MyDialogContent>
-</MyDialog>
- }
-
+       <MostrarDialog show={showDialog} message={dialogMessage} onClose={() => setShowDialog(false)} />
     </>
   );
 }

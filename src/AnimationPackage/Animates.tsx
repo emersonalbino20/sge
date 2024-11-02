@@ -7,3 +7,5 @@ export const animateFadeLeft = 'animate-fade-left animate-once animate-duration-
 export const animatePing = 'active:animate-ping animate-once animate-duration-500 animate-delay-400 animate-ease-out';
 
 export const animateBounce = 'animate-bounce animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out';
+
+export const animatePulse = 'animate-pulse animate-infinite animate-duration-[550ms] animate-delay-[400ms] animate-ease-out';

@@ -140,10 +140,6 @@ React.useEffect(()=>{
     search()
 },[])
 
-
-const [showModal, setShowModal] = React.useState(false);
-const [modalMessage, setModalMessage] = React.useState('');         
-
 //Funcao de matricula
     const [showDialog, setShowDialog] = React.useState(false);
   const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);

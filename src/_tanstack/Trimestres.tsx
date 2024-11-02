@@ -8,8 +8,8 @@ import axios from 'axios';
         return axios.get(`http://localhost:8000/api/trimestres/${id}`);
     }
   
-    export const postTrimestres = (post) => {
-        return (axios.post("http://localhost:8000/api/trimestres/", post));
+    export const postTrimestres = (data) => {
+        return (axios.post("http://localhost:8000/api/trimestres/", data));
     }
   
     export  const putTrimestres = (data) => {
