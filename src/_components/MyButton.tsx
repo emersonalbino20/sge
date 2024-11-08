@@ -14,7 +14,7 @@ export function EditButton(Icon)
         <EditIcon 
         className={ClassIcon}/> 
         <Button 
-        className="h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm border-blue-600" ></Button>
+        className="h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm border-blue-600" ></Button>
         </>
     );
 }
@@ -26,7 +26,7 @@ export function SubmitButton(Icon)
         <Save 
         className={ClassIcon}/> 
         <Button 
-        className="h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600" ></Button>
+        className="h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600" ></Button>
         </>
     );
 }
@@ -63,7 +63,7 @@ export function InfoButton()
             <InfoIcon 
             className={ClassIcon}/>
             <Button 
-            className="h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600"></Button>
+            className="h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600"></Button>
         </>
     );
 }
@@ -75,7 +75,7 @@ export function UserPlusButton()
             <UserPlus
             className={ClassIcon}
             />
-            <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
+            <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
         </>
     );
 }
@@ -91,3 +91,4 @@ export function LibraryButton()
         </>
     );
 }
+

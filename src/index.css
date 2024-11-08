@@ -26,13 +26,7 @@
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
     --radius: 0.5rem;
-    background-image: linear-gradient(to right, var(--tw-gradient-stops));
-    --tw-gradient-from: #9ca3af var(--tw-gradient-from-position);
-    --tw-gradient-to: rgb(156 163 175 / 0) var(--tw-gradient-to-position);
-    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-    --tw-gradient-to: rgb(243 244 246 / 0)  var(--tw-gradient-to-position);
-    --tw-gradient-stops: var(--tw-gradient-from), #f3f4f6 var(--tw-gradient-via-position), var(--tw-gradient-to);
-    --tw-gradient-to: #d1d5db var(--tw-gradient-to-position);
+    
   }
 
   .dark {
@@ -52,63 +46,4 @@
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
   }
-}
-
-
-
-/* src/index.css */
-@font-face {
-    font-family: 'Poppins';
-    src: url('assets/fonts/Poppins/Poppins-Regular.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
-  }
-  
-  @font-face {
-    font-family: 'Poppins';
-    src: url('assets/fonts/Poppins/Poppins-SemiBold.ttf') format('truetype');
-    font-weight: 600;
-    font-style: normal;
-  }
-  @font-face {
-    font-family: 'Poppins';
-    src: url('assets/fonts/Poppins/Poppins-Bold.ttf') format('truetype');
-    font-weight: 700;
-    font-style: normal;
-  }
-  
-/* src/index.css */
-@font-face {
-  font-family: 'PlayfairDisplay';
-  src: url('assets/fonts/Playfair_Display/static/PlayfairDisplay-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'PlayfairDisplay';
-  src: url('assets/fonts/Playfair/static/PlayfairDisplay-SemiBold.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-}
-
-
-@font-face {
-  font-family: 'Lato';
-  src: url('assets/fonts/Lato/Lato-LightItalic.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-}
-  
-@font-face {
-  font-family: 'RobotoSlab';
-  src: url('assets/fonts/Roboto_Slab-SemiBold/static/RobotoSlab-Regular.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'MerriWeather';
-  src: url('assets/fonts/Merriweather_Sans/static/MerriweatherSans-Regular.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
 }

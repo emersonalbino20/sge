@@ -15,10 +15,10 @@ import IPPUImage from './../assets/images/IPPU.png'
 import './stepper.css';
 import { animateBounce, animateFadeLeft, animatePing, animateShake } from '@/AnimationPackage/Animates';
 import MostrarDialog from './MostrarDialog';
-import { getTrimestres } from '@/_tanstack/Trimestres';
+import { getTrimestres } from '@/_queries/Trimestres';
 import { useQueries } from '@tanstack/react-query';
-import { getDisciplinasProfessores, getTurmasProfessores } from '@/_tanstack/Professor';
-import { getTurmasClasse } from '@/_tanstack/Turmas';
+import { getDisciplinasProfessores, getTurmasProfessores } from '@/_queries/Professor';
+import { getTurmasClasse } from '@/_queries/Turmas';
 
 const TForm = z.object({
   alunoId: idZod,
@@ -135,8 +135,8 @@ export default function Bulletin() {
       queries: 
       [
         {queryKey: ["trimestresBulletin"] , queryFn: getTrimestres},
-        {queryKey: ["professoresCursosBulletin", 1], queryFn: ()=>getTurmasProfessores(1)},
-        {queryKey: ["professoresDisciplinasBulletin", 1], queryFn: ()=>getDisciplinasProfessores(1)},
+        {queryKey: ["professoresCursosBulletin", 48], queryFn: ()=>getTurmasProfessores(48)},
+        {queryKey: ["professoresDisciplinasBulletin", 48], queryFn: ()=>getDisciplinasProfessores(48)},
         {queryKey: ["turmasClasseBulletin", fieldCursoId], queryFn: ()=>getTurmasClasse(fieldCursoId), enabled: !!fieldCursoId},
       ]
     }
@@ -217,7 +217,7 @@ export default function Bulletin() {
       </div>
         </div> : (
       <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
-         <Header title={false}/> 
+         <Header /> 
          <div className='flex flex-col space-y-2 justify-center items-center w-full'>
          <div className='flex justify-center items-center text-sm'>
             <div className='flex justify-between'>{
@@ -427,7 +427,7 @@ export default function Bulletin() {
             <DialogTrigger asChild >
             <div title='vincular' className='relative flex justify-center items-center'>
             <Save className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-            <button className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 border-green-600 rounded-sm' ></button>
+            <button className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 border-green-600 rounded-sm' ></button>
               </div>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] bg-white">
@@ -476,7 +476,7 @@ export default function Bulletin() {
                       <DialogTrigger asChild >
                       <div title='vincular' className='relative flex justify-center items-center'>
                       <Edit className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-                        <Button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm border-blue-600'></Button>
+                        <Button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm border-blue-600'></Button>
                         </div>
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-[425px] bg-white">

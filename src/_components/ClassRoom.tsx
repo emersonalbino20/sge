@@ -18,22 +18,23 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { AlertCircleIcon, CheckCircleIcon, DatabaseBackupIcon, EditIcon, PrinterIcon, SaveIcon, Trash} from 'lucide-react'
+import { AlertCircleIcon, CheckCircleIcon, ChevronLeft, ChevronRight, Combine, DatabaseBackupIcon, EditIcon, Library, Loader, PrinterIcon, SaveIcon, Trash} from 'lucide-react'
 import { InfoIcon, AlertTriangle, Search } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
-import {anoLectivo, classe, anoLectivoId, cursoId, custoMatricula, sala, capacidade, localizacao } from '@/_zodValidations/validations'
+import {anoLectivo, classe, anoLectivoId, cursoId, custoMatricula, sala, capacidade, localizacao, idZod } from '@/_zodValidations/validations'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm} from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { MyDialog, MyDialogContent } from './my_dialog'
-import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import Header from './Header'
-import { animateBounce, animatePulse, animateShake } from '@/AnimationPackage/Animates'
+import { animateBounce, animateFadeLeft, animatePulse, animateShake } from '@/AnimationPackage/Animates'
 import { Textarea } from '@/components/ui/textarea'
-import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getSalas, getSalasId, postSalas, putSalas } from '@/_tanstack/Salas'
+import { getSalas, getSalasId, postSalas, putSalas } from '@/_queries/Salas'
 import MostrarDialog from './MostrarDialog';
+import { useGetClassRoomQuery, useGetIdClassRoomdQuery, usePostClassRoom, usePostClassToClassRoom, usePutClassRoom } from '@/_queries/UseClassRoomQuery'
+import { AlertErro, AlertSucesso } from './Alert'
+import { useGetCurseQuery, useGetIdGradeCurseQuery } from '@/_queries/UseCurseQuery'
+import { useGetPeriodQuery } from '@/_queries/UsePeriodQuery'
 
 const TFormCreate =  z.object(
 {
@@ -49,6 +50,14 @@ const TFormUpdate =  z.object({
   id: z.number()
 })
 
+const TformClassToClassRoom = z.object({
+  nome: sala,
+  cursoId: idZod,
+  classeId: idZod,
+  turnoId: idZod,
+  id: z.number()
+})
+
 export default function ClassRoom(){
 
   const formCreate  = useForm<z.infer<typeof TFormCreate>>({
@@ -61,215 +70,73 @@ export default function ClassRoom(){
   resolver: zodResolver(TFormUpdate)
   })
 
-  const [showDialog, setShowDialog] = React.useState(false);
-  const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
-  const queryClient = useQueryClient();
-  const {mutate: postMutationSalas} = useMutation({
-    mutationFn: postSalas,
-    onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ['getSalasMain']});
-      setDialogMessage(null);
-      setShowDialog(true);
-    }
-  });
-
-  const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>,e) => {
-      e.preventDefault();
-      postMutationSalas(data);
-    }
-
-  const {mutate: putMutationSalas} = useMutation({
-    mutationFn: putSalas,
-    onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ['getSalasMain']});
-      setDialogMessage(null);
-      setShowDialog(true);
-    }
-  });
-
-  const handleSubmitUpdate = async (data: z.infer<typeof TFormCreate>,e) => {
-    e.preventDefault();
-    putMutationSalas(data);
-  }
-
-  const[buscar, setBuscar] = React.useState<number>(null);
-
-  const [{data: salas, isLoading: salasLoading, isError: salasError, isSuccess: salasSuccess}, {data: salasId, isSuccess: salasSuccessId}] = useQueries(
-    { 
-      queries: 
-      [
-        {queryKey: ["getSalasMain"] , queryFn: getSalas},
-        {queryKey: ["getSalasIdMain"] , queryFn: ()=> getSalasId(buscar), enabled: !!buscar},
-      ]
+  const formClassToClassRoom  = useForm<z.infer<typeof TformClassToClassRoom>>({
+    mode: 'all', 
+    resolver: zodResolver(TformClassToClassRoom)
     })
 
-if (salasSuccessId){
-            formUpdate.setValue('id', salasId?.data?.id)
-            formUpdate.setValue('nome', salasId?.data?.nome)
-            formUpdate.setValue('localizacao', salasId?.data?.localizacao)
-            formUpdate.setValue('capacidade', salasId?.data?.capacidade)
-      }
+    const { watch } = formClassToClassRoom;
+    const [ fieldCurse ] = watch(['cursoId']);
 
-  const changeResource = (id)=>{
-    setBuscar(id); 
+  //Get
+  const[buscar, setBuscar] = React.useState('');
+  const { data, isError, isLoading } = useGetClassRoomQuery();
+  const { data: dataCurse } = useGetCurseQuery();
+  const { data: dataPeriod } = useGetPeriodQuery();
+  const { dataClassRoomId, isFetched } = useGetIdClassRoomdQuery(buscar);
+  const { dataGradesCurse } = useGetIdGradeCurseQuery(fieldCurse);
+
+  //Post
+  const { postClassRoom, postError, postLevel } = usePostClassRoom();
+  const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>,e) => {
+    e.preventDefault();
+    postClassRoom(data);
   }
-  
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const handleFilterChange = (event) => {
-    setSearchTerm(event.target.value.toLowerCase());
-  };
 
-  const filteredSalas = salas?.data?.data?.filter((salas) =>{
-    return salas.nome.toLowerCase().includes(searchTerm)}
-    );
+  const { postClass, postClassError, postClassLevel } = usePostClassToClassRoom();
+  const handleSubmitClassToClassRoom = async (data: z.infer<typeof TformClassToClassRoom>,e) => {
+    e.preventDefault();
+    postClass(data);
+  }
 
-    return (
-      <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
-      <Header title={false}/>
-       
-      <div className='flex flex-col space-y-2 justify-center items-center w-full'>
-        <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
-       <div className='flex flex-row space-x-2'>
-         <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
-             <Search className='absolute text-gray-300 '/>            
-             <Input className=' pl-6 indent-2' type='text' value={searchTerm} onChange={handleFilterChange} placeholder='Procure por registros...' />
-         </div>
-         <Dialog>
-    <DialogTrigger asChild>
-    <div title='cadastrar' className='relative flex justify-center items-center'>
-    <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
-      </div>
-    </DialogTrigger>
-    <DialogContent className="sm:max-w-[425px] bg-white">
-      <DialogHeader>
-      <DialogTitle className='text-sky-800 text-xl'>Cadastrar Sala</DialogTitle>
-        <DialogDescription>
-          <p className='text-base text-gray-800'>
-          preencha o formulário e em seguida click em <span className='font-bold text-sky-700'>actualizar</span> quando terminar.
-        </p>
-        </DialogDescription>
-      </DialogHeader>
-      <Form {...formCreate} >
-     <form onSubmit={formCreate.handleSubmit(handleSubmitCreate)} >
-     <div className="flex flex-col w-full py-4 bg-white">
-        <div className="w-full mb-2">
-        <label htmlFor="nome">Nome<span className='text-red-500'>*</span>
-        </label>
-          <FormField
-          control={formCreate.control}
-          name="nome"
-          render={({field})=>(
-            <FormItem>
-            <Input
-              id="nome"
-              type='text' {...field} className={formCreate.formState.errors.nome?.message && `${animateShake} select-error`}
-              />
-            <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-        )}/>
-        </div>
-        <div className="w-full mb-2">
-        <label htmlFor="capacidade">Capacidade<span className='text-red-500'>*</span>
-        </label>
-          <FormField
-          control={formCreate.control}
-          name="capacidade"
-          render={({field})=>(
-            <FormItem>
-            <Input id="capacidade" type='number' {...field} className={formCreate.formState.errors.capacidade?.message 
-            && `${animateShake} select-error`}
-            min="0"
-            onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
-            />
-            <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-        )}/>
-        </div>
-        <div className="w-full">
-        <label htmlFor="localizacao">Localização<span className='text-red-500'>*</span>
-              </label>
-          <FormField
-          control={formCreate.control}
-          name="localizacao"
-          render={({field})=>(
-            <FormItem>
-            <Textarea id="localizacao" {...field} className={formCreate.formState.errors.localizacao?.message && `${animateShake} select-error active:outline-none`}
-            />
-            <FormMessage className='text-red-500 text-xs'/>
-          </FormItem>
-        )}/>
-        </div>
-      </div>
-      <DialogFooter>
-      <Button title='cadastrar' className='responsive -button bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7  absolute text-white font-extrabold'/></Button>
-      </DialogFooter>
-      </form></Form>
-    </DialogContent>
-      </Dialog>      
-     </div>
-     <div className="overflow-x-auto overflow-y-auto w-full  h-80 md:h-1/2 lg:h-[500px]">
-         
-         <table className="w-full bg-white border border-gray-200 table-fixed">
-             
-             <thead className='sticky top-0 z-10'>
-                 <tr className={trStyle}>
-                      <th className={thStyle} >Id</th> 
-                      <th className={thStyle} >Salas</th>
-                      <th className={thStyle} >Acção</th>
-                 </tr>
-             </thead>
-             <tbody >
-                {salasLoading &&
-                  
-                  <tr className='w-96 h-32'>
-                  <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
-                      <div className={`${animatePulse}`}>
-                      Loading ...
-                      </div>
-                  </td>
-              </tr>
-                }
-                {filteredSalas?.length === 0 &&
-                <tr className='w-96 h-32'>
-                <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
-                    <div>
-                    <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
-                         <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
-                    </div>
-                </td>
-            </tr> 
-                }
-                 {salasError &&
-                 <tr className='w-96 h-32'>
-                     <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
-                         <div>
-                         <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
-                              <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
-                         </div>
-                     </td>
-                 </tr>}
-                 { salasSuccess &&
-                 filteredSalas.map((item, index) => (
-                     <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-200"}>
-                         <td className={tdStyle}>{item.id}</td>
-                         <td className={tdStyle}>{item.nome}</td>
-                         <td className={tdStyleButtons}    onClick={()=>{
-                           changeResource(item.id)
-                         }}>
-                          <Dialog >
+//Put
+    //Update fields wth datas
+    React.useEffect(()=>{
+      formClassToClassRoom.setValue('id', dataClassRoomId?.data?.id);
+      formUpdate.setValue('id', dataClassRoomId?.data?.id);
+      formUpdate.setValue('nome', dataClassRoomId?.data?.nome);
+      formUpdate.setValue('localizacao', dataClassRoomId?.data?.localizacao);
+      formUpdate.setValue('capacidade', dataClassRoomId?.data?.capacidade);
+    }, [buscar, isFetched])
+
+    const { putClassRoom, updateError, updateLevel } = usePutClassRoom();
+
+    const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
+      e.preventDefault();
+      putClassRoom(data);
+    }
+
+    const putId = (id) => {
+      setBuscar(id)
+    }
+      
+    const colunas = ["Id", "Nome", "Ações"];
+
+    const renderAcoes = () => (
+      <>
+      <Dialog >
           <DialogTrigger asChild >
           <div title='actualizar' className='relative flex justify-center items-center'>
           <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-            <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
+            <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
             </div>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
                 <DialogHeader>
-                <DialogTitle className='text-sky-800 text-xl'>Actualizar Sala</DialogTitle>
+                <DialogTitle className='text-blue-600 text-xl'>Actualizar Sala</DialogTitle>
               <DialogDescription>
                 <p className='text-base text-gray-800'>
-                altere uma informação da sala  e em seguida click em <span className='font-bold text-sky-700'>actualizar</span> quando terminar.
+                altere uma informação da sala  e em seguida click em <span className='font-bold text-blue-500'>actualizar</span> quando terminar.
               </p>
               </DialogDescription>
                 </DialogHeader>
@@ -350,55 +217,420 @@ if (salasSuccessId){
       </DialogFooter>
       </form></Form>
     </DialogContent>
-                          </Dialog>
-                          <div className='relative flex justify-center items-center cursor-pointer'>
-                        
-                          <Popover >
-                    <PopoverTrigger asChild className='bg-white'>
+      </Dialog>
+      <Dialog>
+    <DialogTrigger asChild>
+    <div title='cadastrar turma' className='relative flex justify-center items-center'>
+      <Combine className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
+      <Button className='h-7 px-5 bg-orange-600 text-white font-semibold hover:bg-orange-500 border-orange-500 rounded-sm'></Button>
+      </div>
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[425px] bg-white">
+      <DialogHeader>
+      <DialogTitle className='text-blue-600 text-xl'>Cadastrar Turma</DialogTitle>
+              <DialogDescription>
+                <p className='text-base text-gray-800'>
+                preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>actualizar</span> quando terminar.
+              </p>
+              </DialogDescription>
+      </DialogHeader>
+      <Form {...formClassToClassRoom} >
+     <form onSubmit={formClassToClassRoom.handleSubmit(handleSubmitClassToClassRoom)} >
+     <FormField
+          control={formClassToClassRoom.control}
+          name="id"
+          render={({field})=>(
+            <FormControl>
+          <Input 
+          type='hidden'
+            className="w-full"
+            
+            {...field} 
+            
+            onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
+           
+          />
+          </FormControl>
+        )}
+           />
+     <div className="flex flex-col w-full py-4 bg-white">
+        <div className="w-full">
+        <label htmlFor="nome">Nome<span className='text-red-500'>*</span>
+              </label>
+          <FormField
+          control={formClassToClassRoom.control}
+          name="nome"
+          render={({field})=>(
+            <FormItem>
+            <Input
+              id="nome"
+              type='text' {...field} className={formClassToClassRoom.formState.errors.nome?.message && `${animateShake} input-error`} 
+              />
+            <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+        )}/>
+        </div>
+        <div className="w-full">
+        <FormField
+          control={formClassToClassRoom.control}
+          name={'cursoId'}
+          render={({field})=>(
+          <FormItem>
+        <label htmlFor="curso">Cursos<span className='text-red-500'>*</span>
+              </label>
+              <FormControl>
+              <select {...field}  id='curso' onChange={(e)=>{field.onChange(parseInt(e.target.value))}} >
+                      <option value="">Selecione o curso</option>
+                      {
+                        dataCurse?.data?.data?.map((field)=>{
+                            return <option value={`${field.id}`}>{field.nome}</option>
+                        })
+                      }
+                  </select>
+                  </FormControl>
+                <FormMessage className='text-red-500 text-xs'/>
+              </FormItem>)
+              }
+              />
+        </div>
+        <div className="w-full">
+            <FormField
+              control={formClassToClassRoom.control}
+              name={'classeId'}
+              render={({field})=>(
+              <FormItem>
+                 <label htmlFor="classe">Classes<span className='text-red-500'>*</span>
+              </label>
+                  <FormControl>
+                  <select {...field} className={
+                      formClassToClassRoom.formState.errors.classeId?.message && `${animateShake}  select-error`} id='classe' onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                      <option >Seleciona a classe</option>
+                      {
+                            dataGradesCurse?.data?.data?.map((field)=>{
+                                return <option value={`${field.id}`}>{field.nome}</option>
+                            })
+                      }
+                  </select>
+                     </FormControl>
+                <FormMessage className='text-red-500 text-xs'/>
+              </FormItem>)
+              }
+              />
+              </div>
+              
+              <div className="w-full">
+              <FormField
+              control={formClassToClassRoom.control}
+              name={'turnoId'}
+              render={({field})=>(
+              <FormItem>
+                 <label htmlFor="turno">Turnos<span className='text-red-500'>*</span>
+              </label>
+                  <FormControl>
+                    <select id='turno' {...field} className={
+                      formClassToClassRoom.formState.errors.turnoId?.message && `${animateShake}  select-error`} onChange={(e)=>{field.onChange(parseInt(e.target.value))}}>
+                      <option>Selecione o turno</option>
+                      {
+                        dataPeriod?.data?.data?.map((field)=>{
+                            return <option value={`${field.id}`}>{field.nome}</option>
+                        })
+                      }
+                      </select>
+                  </FormControl>
+                <FormMessage className='text-red-500 text-xs'/>
+              </FormItem>)
+              }
+              />
+              </div>
+      </div>
+      <DialogFooter>
+      <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+      </DialogFooter>
+      </form></Form>
+    </DialogContent>
+      </Dialog>  
+        <div className='relative flex justify-center items-center cursor-pointer'>
+      
+      <Popover >
+<PopoverTrigger asChild className='bg-white'>
 
-                    <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
-                      <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
-                      </div>
-                    </PopoverTrigger >
-                    <PopoverContent className="w-80 bg-white">
-                      <div className="grid gap-4">
-                        <div className="space-y-2">
-                          <h4 className="font-medium leading-none text-gray-800">Dados da Sala</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Inspecione os dados
-                          </p>
-                        </div>
-                        <div className="grid gap-2">
-                          <div className="grid grid-cols-3 items-center gap-4">
-                            <label htmlFor="maxWidth">Capacidade</label>
-                            <p>{salasId?.data?.capacidade}</p>
-                          </div>
-                          <div className="">
-                            <label htmlFor="height">Localização</label>
-                            <p className='indent-2 text-justify text-xs text-pretty'>{salasId?.data?.localizacao}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                          </div>
-                         </td>
-                     </tr>
-                 ))}
-             </tbody>
-             <tfoot className='sticky bottom-0 bg-white"'>
-             <tr>
-                 <td colSpan={3} className="py-2 text-blue-500">
-                     Total de registros: {filteredSalas?.length}
-                 </td>
-             </tr>
-         </tfoot>
-         </table>
-     </div>
+<div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
+  <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600'></Button>
+  </div>
+</PopoverTrigger >
+<PopoverContent className="w-80 bg-white">
+  <div className="grid gap-4">
+    <div className="space-y-2">
+      <h4 className="font-medium leading-none text-gray-800">Dados da Sala</h4>
+      <p className="text-sm text-muted-foreground">
+        Inspecione os dados
+      </p>
     </div>
-     </div>
+    <div className="grid gap-2">
+      <div className="grid grid-cols-3 items-center gap-4">
+        <label htmlFor="maxWidth">Capacidade</label>
+        <p>{dataClassRoomId?.data?.capacidade}</p>
+      </div>
+      <div className="">
+        <label htmlFor="height">Localização</label>
+        <p className='indent-2 text-justify text-xs text-pretty'>{dataClassRoomId?.data?.localizacao}</p>
+      </div>
+    </div>
+  </div>
+</PopoverContent>
+      </Popover>
+        </div>
+      </>
+    )
+  
+  const [pagina, setPagina] = React.useState(1);
+  const [termoBusca, setTermoBusca] = React.useState('');
+  const [itensPorPagina, setItensPorPagina] = React.useState<number>(5);
 
-     <MostrarDialog show={showDialog} message={dialogMessage} onClose={() => setShowDialog(false)} />
+  const dadosFiltrados = data?.data?.data?.filter(item =>
+    Object.values(item).some(valor =>
+      valor.toString().toLowerCase().includes(termoBusca.toLowerCase())
+    )
+  );
+
+  const totalPaginas = Math.ceil(dadosFiltrados?.length / itensPorPagina);
+  const inicio = (pagina - 1) * itensPorPagina;
+  const fim = inicio + itensPorPagina;
+  const dadosPaginados = dadosFiltrados?.slice(inicio, fim);
+
+    return (
+      <section className="m-0 w-screen h-screen  bg-gray-50">
+      <Header />
+      { (updateLevel === 1) &&(
+        <AlertSucesso message={updateError} />  
+    )
+      }
+      { (updateLevel === 2) &&(
+        <AlertErro message={updateError} /> )
+      }
+      { (postLevel === 1) &&(
+        <AlertSucesso message={postError} />  )
+      }
+      { (postLevel === 2) &&(
+          <AlertErro message={postError} />  )
+      }
+      { (postClassLevel === 1) &&(
+        <AlertSucesso message={postClassError} />  )
+      }
+      { (postClassLevel === 2) &&(
+          <AlertErro message={postClassError} />  )
+      }
+     <div className="w-full bg-white p-4 rounded-lg shadow">
+      
+      <div className="mb-4 flex flex-col sm:flex-row justify-between items-center">
+      <div className='flex flex-row space-x-2'>
+            <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
+             <Search className='absolute text-gray-300 w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7'/>            
+             <Input 
+              value={termoBusca}
+              onChange={(e) => setTermoBusca(e.target.value)}
+             className=' pl-6 indent-2' type='text' placeholder='Procure por registros...' />
+             </div>
+             <Dialog>
+    <DialogTrigger asChild>
+    <div title='cadastrar' className='relative flex justify-center items-center'>
+    <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
+      <Button className='h-8 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
+      </div>
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[425px] bg-white">
+      <DialogHeader>
+      <DialogTitle className='text-blue-600 text-xl'>Cadastrar Sala</DialogTitle>
+        <DialogDescription>
+          <p className='text-base text-gray-800'>
+          preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>actualizar</span> quando terminar.
+        </p>
+        </DialogDescription>
+      </DialogHeader>
+      <Form {...formCreate} >
+     <form onSubmit={formCreate.handleSubmit(handleSubmitCreate)} >
+     <div className="flex flex-col w-full py-4 bg-white">
+        <div className="w-full mb-2">
+        <label htmlFor="nome">Nome<span className='text-red-500'>*</span>
+        </label>
+          <FormField
+          control={formCreate.control}
+          name="nome"
+          render={({field})=>(
+            <FormItem>
+            <Input
+              id="nome"
+              type='text' {...field} className={formCreate.formState.errors.nome?.message && `${animateShake} select-error`}
+              />
+            <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+        )}/>
+        </div>
+        <div className="w-full mb-2">
+        <label htmlFor="capacidade">Capacidade<span className='text-red-500'>*</span>
+        </label>
+          <FormField
+          control={formCreate.control}
+          name="capacidade"
+          render={({field})=>(
+            <FormItem>
+            <Input id="capacidade" type='number' {...field} className={formCreate.formState.errors.capacidade?.message 
+            && `${animateShake} select-error`}
+            min="0"
+            onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
+            />
+            <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+        )}/>
+        </div>
+        <div className="w-full">
+        <label htmlFor="localizacao">Localização<span className='text-red-500'>*</span>
+              </label>
+          <FormField
+          control={formCreate.control}
+          name="localizacao"
+          render={({field})=>(
+            <FormItem>
+            <Textarea id="localizacao" {...field} className={formCreate.formState.errors.localizacao?.message && `${animateShake} select-error active:outline-none`}
+            />
+            <FormMessage className='text-red-500 text-xs'/>
+          </FormItem>
+        )}/>
+        </div>
+      </div>
+      <DialogFooter>
+      <Button title='cadastrar' className='responsive -button bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7  absolute text-white font-extrabold'/></Button>
+      </DialogFooter>
+      </form></Form>
+    </DialogContent>
+      </Dialog> 
+         </div>
+        <div className="flex gap-2">
+        
+          <select onChange={
+            (e)=>{
+              setItensPorPagina(parseInt(e.target.value, 10) || 0)}}>
+            <option value={5}>5 por página</option>
+            <option value={10}>10 por página</option>
+            <option value={20}>20 por página</option>
+            <option value={30}>30 por página</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+            {colunas.map((coluna, index) => (
+            <th key={index} className="px-6 py-3 text-left text-xs font-semibold text-blue-600 uppercase tracking-wider">{coluna}</th>
+             ))}
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+          {isLoading &&
+              
+              <tr className='w-96 h-32'>
+              <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
+                  <div >
+                  <Loader className={`${animatePulse} inline-block .Loading-alert`}/>
+                  <p className='text-red-500'>Carregando</p>
+                  </div>
+                  
+              </td>
+          </tr>
+            }
+            {(isError || dadosPaginados?.length === 0) &&
+             <tr className='w-96 h-32'>
+             <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
+               <div>
+               <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
+                    <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
+               </div>
+             </td>
+           </tr>
+            }
+            {!isError && dadosPaginados?.map((turno) => (
+              <tr key={turno.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{turno.id}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-500">{turno.nome}</div>
+                </td>
+                
+                <td className="py-4 whitespace-nowrap text-right text-sm font-medium flex space-x-2" onClick={()=>{
+                           putId(turno.id)
+                         }}>
+                {renderAcoes()}
+              
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex items-center justify-between px-4 py-3 border-t">
+        <div className="flex-1 flex justify-between sm:hidden">
+          <button
+            onClick={() => setPagina(Math.max(1, pagina - 1))}
+            disabled={pagina === 1}
+            className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Anterior
+          </button>
+          <button
+            onClick={() => setPagina(Math.min(totalPaginas, pagina + 1))}
+            disabled={pagina === totalPaginas}
+            className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Próxima
+          </button>
+        </div>
+        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm text-gray-700">
+              Mostrando <span className="font-medium">{inicio + 1}</span> a{' '}
+              <span className="font-medium">{Math.min(fim, dadosFiltrados?.length)}</span> de{' '}
+              <span className="font-medium">{dadosFiltrados?.length}</span> resultados
+            </p>
+          </div>
+          <div>
+            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+              <button
+                onClick={() => setPagina(Math.max(1, pagina - 1))}
+                disabled={pagina === 1}
+                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-none bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+
+              {data?.data?.data?.length > 0 && [...Array(totalPaginas)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setPagina(i + 1)}
+                  className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium
+                    ${pagina === i + 1
+                      ? 'z-10 bg-blue-50 border-none text-blue-600'
+                      : 'bg-white border-none text-gray-500 hover:bg-gray-50'
+                    }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => setPagina(Math.min(totalPaginas, pagina + 1))}
+                disabled={pagina === totalPaginas}
+                className="relative inline-flex items-center px-2 py-2 rounded-r-md   bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 border-none"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
     </section>
    
 )

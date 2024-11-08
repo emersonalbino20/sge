@@ -131,7 +131,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
        const columns = ['Id', 'Nome', 'Acção'];
 
     return (<section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
-    <Header title={false}/>
+    <Header />
        
       <div className='flex flex-col space-y-2 justify-center items-center w-full'> <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
        <div className='flex flex-row space-x-2'>
@@ -141,7 +141,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
     <DialogTrigger asChild>
     <div title='cadastrar' className='relative flex justify-center items-center'>
     <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
+      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
       </div>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
@@ -213,7 +213,7 @@ const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
           <DialogTrigger asChild >
           <div title='actualizar' className='relative flex justify-center items-center'>
           <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-            <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
+            <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
             </div>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">

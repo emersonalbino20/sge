@@ -31,8 +31,6 @@ export  const putSalas = (data) => {
 
 
 
-
-
   {/*axios.post("http://localhost:8000/api/salas/", post).catch(function (error) {
      if (error.response) {
 

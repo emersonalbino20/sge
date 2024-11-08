@@ -25,62 +25,72 @@ export default function HomeBody() {
       return () => clearInterval(interval);
     }, []);
   
-    return (<><section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
-      <Header title={false}/>
-          <div className="w-full pt-14 items-center justify-center px-4 mx-auto max-w-screen-xl text-center">
-          <div className="flex flex-col justify-center items-center w-full">
-  <img 
-    src={IPPUImage} 
-    className="md:h-20 md:w-20 lg:h-32 lg:w-32 xl:h-36 xl:w-36 shadow-[rgba(13,_38,_76,_0.19)_0px_9px_20px] animate-ping animate-once animate-duration-[850ms] animate-delay-[400ms] animate-ease-in " 
-    alt="IPPU Logo" 
-  />
-  <h1 className="animate-fade-up animate-duration-[750ms] animate-delay-200 animate-ease-in mb-2 md:text-md lg:text-lg xl:text-[2rem] capitalize font-medium tracking-wide text-gray-700">
-    Acreditamos no potencial dos nossos alunos
-  </h1>
+    return (<><section className="m-0 w-screen h-screen  bg-gray-50">
+      <Header />
+      <div className=" max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+<div className="lg:grid lg:grid-cols-12 lg:gap-8">
+  <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
+    <h1>
+      <span className="block text-base text-blue-600 font-semibold tracking-wide uppercase">
+        Sistema de Gestão Escolar
+      </span>
+      <span className="mt-1 block text-4xl tracking-tight font-extrabold sm:text-5xl xl:text-6xl">
+        <span className="block text-gray-900">Gestão escolar</span>
+        <span className="block text-blue-600">simplificada</span>
+      </span>
+    </h1>
+    <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
+      Uma plataforma completa para gestão escolar, permitindo o acompanhamento de alunos, 
+      professores e atividades acadêmicas de forma simples e eficiente.
+    </p>
+    <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left">
+     <Link to={'/StudentInsertPage'}> <button className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+        Começar agora
+      </button></Link>
+    </div>
+  </div>
+  <div className="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">
+    <svg
+      className="w-full"
+      viewBox="0 0 400 300"
+      xmlns="http://www.w3.org/2000/svg"
+>
+      {/* Fundo */}
+     <rect width="400" height="300" fill="#f3f4f6" />
+      
+      {/* Prédio da escola */}
+   <rect x="100" y="100" width="200" height="150" fill="#2563eb" />
+      <rect x="150" y="150" width="40" height="100" fill="#ffffff" />
+      <rect x="210" y="150" width="40" height="100" fill="#ffffff" />
+
+      {/* Telhado */}
+      <path d="M50 100 L200 20 L350 100 Z" fill="#1d4ed8" />
+      
+      {/* Porta */}
+      <rect x="180" y="200" width="40" height="50" fill="#1e40af" />
+      
+      {/* Janelas superiores */}
+     <rect x="130" y="120" width="30" height="20" fill="#ffffff" />
+      <rect x="185" y="120" width="30" height="20" fill="#ffffff" />
+      <rect x="240" y="120" width="30" height="20" fill="#ffffff" />
+
+      {/* Árvores */}
+      <circle cx="50" cy="200" r="20" fill="#059669" />
+      <rect x="45" y="200" width="10" height="30" fill="#92400e" />
+      
+      <circle cx="350" cy="200" r="20" fill="#059669" />
+      <rect x="345" y="200" width="10" height="30" fill="#92400e" />
+      {/* Sol */}
+    <circle cx="50" cy="50" r="20" fill="#fcd34d" />
+
+{/* Nuvens */}
+   <circle cx="300" cy="50" r="10" fill="#b9c2d5" />
+      <circle cx="320" cy="50" r="15" fill="#b9c2d5" />
+      <circle cx="340" cy="50" r="10" fill="#b9c2d5" />
+    </svg>
+  </div>
 </div>
-
-
-            <p className="animate-fade-up animate-duration-[750ms] animate-delay-200 animate-ease-in  mb-8 text-[14px] lg:text-[16px] xl:text-xl   text-gray-600 font-medium sm:px-16 lg:px-48">
-              Aqui na IPPU focamos em melhorar, ensinar e orientar nossos estudantes, com o mais alto escalão de ensino, com nossos profissionais vamos longe!
-            </p>
-  
-            <div className={`${animateFadeLeft} flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0`}>
-              <Link to="/StudentInsertPage">
-                <button className=" inline-flex justify-center items-center sm:text-sm md:text-[10px] lg:text-[12px] xl:text-[16px]
-                md:py-1 md:px-2 lg:py-1 lg:px-3 xl:py-2 xl:px-4 text-base font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300">
-                  Dar início
-                  <svg
-                    className="w-3.5 h-3.5 ms-2 rtl:rotate-180"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 14 10"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M1 5h12m0 0L9 1m4 4L9 9"
-                    />
-                  </svg>
-                </button>
-              </Link>
-              <button className="inline-flex justify-center hover:text-gray-900 items-center sm:text-sm md:text-[10px] lg:text-[12px] xl:text-[16px] xl:px-4  text-base font-medium text-center text-black rounded-lg border border-white hover:bg-white focus:ring-4 focus:ring-gray-400">
-                Saber mais
-              </button>
-            </div>
-  
-            <div
-              ref={scrollRef}
-              className="flex flex-row space-x-2 overflow-x-auto w-full mt-8 mb-5"
-            >
-              {/*<Cards bgColor="bg-blue-600" textColor="text-white" titleColor="text-yellow-300" />
-              <Cards bgColor="bg-red-600" textColor="text-white" titleColor="text-yellow-300" />
-              <Cards bgColor="bg-green-600" textColor="text-white" titleColor="text-yellow-300" />
-              <Cards bgColor="bg-pink-600" textColor="text-white" titleColor="text-yellow-300" />*/}
-            </div>
-          </div>
+</div>
           
         </section>
   

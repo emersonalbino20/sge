@@ -140,7 +140,7 @@ export default function Payment (){
 
     return( 
       <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
-      <Header title={false}/>
+      <Header />
       <div className='flex flex-col space-y-2 justify-center items-center w-full'>
         <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
        <div className='flex flex-row space-x-2'>
@@ -152,7 +152,7 @@ export default function Payment (){
     <DialogTrigger asChild >
     <div title='cadastrar' className='relative flex justify-center items-center' >
     <UserPlus className='w-5 h-4 absolute text-white font-extrabold'/>
-      <button className='py-4 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm' ></button>
+      <button className='py-4 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm' ></button>
       </div>
       
     </DialogTrigger>
@@ -209,7 +209,7 @@ export default function Payment (){
            <div className='flex flex-row space-x-2 mt-2'>
            <div className='relative flex justify-center items-center' >
                  <SaveIcon className='w-4 h-5 absolute text-white font-extrabold'/>
-                 <button type='submit' title='registrar' className='py-3 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 border-green-600 rounded-sm' ></button>
+                 <button type='submit' title='registrar' className='py-3 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 border-green-600 rounded-sm' ></button>
           </div>
         
           </div>
@@ -275,11 +275,11 @@ export default function Payment (){
    </div>
    <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
    <CheckCircleIcon className='w-28 h-20 text-green-400'/>
-   <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
-   <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
+   <p className='uppercase'>Operação foi bem sucedida!</p>
+   <div className=' bottom-0 py-2 flex flex-col items-end justify-end border-t w-full border-green-400'>
      <Button className='bg-green-400 hover:bg-green-500
      hover:font-medium
-      font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+     text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
  </div>
  </div>
  
@@ -298,9 +298,9 @@ export default function Payment (){
    </div>
    <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
    <AlertCircleIcon className='w-28 h-20 text-red-400'/>
-   <p className='font-poppins uppercase'>{modalMessage}</p>
-   <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
-     <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+   <p className='uppercase'>{modalMessage}</p>
+   <div className='bottom-0 py-2 flex flex-col items-end justify-end border-t w-full border-red-400'>
+     <Button className='hover:bg-red-500 bg-red-400 hover:font-medium text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
  </div>
  </div>
  

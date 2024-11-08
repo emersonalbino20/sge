@@ -15,13 +15,13 @@ import IPPUImage from './../assets/images/IPPU.png'
 import './stepper.css';
 import { animateBounce, animateFadeLeft, animatePing, animatePulse, animateShake } from '@/AnimationPackage/Animates';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getCursos } from '@/_tanstack/Cursos';
-import { getClassesId } from '@/_tanstack/Classes';
-import { getTurmasId } from '@/_tanstack/Turmas';
-import { getTrimestres } from '@/_tanstack/Trimestres';
-import { collectErrorMessages, confirmacaoAluno, getAlunosClassesMatriculasCurso, getAlunosId, getAlunosMatriculas, getAlunosNotas, getAlunosPorTurma, putAlunos } from '@/_tanstack/Alunos';
-import { getPagamentos } from '@/_tanstack/Pagamentos';
-import { getTurnos } from '@/_tanstack/Turnos';
+import { getCursos } from '@/_queries/Cursos';
+import { getClassesId } from '@/_queries/Classes';
+import { getTurmasId } from '@/_queries/Turmas';
+import { getTrimestres } from '@/_queries/Trimestres';
+import { collectErrorMessages, confirmacaoAluno, getAlunosClassesMatriculasCurso, getAlunosId, getAlunosMatriculas, getAlunosNotas, getAlunosPorTurma, putAlunos } from '@/_queries/Alunos';
+import { getPagamentos } from '@/_queries/Pagamentos';
+import { getTurnos } from '@/_queries/Turnos';
 import { useHookFormMask } from 'use-mask-input'
 import axios from 'axios';
 import { setCookies } from '@/_cookies/Cookies';
@@ -130,7 +130,7 @@ export default function ListStudent() {
 
   const [alunoId, setAlunoId] = React.useState<number>(null);
 
-  const [{data: trimestres},{data: cursos }, { data: pagamentos }, {data: turnos}, {data: classes, isLoading: classesLoading, isError: classesError, isSuccess: classesSuccess}, {data: turmas, isLoading: turmasLoading, isError: turmasError, isSuccess: turmasSuccess}, {data: alunosNotas}, {data: alunosPorId, isFetched: alunosIdFetched}, {data: alunosPorMatricula}, {data: classesAluno}, {data: turmasAluno}, {data: alunosTurma, isLoading: alunosTurmaLoading, isError: alunosTurmaError, isSuccess: alunosTurmaSuccess}] = useQueries(
+  const [{data: trimestres},{data: cursos }, { data: pagamentos }, {data: turnos}, {data: classes, isLoading: classesLoading, isError: classesError,}, {data: turmas, isLoading: turmasLoading, isError: turmasError, }, {data: alunosNotas}, {data: alunosPorId, isFetched: alunosIdFetched}, {data: alunosPorMatricula}, {data: classesAluno}, {data: turmasAluno}, {data: alunosTurma, isLoading: alunosTurmaLoading, isError: alunosTurmaError, isSuccess: alunosTurmaSuccess}] = useQueries(
     { 
       queries: 
       [
@@ -199,7 +199,7 @@ const [idAno, setIdAno] = React.useState<number>(0);
   const[ currentStep, setCurrentStep ] = React.useState<number>(1);
   const[ complete, setComplete ] = React.useState<boolean>(false);
 
-  const fieldDivStyle = 'text-lg sm:text-base md:text-[14px] lg:text-[16px] xl:text-xl text-sky-600 mb-2 font-semibold';
+  const fieldDivStyle = 'text-lg sm:text-base md:text-[14px] lg:text-[16px] xl:text-xl text-blue-600 mb-2 font-semibold';
   return (<>
       
     { idAno === 0 ? <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
@@ -212,7 +212,7 @@ const [idAno, setIdAno] = React.useState<number>(0);
       </div>
         </div> : (
       <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
-         <Header title={false}/> 
+         <Header /> 
          <div className='flex flex-col space-y-2 justify-center items-center w-full'>
          <div className='flex justify-center items-center text-sm'>
             <div className='flex justify-between'>{
@@ -431,16 +431,16 @@ const [idAno, setIdAno] = React.useState<number>(0);
                     <DialogTrigger asChild >
                     <div title='actualizar' className='relative flex justify-center items-center' >
                     <EditIcon className='w-5 h-4 absolute text-white font-extrabold'/>
-                      <Button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm' ></Button>
+                      <Button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm' ></Button>
                       </div>
                       
                     </DialogTrigger>
                     <DialogContent className="max-w-[425px] sm:w-[260px] md:w-[600px] lg:w-[780px] xl:w-[400px] overflow-y-scroll h-[500px] bg-white">
                       <DialogHeader>
-                      <DialogTitle className='text-sky-800 text-xl'>Actualização do Registro</DialogTitle>
+                      <DialogTitle className='text-blue-600 text-xl'>Actualização do Registro</DialogTitle>
                     <DialogDescription>
                       <p className='text-base text-gray-800'>
-                     secção reservada para actualizar os dados do aluno click em <span className='font-bold text-sky-700'>actualizar</span> quando terminar.
+                     secção reservada para actualizar os dados do aluno click em <span className='font-bold text-blue-500'>actualizar</span> quando terminar.
                     </p>
                     </DialogDescription>
                       </DialogHeader>
@@ -649,7 +649,7 @@ const [idAno, setIdAno] = React.useState<number>(0);
             </DialogTrigger>
             <DialogContent className="max-w-[425px] sm:w-[260px] md:w-[600px] lg:w-[780px] xl:w-[400px] overflow-y-scroll h-[500px] -mb-2 bg-white">
               <DialogHeader>
-              <DialogTitle className='text-sky-800 text-xl'>Confirmação da Matrícula</DialogTitle>
+              <DialogTitle className='text-blue-600 text-xl'>Confirmação da Matrícula</DialogTitle>
                 <DialogDescription>
                   <p className='text-base text-gray-800'>
                   confirma a matrícula {alunosPorId?.data?.genero === 'M' ? 'do aluno' : 'da aluna'} <span className='font-bold uppercase'>{alunosPorId?.data?.nomeCompleto}</span> n. bi: <span className='font-bold'>{alunosPorId?.data?.numeroBi}</span> para o ano corrente.</p>
@@ -757,7 +757,7 @@ const [idAno, setIdAno] = React.useState<number>(0);
                         
               
               <DialogFooter>
-                <Button title='nova matrícula' className='responsive-button bg-blue-600 border-blue-600 text-white hover:bg-blue-600 font-semibold w-12' type='submit'><SaveIcon className='h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7 w-5 absolute text-white font-extrabold'/></Button>
+                <Button title='nova matrícula' className='responsive-button bg-blue-600 border-blue-600 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7 w-5 absolute text-white font-extrabold'/></Button>
               </DialogFooter>
               </form>
               </Form>
@@ -767,7 +767,7 @@ const [idAno, setIdAno] = React.useState<number>(0);
               <DialogTrigger asChild>
               <div title='ver dados' className='relative flex justify-center items-center'>
               <InfoIcon className='w-5 h-4 absolute text-white font-extrabold'/>
-                <button className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600' ></button>
+                <button className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600' ></button>
                 </div>
                 
               </DialogTrigger>
@@ -789,27 +789,27 @@ const [idAno, setIdAno] = React.useState<number>(0);
                           <p className='font-thin text-sm'>{alunosPorId?.data?.nomeCompleto}</p>
                       </div>
                       <div>
-                          <label className='font-poppins'>número do bi</label>		
+                          <label >número do bi</label>		
                             <p className='font-thin text-sm'>{alunosPorId?.data?.numeroBi}</p>
                       </div>
                       </div>
                       <div className="w-full flex flex-row justify-between px-2">
                       <div>
-                          <label className='font-poppins'>nome do pai</label>	
+                          <label >nome do pai</label>	
                           <p className='font-thin text-sm'>{alunosPorId?.data?.nomeCompletoPai}</p>
                       </div>
                       <div>
-                          <label className='font-poppins'>nome da mãe</label>
+                          <label >nome da mãe</label>
                           <p className='font-thin text-sm'>{alunosPorId?.data?.nomeCompletoMae}</p>
                       </div>
                       </div>
                       <div className="w-full flex flex-row justify-between px-2">
                       <div>
-                          <label className='font-poppins'>gênero</label>
+                          <label >gênero</label>
                           <p className='font-thin text-sm'>{alunosPorId?.data?.genero}</p>
                       </div>
                       <div>
-                          <label className='font-poppins'>data de nascimento</label>
+                          <label >data de nascimento</label>
                           <p className='font-thin text-sm'>{alunosPorId?.data?.dataNascimento}</p>
                       </div>
                       </div>
@@ -821,31 +821,31 @@ const [idAno, setIdAno] = React.useState<number>(0);
                       <div className="w-full flex flex-row justify-between px-2">
                       <div className="w-full flex flex-row justify-between px-2">
                       <div>
-                          <label className='font-poppins'>número da casa</label>
+                          <label >número da casa</label>
                           <p className='font-thin text-sm'>{alunosPorId?.data?.endereco.numeroCasa}</p>
                       </div>
                       <div>
-                          <label className='font-poppins'>bairro</label>
+                          <label >bairro</label>
                           <p className='font-thin text-sm'>{alunosPorId?.data?.endereco.bairro}</p>
                       </div>
                       <div>
-                          <label className='font-poppins'>rua</label>
+                          <label >rua</label>
                           <p className='font-thin text-sm'>{alunosPorId?.data?.endereco?.rua}</p>
                       </div>
                       </div>
                       </div>
                   </fieldset>
                       <fieldset>
-                          <legend className='font-robotoSlab text-sm text-gray-800'>Contacto</legend>
+                          <legend className='text-sm text-gray-800'>Contacto</legend>
                       <div className="w-full flex flex-row justify-between px-2">
                       <div className="w-full flex flex-row justify-between px-2">
                       <div>
-                          <label className='font-poppins'>Telefone</label>
+                          <label >Telefone</label>
                           <p className='font-thin text-sm'>{alunosPorId?.data?.contacto?.telefone}</p>
                       </div>
                       {alunosPorId?.data?.email && 
                       <div>
-                          <label className='font-poppins'>email</label>
+                          <label >email</label>
                           <p className='font-thin text-sm'>{alunosPorId?.data?.contacto?.email}</p>
                       </div>
                       }

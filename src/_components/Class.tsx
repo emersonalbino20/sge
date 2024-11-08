@@ -214,7 +214,7 @@ const changeResource = (id)=>{
     <DialogTrigger asChild>
     <div title='cadastrar' className='relative flex justify-center items-center'>
     <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
+      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
       </div>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
@@ -382,7 +382,7 @@ const changeResource = (id)=>{
           <DialogTrigger asChild >
           <div title='actualizar' className='relative flex justify-center items-center'>
           <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-            <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
+            <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
             </div>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
@@ -500,7 +500,7 @@ const changeResource = (id)=>{
                     <PopoverTrigger asChild className='bg-white'>
 
                     <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
-                      <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
+                      <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600'></Button>
                       </div>
                     </PopoverTrigger >
                     <PopoverContent className="w-80 bg-white">
@@ -563,11 +563,11 @@ const changeResource = (id)=>{
    </div>
    <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
    <CheckCircleIcon className='w-28 h-20 text-green-400'/>
-   <p className='font-poppins uppercase'>Operação foi bem sucedida!</p>
-   <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
+   <p className='uppercase'>Operação foi bem sucedida!</p>
+   <div className=' bottom-0 py-2 flex flex-col items-end justify-end border-t w-full border-green-400'>
      <Button className='bg-green-400 hover:bg-green-500
      hover:font-medium
-      font-poppins text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+     text-md border-green-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
  </div>
  </div>
  
@@ -586,9 +586,9 @@ const changeResource = (id)=>{
    </div>
    <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
    <AlertCircleIcon className='w-28 h-20 text-red-400'/>
-   <p className='font-poppins uppercase'>{modalMessage}</p>
-   <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
-     <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
+   <p className='uppercase'>{modalMessage}</p>
+   <div className='bottom-0 py-2 flex flex-col items-end justify-end border-t w-full border-red-400'>
+     <Button className='hover:bg-red-500 bg-red-400 hover:font-medium text-md border-red-400 font-medium h-9 w-20' onClick={() => setShowModal(false)}>Fechar</Button>
  </div>
  </div>
  

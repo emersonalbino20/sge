@@ -23,7 +23,7 @@ interface MostrarDialogProps {
            <MyDialog open={show} onOpenChange={onClose} >
         
         <MyDialogContent className="sm:max-w-[425px] bg-white p-0 m-0">
-        {message == null &&
+        {message === null &&
             <div role="alert" className='w-full'>
           <div className="bg-green-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
             <div>
@@ -35,18 +35,18 @@ interface MostrarDialogProps {
           </div>
           <div className="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700 flex flex-col items-center justify-center space-y-2">
           <CheckCircleIcon className='w-28 h-20 text-green-400'/>
-          <p className='font-poppins uppercase text-green-400'>Operação foi bem sucedida!</p>
-          <div className=' bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-green-400'>
+          <p className='uppercase text-green-400'>Operação foi bem sucedida!{message}</p>
+          <div className=' bottom-0 py-2 flex flex-col items-end justify-end border-t w-full border-green-400'>
             <Button className='bg-green-400 hover:bg-green-500
             hover:font-medium
-             font-poppins text-md border-green-400 font-medium h-9 w-20 outline-none' onClick={onClose}>Fechar</Button>
+            text-md border-green-400 font-medium h-9 w-20 outline-none' onClick={onClose}>Fechar</Button>
         </div>
         </div>
         
           </div>
           
       }
-       {message != null &&
+       {message !== null &&
             <div role="alert" className='w-full'>
           <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex justify-between">
             <div>
@@ -58,9 +58,9 @@ interface MostrarDialogProps {
           </div>
           <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 flex flex-col items-center justify-center space-y-2">
           <AlertCircleIcon className='w-28 h-20 text-red-400'/>
-          <p className='font-poppins uppercase text-red-400'>{message}</p>
-          <div className='bottom-0 py-2 flex flex-col items-end justify-end font-lato border-t w-full border-red-400'>
-            <Button className='hover:bg-red-500 bg-red-400 hover:font-medium font-poppins text-md border-red-400 font-medium h-9 w-20 outline-none' onClick={onClose}>Fechar</Button>
+          <p className='uppercase text-red-400'>{message}</p>
+          <div className='bottom-0 py-2 flex flex-col items-end justify-end border-t w-full border-red-400'>
+            <Button className='hover:bg-red-500 bg-red-400 hover:font-medium text-md border-red-400 font-medium h-9 w-20 outline-none' onClick={onClose}>Fechar</Button>
         </div>
         </div>
         

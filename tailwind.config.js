@@ -89,13 +89,6 @@ module.exports = {
         'custom-image':"url('./assets/_images/saude.png')",
         'custom-gradient':'linear-gradient (to right, #007cf0, #00dfd8)',
       }, 
-      fontFamily: {
-        poppins: ['Poppins', 'sans-serif'],
-        playfair: ['PlayfairDisplay','serif'],
-        lato: ['Lato','sans-serif'],
-        robotoSlab: ['RobotoSlab','sans-serif'],
-        merriweather: ['MerriWeather','sans-serif']
-      },
       textColor: {
         'blueColorLoginParagraf':'#008ae1',
         'blueColorLoginTitle':'#1e293b',

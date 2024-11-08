@@ -1,5 +1,5 @@
 .input-confirm{
-    @apply border-gray-300 text-gray-600 focus:text-sky-600 focus:font-semibold focus:border-sky-500;
+    @apply border-gray-300 text-gray-600 focus:text-blue-600 focus:font-semibold focus:border-blue-500;
 }
 .input-error{
     @apply border-red-300 text-red-500 focus:text-red-600 font-semibold focus:border-red-500;

@@ -258,7 +258,7 @@ export default function PersonIncharge (){
       </div>
         </div>: (
        <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
-       <Header title={false}/>
+       <Header />
        
        <div className='flex flex-col space-y-2 justify-center items-center w-full'> 
        <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
@@ -271,16 +271,16 @@ export default function PersonIncharge (){
     <DialogTrigger asChild >
     <div title='cadastrar' className='relative flex justify-center items-center' >
     <UserPlus className='w-5 h-4 absolute text-white font-extrabold'/>
-      <button className='py-4 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm' ></button>
+      <button className='py-4 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm' ></button>
       </div>
       
     </DialogTrigger>
     <DialogContent className="sm:max-w-[525px]  bg-white">
       <DialogHeader>
-      <DialogTitle className='text-sky-800 text-xl'>Cadastrar Regstro</DialogTitle>
+      <DialogTitle className='text-blue-600 text-xl'>Cadastrar Regstro</DialogTitle>
         <DialogDescription>
           <p className='text-base text-gray-800'>
-          preencha o formulário e em seguida click em <span className='font-bold text-sky-700'>cadastrar</span> quando terminar.
+          preencha o formulário e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
         </p>
         </DialogDescription>
       </DialogHeader>
@@ -289,7 +289,7 @@ export default function PersonIncharge (){
      <form onSubmit={form.handleSubmit(handleSubmitCreate)} >
      <div className="w-full flex flex-col justify-between  ">
         <fieldset>
-        <legend className='text-sky-800 text-xl'>Dados Pessoal</legend>
+        <legend className='text-blue-600 text-xl'>Dados Pessoal</legend>
             <div className='w-full flex flex-col '>
             <div className="w-full flex flex-row justify-between space-x-2 ">
             <div className='w-full'>
@@ -343,7 +343,7 @@ export default function PersonIncharge (){
        </div>
         </fieldset>
         <fieldset>
-        <legend className='text-sky-800 text-xl'>
+        <legend className='text-blue-600 text-xl'>
         Localização</legend>
             <div className="w-full flex flex-row justify-between space-x-2">
             <div className='w-full'>
@@ -393,7 +393,7 @@ export default function PersonIncharge (){
         </div></div>
         </fieldset>
         <fieldset>
-        <legend className='text-sky-800 text-xl'>
+        <legend className='text-blue-600 text-xl'>
         Contacto</legend>
             <div className="w-full flex flex-row justify-between space-x-2">
         <div className='w-full'>
@@ -471,16 +471,16 @@ export default function PersonIncharge (){
                               <DialogTrigger asChild >
                             <div title='actualizar' className='relative flex justify-center items-center' >
                             <EditIcon className='w-5 h-4 absolute text-white'/> 
-                              <Button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm border-blue-600'></Button>
+                              <Button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm border-blue-600'></Button>
                               </div>
                               
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[525px] bg-white">
                               <DialogHeader>
-                              <DialogTitle className='text-sky-800 text-xl'>Actualizar Registro</DialogTitle>
+                              <DialogTitle className='text-blue-600 text-xl'>Actualizar Registro</DialogTitle>
                                   <DialogDescription>
                                     <p className='text-base text-gray-800'>
-                                    altere uma informação do registro click em <span className='font-bold text-sky-700'>actualizar</span> quando terminar.
+                                    altere uma informação do registro click em <span className='font-bold text-blue-500'>actualizar</span> quando terminar.
                                   </p>
                                   </DialogDescription>
                               </DialogHeader>
@@ -488,7 +488,7 @@ export default function PersonIncharge (){
                             <form onSubmit={formUpdate.handleSubmit(handleSubmitUpdate)} >
                             <div className="w-full flex flex-col justify-between  ">
                                 <fieldset>
-                                <legend className='text-sky-800 text-xl'>
+                                <legend className='text-blue-600 text-xl'>
                                 Dados Pessoal</legend>
                                     <div className='w-full flex flex-col '>
                                     <div className="w-full flex flex-row justify-between space-x-2 ">
@@ -544,7 +544,7 @@ export default function PersonIncharge (){
                               </div>
                                 </fieldset>
                                 <fieldset>
-                                <legend className='text-sky-800 text-xl'>
+                                <legend className='text-blue-600 text-xl'>
                                 Localização</legend>
                                     <div className="w-full flex flex-row justify-between space-x-2">
                                     <div className='w-full'>
@@ -598,7 +598,7 @@ export default function PersonIncharge (){
                                 </div></div>
                                 </fieldset>
                                 <fieldset>
-                                <legend className='text-sky-800 text-xl'>
+                                <legend className='text-blue-600 text-xl'>
                                 Contacto</legend>
                                     <div className="w-full flex flex-row justify-between space-x-2">
                                 <div className='w-full'>
@@ -688,7 +688,7 @@ export default function PersonIncharge (){
                             <DialogTrigger asChild>
                             <div title='ver dados' className='relative flex justify-center items-center'>
                             <InfoIcon className='w-5 h-4 absolute text-white font-extrabold'/>
-                              <button className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600' ></button>
+                              <button className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600' ></button>
                               </div>
                               
                             </DialogTrigger>
@@ -704,35 +704,35 @@ export default function PersonIncharge (){
                                 <div className="flex flex-col w-full">
                                     
                                 <fieldset>
-                                    <legend className='font-robotoSlab text-sm'>Localização</legend>
+                                    <legend className='text-sm'>Localização</legend>
                                     <div className="w-full flex flex-row justify-between px-2">
                                     <div className="w-full flex flex-row justify-between px-2">
                                     <div>
-                                        <label className='font-poppins'>número da casa</label>
+                                        <label >número da casa</label>
                                         <p className='font-thin text-sm'>{casa}</p>
                                     </div>
                                     <div>
-                                        <label className='font-poppins'>bairro</label>
+                                        <label >bairro</label>
                                         <p className='font-thin text-sm'>{bairro}</p>
                                     </div>
                                     <div>
-                                        <label className='font-poppins'>rua</label>
+                                        <label >rua</label>
                                         <p className='font-thin text-sm'>{rua}</p>
                                     </div>
                                     </div>
                                     </div>
                                 </fieldset>
                                     <fieldset>
-                                        <legend className='font-robotoSlab text-sm'>Contacto</legend>
+                                        <legend className='text-sm'>Contacto</legend>
                                     <div className="w-full flex flex-row justify-between px-2">
                                     <div className="w-full flex flex-row justify-between px-2">
                                     <div>
-                                        <label className='font-poppins'>Telefone</label>
+                                        <label >Telefone</label>
                                         <p className='font-thin text-sm'>{telefone}</p>
                                     </div>
                                     {email && (
                                     <div>
-                                        <label className='font-poppins'>email</label>
+                                        <label >email</label>
                                         <p className='font-thin text-sm'>{email}</p>
                                     </div>
                                     )}

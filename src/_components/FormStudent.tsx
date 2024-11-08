@@ -2,22 +2,21 @@
 import * as React from 'react'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { AlertCircleIcon, AlertTriangle, CheckCircleIcon,  PlusIcon } from 'lucide-react'
+import { AlertTriangle, PlusIcon } from 'lucide-react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver} from '@hookform/resolvers/zod'
-import {nomeCompletoZod,  dataNascimentoZod, generoZod, numeroBiZod, bairroZod, ruaZod, numeroCasaZod, telefoneZod, emailZod} from '../_zodValidations/validations'
-import { MyDialog, MyDialogContent } from './my_dialog'
-import { Button } from '@/components/ui/button'
+import {nomeCompletoZod,  dataNascimentoZod, generoZod, numeroBiZod, bairroZod, ruaZod, telefoneZod, emailZod} from '../_zodValidations/validations'
 import './stepper.css';
 import { Check } from 'lucide-react';
 import Header from './Header'
 import { useHookFormMask, withMask } from 'use-mask-input'
-import { error } from 'console'
 import { animateBounce, animateFadeLeft, animatePing, animateShake } from '@/AnimationPackage/Animates'
 import { Link } from 'react-router-dom'
 import MostrarDialog from './MostrarDialog';
-//define the data that will send for the server to be insert on database
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import axios from 'axios'
+import { collectErrorMessages, matriculaAluno } from '@/_queries/Alunos'
 
 const TFormCreate =  z.object({
     nomeCompleto: nomeCompletoZod,
@@ -140,10 +139,10 @@ React.useEffect(()=>{
     search()
 },[])
 
-//Funcao de matricula
+
     const [showDialog, setShowDialog] = React.useState(false);
-  const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
-const handleSubmitCreate = async (dados: z.infer<typeof TFormCreate>) => {
+    const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
+const handleSubmitCreates = async (dados: z.infer<typeof TFormCreate>) => {
     const data = {
         classeId: dados.classeId,
         cursoId: idCurso,
@@ -220,6 +219,61 @@ const handleSubmitCreate = async (dados: z.infer<typeof TFormCreate>) => {
         
     }
 
+    const queryClient = useQueryClient();
+
+    const {mutate: postMutationMatriculaAlunos, error} = useMutation({
+        mutationFn: matriculaAluno,
+        onSuccess: (response) => {
+            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+            window.open(url, '_blank');
+            queryClient.invalidateQueries({queryKey: ["alunosTurmaId", fieldClasseId, fieldTurmaId]});
+        },
+        onError: (error) => {
+        if(axios.isAxiosError(error)){
+            
+            if (error.response && error.response.data) {
+                const err = error.response.data?.errors;
+                const errorMessages = collectErrorMessages(err);
+                let from = String(Object.keys(error.response?.data?.errors?.aluno)) ? 'Responsavél' : 'Aluno';
+
+                console.log(String(errorMessages))
+                setDialogMessage(from+": "+String(errorMessages));
+                setShowDialog(true);
+                }
+            }
+        }
+      });
+    
+      const handleSubmitCreate = async (dados: z.infer<typeof TFormCreate>,e) => {
+        e.preventDefault();
+        const data = {
+            classeId: dados.classeId,
+            cursoId: idCurso,
+            turmaId: dados.turmaId,
+            turnoId: dados.turnoId,
+            metodoPagamentoId: dados.metodoId,
+            aluno: {
+              nomeCompleto: dados.nomeCompleto,
+              nomeCompletoPai: dados.nomeCompletoPai,
+              nomeCompletoMae: dados.nomeCompletoMae,
+              numeroBi: dados.numeroBi,
+              dataNascimento: dados.dataNascimento,
+              genero: dados.genero,
+              endereco: {
+                bairro: dados.bairro,
+                rua: dados.rua,
+                numeroCasa: dados.numeroCasa
+              },
+              contacto: {
+                telefone: dados.telefone,
+                email: dados.email
+              },
+              responsaveis: dados.responsaveis
+            }
+          }
+        postMutationMatriculaAlunos(data)
+       }
+
     const step = ['Info. Aluno', 'Info. Encarregado', 'Último Passo'];
     const[ currentStep, setCurrentStep ] = React.useState<number>(1);
     const[ complete, setComplete ] = React.useState<boolean>(false);
@@ -247,7 +301,7 @@ return(
     </div>
       </div> : (
     <div className='w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3'>
-          <Header title={false} />
+          <Header />
           
          <div className='w-full flex items-center justify-center'>
         <div className='flex flex-col space-y-2 justify-center sm:[376px] md:w-[550px] lg:w-[600px]'>
@@ -799,7 +853,7 @@ return(
         currentStep === step.length ?
         setComplete(true) :
         setCurrentStep(prev => prev + 1);
-    }} className={`${currentStep === 3 && complete ? `${animateFadeLeft} bg-green-700 hover:bg-green-600 border-green-700`: `${animateFadeLeft}  bg-sky-700 hover:bg-sky-600 border-sky-700`} text-white font-semibold sm:text-sm md:text-[10px] lg:text-[12px] xl:text-[16px]
+    }} className={`${currentStep === 3 && complete ? `${animateFadeLeft} bg-green-700 hover:bg-green-500 border-green-700`: `${animateFadeLeft}  bg-sky-700 hover:bg-sky-600 border-sky-700`} text-white font-semibold sm:text-sm md:text-[10px] lg:text-[12px] xl:text-[16px]
     py-1 sm:py-[2px] lg:py-1 xl:py-2 `} disabled={!isValid}>{!isValid}Cadastrar</button> }</div>: 
     <button type='button' onClick={()=>{
     const isStep1Valid = !errors.nomeCompleto && !errors.numeroBi && !errors.genero &&

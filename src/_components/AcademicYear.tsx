@@ -31,9 +31,9 @@ import Header from './Header'
 import { animateBounce, animatePulse, animateShake } from '@/AnimationPackage/Animates'
 import MostrarDialog from './MostrarDialog';
 import {  useMutation, useQueries, useQueryClient } from '@tanstack/react-query'
-import { collectErrorMessages, getAnoAcademico, getAnoAcademicoId, patchAnoAcademico, postAnoAcademico, putAnoAcademico } from '@/_tanstack/AnoAcademico'
+import { collectErrorMessages, getAnoAcademico, getAnoAcademicoId, patchAnoAcademico, postAnoAcademico, putAnoAcademico } from '@/_queries/AnoAcademico'
 import axios from 'axios'
-import { postTrimestres } from '@/_tanstack/Trimestres'
+import { postTrimestres } from '@/_queries/Trimestres'
 
 const TFormCreate =  z.object({
   inicio: inicio,
@@ -224,7 +224,7 @@ const [buscar, setBuscar] = React.useState<number>(null);
 
     return (
       <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
-      <Header title={false}/>
+      <Header />
       <div className='flex flex-col space-y-2 justify-center items-center w-full'>
         <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
       <div className='flex flex-col space-y-2 justify-center w-[90%] z-10'> 
@@ -237,15 +237,15 @@ const [buscar, setBuscar] = React.useState<number>(null);
     <DialogTrigger asChild >
     <div title='cadastrar Ano-Lectivos' className='relative flex justify-center items-center'>
     <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
+      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
       </div>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
-      <DialogTitle className='text-sky-800 text-xl'>Cadastrar Ano Académico</DialogTitle>
+      <DialogTitle className='text-blue-600 text-xl'>Cadastrar Ano Académico</DialogTitle>
       <DialogDescription>
         <p className='text-base text-gray-800'>
-        preencha o formulárioe em seguida click em <span className='font-bold text-sky-700'>cadastrar</span> quando terminar.
+        preencha o formulárioe em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
       </p>
       </DialogDescription>
       </DialogHeader>
@@ -269,7 +269,7 @@ const [buscar, setBuscar] = React.useState<number>(null);
         )}/>
         </div>
         <div className="w-full">
-        <Label htmlFor="termino"className='text-sky-700 text-lg font-semibold'>Término<span className='text-red-500'>*</span>
+        <Label htmlFor="termino"className='text-blue-500 text-lg font-semibold'>Término<span className='text-red-500'>*</span>
           </Label>
           <FormField
           control={formCreate.control}
@@ -294,12 +294,12 @@ const [buscar, setBuscar] = React.useState<number>(null);
     <div title='cadastrar trimestre' className='relative flex justify-center items-center'>
     
     <Library className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
+      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
       </div>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
-      <DialogTitle className='text-sky-800 text-xl'>Cadastrar Trimestre</DialogTitle>
+      <DialogTitle className='text-blue-600 text-xl'>Cadastrar Trimestre</DialogTitle>
         <DialogDescription>
           <p className='text-base text-gray-800'>
           esta secção tem como finalidade adicionar um novo trimestre ao ano lectivo corrente.
@@ -326,7 +326,7 @@ const [buscar, setBuscar] = React.useState<number>(null);
         )}/>
         </div>
         <div className="w-full">
-         <label htmlFor="inicio"className='text-sky-700 text-lg font-semibold'>Ínicio<span className='text-red-500'>*</span>
+         <label htmlFor="inicio"className='text-blue-500 text-lg font-semibold'>Ínicio<span className='text-red-500'>*</span>
           </label>
           <FormField
           control={formCreateTrimestre.control}
@@ -342,7 +342,7 @@ const [buscar, setBuscar] = React.useState<number>(null);
         )}/>
         </div>
         <div className="w-full">
-        <label htmlFor="termino"className='text-sky-700 text-lg font-semibold'>Término<span className='text-red-500'>*</span>
+        <label htmlFor="termino"className='text-blue-500 text-lg font-semibold'>Término<span className='text-red-500'>*</span>
           </label>
           <FormField
           control={formCreateTrimestre.control}
@@ -422,15 +422,15 @@ const [buscar, setBuscar] = React.useState<number>(null);
           <DialogTrigger asChild >
           <div title='actualizar' className='relative flex justify-center items-center'>
           <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-            <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-600 rounded-sm'></Button>
+            <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
             </div>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
                 <DialogHeader>
-                <DialogTitle className='text-sky-800 text-xl'>Actualizar Ano Académico</DialogTitle>
+                <DialogTitle className='text-blue-600 text-xl'>Actualizar Ano Académico</DialogTitle>
               <DialogDescription>
                 <p className='text-base text-gray-800'>
-                altere uma informação do ano e em seguida click em <span className='font-bold text-sky-700'>actualizar</span> quando terminar.
+                altere uma informação do ano e em seguida click em <span className='font-bold text-blue-500'>actualizar</span> quando terminar.
               </p>
               </DialogDescription>
                 </DialogHeader>
@@ -453,7 +453,7 @@ const [buscar, setBuscar] = React.useState<number>(null);
   
               <div className="flex flex-col w-full py-4 bg-white">
               <div className="w-full">
-              <label htmlFor="inicio"className='text-sky-700 text-lg font-semibold'>Ínicio<span className='text-red-500'>*</span>
+              <label htmlFor="inicio"className='text-blue-500 text-lg font-semibold'>Ínicio<span className='text-red-500'>*</span>
           </label>
                 <FormField
                 control={formUpdate.control}
@@ -469,7 +469,7 @@ const [buscar, setBuscar] = React.useState<number>(null);
               )}/>
               </div>
               <div className="w-full">
-              <label htmlFor="termino"className='text-sky-700 text-lg font-semibold'>Término<span className='text-red-500'>*</span>
+              <label htmlFor="termino"className='text-blue-500 text-lg font-semibold'>Término<span className='text-red-500'>*</span>
               </label>
                 <FormField
                 control={formUpdate.control}
@@ -498,7 +498,7 @@ const [buscar, setBuscar] = React.useState<number>(null);
                   <PopoverTrigger asChild className='bg-white'>
 
                   <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
-                    <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-600 rounded-sm border-green-600'></Button>
+                    <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600'></Button>
                     </div>
                   </PopoverTrigger >
                   <PopoverContent className="w-80 bg-white">

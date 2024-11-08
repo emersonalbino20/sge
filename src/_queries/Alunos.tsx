@@ -48,20 +48,30 @@ import axios from 'axios';
         return (axios.put(`http://localhost:8000/api/alunos/${data.id}`, dados));
         
     }
-      export const confirmacaoAluno = (data) =>{
-            const dados = { 
-                classeId: data.classeId,
-                turmaId: data.turmaId,
-                turnoId: data.turnoId,
-                metodoPagamentoId: data.metodoPagamentoId,
-            }
-        return axios.post(`http://localhost:8000/api/alunos/${data.id}/matriculas`, dados, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            responseType: 'blob',
-          });
-     }
+    export const confirmacaoAluno = (data) =>{
+          const dados = { 
+              classeId: data.classeId,
+              turmaId: data.turmaId,
+              turnoId: data.turnoId,
+              metodoPagamentoId: data.metodoPagamentoId,
+          }
+      return axios.post(`http://localhost:8000/api/alunos/${data.id}/matriculas`, dados, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          responseType: 'blob',
+        });
+    }
+
+    export const matriculaAluno = (data) =>{
+     
+      return axios.post(`http://localhost:8000/api/matriculas/`, data, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          responseType: 'blob',
+        });
+      }
 
      export const collectErrorMessages = (obj) => {
         let messages = [];

@@ -336,3 +336,14 @@ export const  numeroCasaZod = z
     })
     .max(20, { message: 'O valor máximo da nota é 20.' })
     .transform((value) => value.toFixed(1))
+
+    export const ordem = z
+    .number({
+      required_error: 'A ordem é obrigatória.',
+      invalid_type_error: 'A ordem deve ser número.',
+    })
+    .int({ message: 'A ordem deve ser inteiro.' })
+    .positive({ message: 'A ordem deve ser positivo.' })
+    .min(1, { message: 'A ordem no minimo deve ser 1' })
+    .max(4, { message: 'A ordem no máximo deve ser 4' })
+ 
