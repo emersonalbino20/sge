@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { EditIcon, InfoIcon, UserPlus, LucideLibrary, Save, Trash2, Link2, GraduationCap, Building2, Users, BookOpen, Sun, Calendar } from 'lucide-react';
+import { EditIcon, InfoIcon, UserPlus, LucideLibrary, Save, Trash2, Link2, GraduationCap, Building2, Users, BookOpen, Sun, Calendar, School } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 
@@ -163,3 +163,28 @@ export function PeriodButton()
         </>
     );
 }
+
+export function AcademicYearButton()
+{
+    return (
+        <>
+            <School
+            className={ClassIcon}
+            />
+            <Button className='h-8 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm border-blue-600'></Button>
+        </>
+    );
+}
+
+export function TermButton()
+{
+    return (
+        <>
+            <Calendar
+            className={ClassIcon}
+            />
+            <Button className='h-8 px-5 bg-orange-600 text-white font-semibold hover:bg-orange-500 rounded-sm border-orange-600'></Button>
+        </>
+    );
+}
+

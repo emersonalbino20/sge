@@ -30,7 +30,7 @@ export default function Header(){
         { titulo: "Disciplinas", link: "/SubjectPage" },
         { titulo: "Turnos", link: "/PeriodPage" },
         { titulo: "Salas", link: "/ClassRoomPage" },
-        { titulo: "Classes", link: "/GradePage" },
+        { titulo: "Ano-Lectivo", link: "/AcademicYearPage" },
       ]
     },
     {

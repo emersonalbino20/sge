@@ -17,11 +17,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import { AlertCircleIcon, AlertTriangle, CheckCircle, EditIcon, Library, PrinterIcon, SaveIcon, Search, Trash} from 'lucide-react'
+import { AlertCircleIcon, AlertTriangle, CheckCircle, ChevronLeft, ChevronRight, EditIcon, Library, Loader, PrinterIcon, SaveIcon, Search, Trash} from 'lucide-react'
 import { InfoIcon } from 'lucide-react'
 import { UserPlus } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
-import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, nomeCursoZod, descricaoZod, duracaoZod, inicio, termino, anoLectivo, idZod } from '@/_zodValidations/validations'
+import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, nomeCursoZod, descricaoZod, duracaoZod, inicio, termino, anoLectivo, idZod, matriculaAberta, ordem, classe, custoMatricula, activo } from '@/_zodValidations/validations'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, useFieldArray } from 'react-hook-form'
@@ -34,24 +34,37 @@ import {  useMutation, useQueries, useQueryClient } from '@tanstack/react-query'
 import { collectErrorMessages, getAnoAcademico, getAnoAcademicoId, patchAnoAcademico, postAnoAcademico, putAnoAcademico } from '@/_queries/AnoAcademico'
 import axios from 'axios'
 import { postTrimestres } from '@/_queries/Trimestres'
+import { useGetAcademicQuery, useGetIdAcademicQuery, usePatchAcademic, usePostAcademic, usePostGradeToAcademic, usePostTerm, usePutAcademic } from '@/_queries/UseAcademicQuery'
+import { Switch } from '@/components/ui/switch'
+import { AcademicYearButton, EditButton, GradeButton, InfoButton, TermButton } from './MyButton'
+import { useGetCurseQuery } from '@/_queries/UseCurseQuery'
+import { AlertErro, AlertSucesso } from './Alert'
 
 const TFormCreate =  z.object({
   inicio: inicio,
   termino: termino,
+  matriculaAberta: matriculaAberta
 })
 
 const TFormUpdate =  z.object({
   inicio: inicio,
   termino: termino,
+  matriculaAberta: matriculaAberta,
   id: z.number()
 })
-
 const TFormCreateTrimestre =  z.object({
   numero: idZod,
   inicio: inicio,
   termino: termino,
 })
 
+const TFormGradeToAcademic =  z.object({
+  nome: classe,
+  ordem: ordem,
+  cursoId: idZod,
+  valorMatricula: custoMatricula,
+  id: z.number()
+})
 
 export default function AcademicYear(){
 
@@ -70,174 +83,374 @@ const formUpdate  = useForm<z.infer<typeof TFormUpdate>>({
   resolver: zodResolver(TFormUpdate)
   })
 
-const [showDialog, setShowDialog] = React.useState(false);
-const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
+const formGradeToAcademic  = useForm<z.infer<typeof TFormGradeToAcademic>>({
+  mode: 'all', 
+  resolver: zodResolver(TFormGradeToAcademic)
+  })
 
-const queryClient = useQueryClient();
-const {mutate: postMutationAnoAcademico} = useMutation({
-  mutationFn: postAnoAcademico,
-  onSuccess: () => {
-    setDialogMessage(null);
-    setShowDialog(true);
-    queryClient.invalidateQueries({queryKey: ["getAnoLectivos"]});
-  },
-  onError: (error) => {
-    if(axios.isAxiosError(error)){
-      if (error.response && error.response.data) {
-        const err = error.response.data?.errors;
-        const errorMessages = collectErrorMessages(err);
-        setDialogMessage(errorMessages[0]);
-        setShowDialog(true);
-       }
-      }
-    }
-});
-
-const handleSubmitCreateAnoLectivos = async (data: z.infer<typeof TFormCreate>,e) => {
-  e.preventDefault();
-  postMutationAnoAcademico(data)
+//Post
+const { postAcademic, postError, postLevel } = usePostAcademic();
+const handleSubmitCreateAnoLectivos = async (data: z.infer<typeof TFormCreate>) => {
+  postAcademic(data)
  }
 
-const {mutate: postMutationTrimestre} = useMutation({
-  mutationFn: postTrimestres,
-  onSuccess: () => {
-    setDialogMessage(null);
-    setShowDialog(true);
-    queryClient.invalidateQueries({queryKey: ["getAnoLectivos"]});
-  },
-  onError: (error) => {
-      if(axios.isAxiosError(error)){
-        if (error.response && error.response.data) {
-          if(error.response.data?.errors)
-            {
-              const err = error.response.data?.errors;
-              const errorMessages = collectErrorMessages(err);
-            setDialogMessage(errorMessages[0]);
-            setShowDialog(true);
-            }else{
-              const errorMessages = error.response.data.message
-              setDialogMessage(errorMessages);
-              setShowDialog(true);
-            }
-         }
-        }
-      }
-    }
-);
-
-const handleSubmitCreateTrimestre = async (data: z.infer<typeof TFormCreateTrimestre>,e) => {
-  e.preventDefault();
-  postMutationTrimestre(data)
+const { postTerm, postTermError, postTermLevel } = usePostTerm();
+const handleSubmitCreateTrimestre = async (data: z.infer<typeof TFormCreateTrimestre>) => {
+  postTerm(data)
  }
 
- const {mutate: patchMutationAnoLectivo} = useMutation({
-  mutationFn: patchAnoAcademico,
-  onSuccess: () => {
-    queryClient.invalidateQueries({queryKey: ["getAnoLectivos"]});
-  },
-  onError: (error) => {
-    console.log(error);
-    if(axios.isAxiosError(error)){
-      if (error.response && error.response.data) {
-        if(error.response.data?.errors)
-          {
-            const err = error.response.data?.errors;
-            const errorMessages = collectErrorMessages(err);
-          setDialogMessage(errorMessages[0]);
-          setShowDialog(true);
-          }else{
-            const errorMessages = error.response.data.message
-            setDialogMessage(errorMessages);
-            setShowDialog(true);
-          }
-       }
-      }
-    }
-});
-
-const handleSubmitPatchAno = async (buscar, bool) => {
-  const dados = {
-    id: buscar,
-    values: bool 
-  }
-  patchMutationAnoLectivo(dados);
- }
- 
- const {mutate: putMutationAnoAcademico} = useMutation({
-  mutationFn: putAnoAcademico,
-  onSuccess: () => {
-    setDialogMessage(null);
-    setShowDialog(true);
-    queryClient.invalidateQueries({queryKey: ["getAnoLectivos"]});
-  },
-  onError: (error) => {
-    console.log(error)
-    if(axios.isAxiosError(error)){
-      if (error.response && error.response.data) {
-        const err = error.response.data?.errors;
-        const errorMessages = collectErrorMessages(err);
-        setDialogMessage(errorMessages[0]);
-        setShowDialog(true);
-       }
-      }
-    }
-});
-
-const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
-  e.preventDefault();
-  putMutationAnoAcademico(data)
+const { postGrade, postGradeError, postGradeLevel } = usePostGradeToAcademic();
+const handleSubmitGrade = async (data: z.infer<typeof TFormGradeToAcademic>) => {
+  postGrade(data)
  }
 
-const [buscar, setBuscar] = React.useState<number>(null);
-  const [{data: dados, isLoading: dadosLoading, isSuccess: dadosSuccess, isError: dadosError}, {data: anoLectivos}] = useQueries(
-    { 
-      queries: 
-      [
-        {queryKey: ["getAnoLectivos"] , queryFn: getAnoAcademico},
-        {queryKey: ["getAnoLectivosId", buscar] , queryFn:()=>getAnoAcademicoId(buscar), enabled: !!buscar},
-      ]
-    })
-    
+//Patch
+ const { patchAcademic, patchError, patchLevel } = usePatchAcademic();
+const handleSubmitPatchAno = (bool) => {
+  patchAcademic({ id: buscar, activo: bool, matriculaAberta: false });
+ }
 
+//Get
+  const [buscar, setBuscar] = React.useState<number>(null);
+  const { data, isError, isLoading } = useGetAcademicQuery();
+  const { data: dataCurse } = useGetCurseQuery();
+  const { dataAcademicById, isFetched } = useGetIdAcademicQuery(buscar);
+
+//Put
+  //Update fields wth datas
   React.useEffect(()=>{
-      async () => {
-            formUpdate.setValue('inicio', anoLectivos?.data?.data?.inicio)
-            formUpdate.setValue('termino', anoLectivos?.data?.data?.termino)
-            formUpdate.setValue('id', anoLectivos?.data?.data?.id)
-      }
-  },[buscar])
+    formUpdate.setValue('inicio', dataAcademicById?.data?.inicio)
+    formUpdate.setValue('termino', dataAcademicById?.data?.termino)
+    formUpdate.setValue('matriculaAberta', dataAcademicById?.data?.matriculaAberta)
+    formUpdate.setValue('id', dataAcademicById?.data?.id)
+    formGradeToAcademic.setValue('id', dataAcademicById?.data?.id)
+  },[buscar, isFetched])
 
-
-
-  const changeResource = (id)=>{
+  const { putAcademic, putError, putLevel } = usePutAcademic();
+  const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>) => {
+    putAcademic(data)
+   }
+   const putId = (id) => {
     setBuscar(id)
   }
+    
+  const colunas = ["Id", "Nome", "Ações"];
 
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const handleFilterChange = (event) => {
-    setSearchTerm(event.target.value.toLowerCase());
-  };
+  const renderAcoes = () => (
+        <> 
+        <Dialog >
+        <DialogTrigger asChild >
+        <div title='actualizar' className='relative flex justify-center items-center'>
+        <EditButton/>
+          </div>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px] bg-white">
+              <DialogHeader>
+              <DialogTitle className='text-blue-600 text-xl'>Actualizar Ano Académico</DialogTitle>
+            <DialogDescription>
+              <p className='text-base text-gray-800'>
+              altere uma informação do ano e em seguida click em <span className='font-bold text-blue-500'>actualizar</span> quando terminar.
+            </p>
+            </DialogDescription>
+              </DialogHeader>
+              <Form {...formUpdate} >
+            <form onSubmit={formUpdate.handleSubmit(handleSubmitUpdate)} >
+            <FormField
+              control={formUpdate.control}
+              name="id"
+              render={({field})=>(
+                <FormControl>
+              <Input 
+              type='hidden'
+                className="w-full"
+                {...field} value={dataAcademicById?.data?.id}
+                onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
+              />
+              </FormControl>
+            )}
+              />
 
-  const filteredAnos = dados?.data?.data?.filter((ano) =>{
-    return ano.nome.toLowerCase().includes(searchTerm)}
+            <div className="flex flex-col w-full py-4 bg-white">
+            <div className="w-full">
+            <label htmlFor="inicio"className='text-blue-500 text-lg font-semibold'>Ínicio<span className='text-red-500'>*</span>
+        </label>
+              <FormField
+              control={formUpdate.control}
+              name="inicio"
+              render={({field})=>(
+                <FormItem>
+                <Input
+                  id="inicio"
+                  type='date' {...field} className={formUpdate.formState.errors.inicio?.message && `${animateShake} input-error`}
+                  />
+                <FormMessage className='text-red-500 text-xs'/>
+              </FormItem>
+            )}/>
+            </div>
+            <div className="w-full">
+            <label htmlFor="termino"className='text-blue-500 text-lg font-semibold'>Término<span className='text-red-500'>*</span>
+            </label>
+              <FormField
+              control={formUpdate.control}
+              name="termino"
+              render={({field})=>(
+                <FormItem>
+                <Input
+                  id="termino"
+                  type='date' {...field} className={formUpdate.formState.errors.termino?.message && `${animateShake} input-error`}
+                  />
+                <FormMessage className='text-red-500 text-xs'/>
+              </FormItem>
+            )}/>               
+            
+            </div>
+            <div className="w-full my-4">
+    <FormField
+      control={formUpdate.control}
+      name="matriculaAberta"
+      render={({ field }) => (
+        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+          <div className="space-y-0.5">
+            <FormLabel className="text-base">
+              Matrícula Aberta
+            </FormLabel>
+            <div className="text-sm text-gray-500">
+              Determina se as matrículas estão abertas para este período
+            </div>
+          </div>
+          <Switch
+            checked={field.value}
+            onCheckedChange={field.onChange}
+            aria-label="Toggle matrícula aberta"
+            className="data-[state=checked]:bg-blue-500"
+          />
+        </FormItem>
+      )}
+    />
+    </div>
+    </div>
+    <DialogFooter>
+    <Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold w-12' type='submit' ><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+    </DialogFooter>
+    </form></Form>
+    </DialogContent>
+      </Dialog>
+      <Dialog>
+  <DialogTrigger asChild>
+  <div title='cadastrar classe' className='relative flex justify-center items-center'>
+    <GradeButton />
+    </div>
+  </DialogTrigger>
+  <DialogContent className="sm:max-w-[425px] bg-white">
+    <DialogHeader>
+    <DialogTitle className='text-blue-600 text-xl'>Cadastrar Classe</DialogTitle>
+      <DialogDescription>
+          <p className='text-base text-gray-800'>
+            Adicione Uma Classe ao ano-lectivo selecionado e em seguida click em <span className='font-bold text-blue-500'>cadastrar</span> quando terminar.
+        </p>
+      </DialogDescription>
+    </DialogHeader>
+    <Form {...formGradeToAcademic} >
+        <form onSubmit={formGradeToAcademic.handleSubmit(handleSubmitGrade)} >
+        <FormField
+    control={formGradeToAcademic.control}
+    name="id"
+    render={({field})=>(
+      <FormControl>
+    <Input 
+    type='hidden'
+      className="w-full"
+      {...field}
+      onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
+    />
+    </FormControl>
+  )}
+    />
+  <div className="flex flex-col w-full py-4 bg-white">
+      <div className="w-full">
+      <label htmlFor="nome">Nome<span className='text-red-500'>*</span>
+            </label>
+        <FormField
+        control={formGradeToAcademic.control}
+        name="nome"
+        render={({field})=>(
+          <FormItem>
+          <Input
+            id="nome"
+            type='text' {...field} className={formGradeToAcademic.formState.errors.nome?.message && `${animateShake} input-error`}
+            />
+          <FormMessage className='text-red-500 text-xs'/>
+        </FormItem>
+      )}/>
+      </div>
+      <div className="w-full">
+      <label htmlFor="ordem">Ordem<span className='text-red-500'>*</span>
+            </label>
+        <FormField
+        control={formGradeToAcademic.control}
+        name="ordem"
+        render={({field})=>(
+          <FormItem>
+          <Input id="ordem" type='number' {...field} className={formGradeToAcademic.formState.errors.ordem?.message&& `${animateShake} input-error`}
+          min="0"
+          onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
+          <FormMessage className='text-red-500 text-xs'/>
+        </FormItem>
+      )}/>
+      </div>
+      <div className="w-full">
+    <FormField
+      control={formGradeToAcademic.control}
+      name={'cursoId'}
+      render={({field})=>(
+      <FormItem>
+    <label htmlFor="curso">Cursos<span className='text-red-500'>*</span>
+          </label>
+    <FormControl>
+    <select {...field}  id='curso' onChange={(e)=>{field.onChange(parseInt(e.target.value))}} >
+            <option value="">Selecione o curso</option>
+            {
+              dataCurse?.data?.data?.map((field)=>{
+                  return <option value={`${field.id}`}>{field.nome}</option>
+              })
+            }
+        </select>
+        </FormControl>
+      <FormMessage className='text-red-500 text-xs'/>
+    </FormItem>)
+    }
+    />
+    </div>
+      <div className="w-full">
+      <label htmlFor="custo">Custo<span className='text-red-500'>*</span>
+            </label>
+        <FormField
+        control={formGradeToAcademic.control}
+        name="valorMatricula"
+        render={({field})=>(
+          <FormItem>
+          <Input id="custo" type='number' {...field} className={formGradeToAcademic.formState.errors.valorMatricula?.message&& `${animateShake} input-error`}
+          min="0"
+          onChange={(e)=>{field.onChange(parseInt( e.target.value))}}/>
+          <FormMessage className='text-red-500 text-xs'/>
+        </FormItem>
+      )}/>
+      </div>
+      
+    </div>
+    <DialogFooter>
+    <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
+    </DialogFooter>
+    </form></Form>
+  </DialogContent>
+      </Dialog> 
+      <div className='relative flex justify-center items-center cursor-pointer'>
+    
+      <Popover >
+<PopoverTrigger asChild className='bg-white'>
+
+<div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>
+  <InfoButton/>
+  </div>
+</PopoverTrigger >
+<PopoverContent className="w-80 bg-white">
+  <div className="grid gap-4">
+    <div className="space-y-2">
+      <h4 className="font-medium leading-none">Dados do Ano Em Curso</h4>
+      <p className="text-sm text-muted-foreground">
+        Inspecione os dados
+      </p>
+    </div>
+    <div className="grid gap-2">
+      <div className="grid grid-cols-3 items-center gap-4">
+        <label htmlFor="maxWidth">Ínicio</label>
+        <p>{dataAcademicById?.data?.inicio}</p>
+      </div>
+      <div className="grid grid-cols-3 items-center gap-4">
+        <label htmlFor="height">Termino</label>
+        <p className='text-xs'>{dataAcademicById?.data?.termino}</p>
+      </div>
+      <div className="grid grid-cols-3 items-center gap-4">
+        <label htmlFor="height">Matrícula Disponível</label>
+        <p className='text-xs'>{dataAcademicById?.data?.matriculaAberta ? dataAcademicById?.data?.matriculaAberta ? "Disponível" : "Indisponível" : <p className='text-red-500'>Serviço Indisponível</p>}
+        </p>
+      </div>
+      <div className="grid grid-cols-3 items-center gap-4">
+        <label htmlFor="height">Estado</label>
+        <p className='text-xs'>{dataAcademicById?.data?.activo ? "Disponível" : "Indisponível"}
+        </p>
+      </div>
+    </div>
+  </div>
+</PopoverContent>
+</Popover>
+      </div>
+      <Button title='activar' className={`h-8 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600`} onClick={()=>{handleSubmitPatchAno(true)
+      }}>Yes</Button>
+      <Button title='desactivar' className='h-8 px-5 bg-red-600 text-white font-semibold hover:bg-red-500 rounded-sm border-red-600' onClick={()=>{handleSubmitPatchAno(false)
+      }}>No</Button>
+      </>
+  )
+  const [pagina, setPagina] = React.useState(1);
+  const [termoBusca, setTermoBusca] = React.useState('');
+  const [itensPorPagina, setItensPorPagina] = React.useState<number>(5);
+
+  const dadosFiltrados = data?.data?.data?.filter(item =>
+    Object.values(item).some(valor =>
+      valor.toString().toLowerCase().includes(termoBusca.toLowerCase())
+    )
   );
 
+  const totalPaginas = Math.ceil(dadosFiltrados?.length / itensPorPagina);
+  const inicio = (pagina - 1) * itensPorPagina;
+  const fim = inicio + itensPorPagina;
+  const dadosPaginados = dadosFiltrados?.slice(inicio, fim);
+
     return (
-      <section className="m-0 w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3">
+      <section className="m-0 w-screen h-screen  bg-gray-50">
       <Header />
-      <div className='flex flex-col space-y-2 justify-center items-center w-full'>
-        <div className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in flex flex-col space-y-2 justify-center w-[90%] z-10'>
-      <div className='flex flex-col space-y-2 justify-center w-[90%] z-10'> 
-       <div className='flex flex-row space-x-2'>
-         <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
+      { (postLevel === 1) &&(
+        <AlertSucesso message={postError} />  
+    )
+      }
+      { (postLevel === 2) &&(
+        <AlertErro message={postError} /> )
+      }
+      { (putLevel === 1) &&(
+        <AlertSucesso message={putError} />  
+    )
+      }
+      { (putLevel === 2) &&(
+        <AlertErro message={putError} /> )
+      }
+      { (postGradeLevel === 1) &&(
+        <AlertSucesso message={postGradeError} />  
+    )
+      }
+      { (postGradeLevel === 2) &&(
+        <AlertErro message={postGradeError} /> )
+      }
+      { (postTermLevel === 1) &&(
+        <AlertSucesso message={postTermError} />  
+    )
+      }
+      { (postTermLevel === 2) &&(
+        <AlertErro message={postTermError} /> )
+      }
+     <div className="w-full bg-white p-4 rounded-lg shadow">
+      <div className="mb-4 flex flex-col sm:flex-row justify-between items-center">
+      <div className='flex flex-row space-x-2'>
+            <div className='relative flex justify-start items-center -space-x-2 w-[80%] md:w-80 lg:w-96'>
              <Search className='absolute text-gray-300 w-4 h-4 sm:w-4 sm:h-5 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-5 xl:h-7'/>            
-             <Input className=' pl-6 indent-2' type='text' value={searchTerm} onChange={handleFilterChange} placeholder='Procure por registros...' />
-         </div>
-         <Dialog>
+             <Input 
+              value={termoBusca}
+              onChange={(e) => setTermoBusca(e.target.value)}
+             className=' pl-6 indent-2' type='text' placeholder='Procure por registros...' />
+             </div>
+             <Dialog>
     <DialogTrigger asChild >
     <div title='cadastrar Ano-Lectivos' className='relative flex justify-center items-center'>
-    <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
+      <AcademicYearButton/>
       </div>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
@@ -282,6 +495,30 @@ const [buscar, setBuscar] = React.useState<number>(null);
           </FormItem>
         )}/>  
         </div>
+        <div className="w-full my-4">
+      <FormField
+        control={formCreate.control}
+        name="matriculaAberta"
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+            <div className="space-y-0.5">
+              <FormLabel className="text-base">
+                Matrícula Aberta
+              </FormLabel>
+              <div className="text-sm text-gray-500">
+                Determina se as matrículas estão abertas para este período
+              </div>
+            </div>
+            <Switch
+              checked={field.value}
+              onCheckedChange={field.onChange}
+              aria-label="Toggle matrícula aberta"
+              className="data-[state=checked]:bg-blue-500"
+            />
+          </FormItem>
+        )}
+      />
+    </div>
       </div>
       <DialogFooter>
       <Button title='cadastrar' className='bg-blue-500 border-blue-500 text-white hover:bg-blue-500 font-semibold w-12' type='submit'><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
@@ -292,9 +529,7 @@ const [buscar, setBuscar] = React.useState<number>(null);
          <Dialog>
     <DialogTrigger asChild >
     <div title='cadastrar trimestre' className='relative flex justify-center items-center'>
-    
-    <Library className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-      <Button className='h-9 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
+    <TermButton/>
       </div>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
@@ -361,195 +596,134 @@ const [buscar, setBuscar] = React.useState<number>(null);
       </DialogFooter>
       </form></Form>
     </DialogContent>
-         </Dialog>    
-     </div>
-     <div className="overflow-x-auto overflow-y-auto w-full  h-80 md:h-1/2 lg:h-[500px]">
-         
-         <table className="w-full bg-white border border-gray-200 table-fixed">
-             
-             <thead className='sticky top-0 z-10 '>
-                 <tr className={trStyle}>
-                   <th className={thStyle} >Id</th>
-                   <th className={thStyle} >Nome</th>
-                   <th className={thStyle} >Acção</th>
-                 </tr>
-             </thead>
-             <tbody >
-              {dadosLoading &&
+         </Dialog> 
+         </div>
+        <div className="flex gap-2">
+        
+          <select onChange={
+            (e)=>{
+              setItensPorPagina(parseInt(e.target.value, 10) || 0)}}>
+            <option value={5}>5 por página</option>
+            <option value={10}>10 por página</option>
+            <option value={20}>20 por página</option>
+            <option value={30}>30 por página</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+            {colunas.map((coluna, index) => (
+            <th key={index} className="px-6 py-3 text-left text-xs font-semibold text-blue-600 uppercase tracking-wider">{coluna}</th>
+             ))}
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+          {isLoading &&
               
               <tr className='w-96 h-32'>
               <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
-                  <div className={`${animatePulse}`}>
-                  Loading ...
+                  <div >
+                  <Loader className={`${animatePulse} inline-block .Loading-alert`}/>
+                  <p className='text-red-500'>Carregando</p>
                   </div>
+                  
               </td>
           </tr>
             }
-            {filteredAnos?.length === 0 &&
-            <tr className='w-96 h-32'>
-            <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
-                <div>
-                <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
-                     <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
-                </div>
-            </td>
-        </tr>
+            {(isError || dadosPaginados?.length === 0) &&
+             <tr className='w-96 h-32'>
+             <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
+               <div>
+               <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
+                    <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
+               </div>
+             </td>
+           </tr>
             }
-            {dadosError &&
-                 <tr className='w-96 h-32'>
-                     <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
-                         <div>
-                         <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
-                              <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
-                         </div>
-                     </td>
-                 </tr>}
-                 { dadosSuccess &&
-                 filteredAnos?.map((item, index) => (
-                     <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-200"}>
-                      {item.activo == true && 
-                         <td className={tdStyle}><CheckCircle className='h-5 w-7 text-green-600'/></td>
-                        }
-                        {!item.activo &&
-                         <td className={tdStyle}>{item.id}</td>
-                        
-                        }
-                         <td className={tdStyle}>{item.nome}</td>
-                         <td className={tdStyleButtons}    onClick={()=>{
-                           changeResource(item.id)
+            {!isError && dadosPaginados?.map((turno) => (
+              <tr key={turno.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{turno.id}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-500">{turno.nome}</div>
+                </td>
+                
+                <td className="py-4 whitespace-nowrap text-right text-sm font-medium flex space-x-2" onClick={()=>{
+                           putId(turno.id)
                          }}>
-                         <Dialog >
-          <DialogTrigger asChild >
-          <div title='actualizar' className='relative flex justify-center items-center'>
-          <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-            <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
-            </div>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] bg-white">
-                <DialogHeader>
-                <DialogTitle className='text-blue-600 text-xl'>Actualizar Ano Académico</DialogTitle>
-              <DialogDescription>
-                <p className='text-base text-gray-800'>
-                altere uma informação do ano e em seguida click em <span className='font-bold text-blue-500'>actualizar</span> quando terminar.
-              </p>
-              </DialogDescription>
-                </DialogHeader>
-                <Form {...formUpdate} >
-              <form onSubmit={formUpdate.handleSubmit(handleSubmitUpdate)} >
-              <FormField
-          control={formUpdate.control}
-          name="id"
-          render={({field})=>(
-            <FormControl>
-          <Input 
-          type='hidden'
-            className="w-full"
-            {...field} value={item.id}
-            onChange={(e)=>{field.onChange(parseInt( e.target.value))}}
-          />
-          </FormControl>
-        )}
-           />
-  
-              <div className="flex flex-col w-full py-4 bg-white">
-              <div className="w-full">
-              <label htmlFor="inicio"className='text-blue-500 text-lg font-semibold'>Ínicio<span className='text-red-500'>*</span>
-          </label>
-                <FormField
-                control={formUpdate.control}
-                name="inicio"
-                render={({field})=>(
-                  <FormItem>
-                  <Input
-                    id="inicio"
-                    type='date' {...field} className={formUpdate.formState.errors.inicio?.message && `${animateShake} input-error`}
-                    />
-                  <FormMessage className='text-red-500 text-xs'/>
-                </FormItem>
-              )}/>
-              </div>
-              <div className="w-full">
-              <label htmlFor="termino"className='text-blue-500 text-lg font-semibold'>Término<span className='text-red-500'>*</span>
-              </label>
-                <FormField
-                control={formUpdate.control}
-                name="termino"
-                render={({field})=>(
-                  <FormItem>
-                  <Input
-                    id="termino"
-                    type='date' {...field} className={formUpdate.formState.errors.termino?.message && `${animateShake} input-error`}
-                    />
-                  <FormMessage className='text-red-500 text-xs'/>
-                </FormItem>
-              )}/>               
+                {renderAcoes()}
               
-              </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-      <DialogFooter>
-      <Button title='actualizar' className='bg-green-500 border-green-500 text-white hover:bg-green-500 font-semibold w-12' type='submit' ><SaveIcon className='w-5 h-5 absolute text-white font-extrabold'/></Button>
-      </DialogFooter>
-      </form></Form>
-    </DialogContent>
-                        </Dialog>
-                        <div className='relative flex justify-center items-center cursor-pointer'>
-                      
-                        <Popover >
-                  <PopoverTrigger asChild className='bg-white'>
 
-                  <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
-                    <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600'></Button>
-                    </div>
-                  </PopoverTrigger >
-                  <PopoverContent className="w-80 bg-white">
-                    <div className="grid gap-4">
-                      <div className="space-y-2">
-                        <h4 className="font-medium leading-none">Dados do Ano Em Curso</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Inspecione os dados
-                        </p>
-                      </div>
-                      <div className="grid gap-2">
-                        <div className="grid grid-cols-3 items-center gap-4">
-                          <label htmlFor="maxWidth">Ínicio</label>
-                          <p>{anoLectivos?.data?.inicio}</p>
-                        </div>
-                        <div className="grid grid-cols-3 items-center gap-4">
-                          <label htmlFor="height">Termino</label>
-                          <p className='text-xs'>{anoLectivos?.data?.termino}</p>
-                        </div>
-                        <div className="grid grid-cols-3 items-center gap-4">
-                          <label htmlFor="height">Estado</label>
-                          <p className='text-xs'>{anoLectivos?.data?.activo ? "Disponível" : "Indisponível"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-                        </div>
-                      <Button title='activar' className='h-7 px-5 bg-green-300 text-white font-semibold hover:bg-green-300 rounded-sm border-green-300' onClick={()=>{handleSubmitPatchAno(item.id, true)
-                      }}>Yes</Button>
-                      <Button title='desactivar' className='h-7 px-5 bg-red-300 text-white font-semibold hover:bg-red-300 rounded-sm border-red-300' onClick={()=>{handleSubmitPatchAno(item.id, false)
-                      }}>No</Button>
-                         </td>
-                     </tr>
-                 ))}
-             </tbody>
-             <tfoot className='sticky bottom-0 bg-white"'>
-             <tr>
-                 <td colSpan={3} className="py-2 text-blue-500">
-                     Total de registros: {filteredAnos?.length}
-                 </td>
-             </tr>
-         </tfoot>
-         </table>
-     </div>
+      <div className="flex items-center justify-between px-4 py-3 border-t">
+        <div className="flex-1 flex justify-between sm:hidden">
+          <button
+            onClick={() => setPagina(Math.max(1, pagina - 1))}
+            disabled={pagina === 1}
+            className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Anterior
+          </button>
+          <button
+            onClick={() => setPagina(Math.min(totalPaginas, pagina + 1))}
+            disabled={pagina === totalPaginas}
+            className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Próxima
+          </button>
+        </div>
+        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm text-gray-700">
+              Mostrando <span className="font-medium">{inicio + 1}</span> a{' '}
+              <span className="font-medium">{Math.min(fim, dadosFiltrados?.length)}</span> de{' '}
+              <span className="font-medium">{dadosFiltrados?.length}</span> resultados
+            </p>
+          </div>
+          <div>
+            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+              <button
+                onClick={() => setPagina(Math.max(1, pagina - 1))}
+                disabled={pagina === 1}
+                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-none bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+
+              {data?.data?.data?.length > 0 && [...Array(totalPaginas)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setPagina(i + 1)}
+                  className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium
+                    ${pagina === i + 1
+                      ? 'z-10 bg-blue-50 border-none text-blue-600'
+                      : 'bg-white border-none text-gray-500 hover:bg-gray-50'
+                    }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => setPagina(Math.min(totalPaginas, pagina + 1))}
+                disabled={pagina === totalPaginas}
+                className="relative inline-flex items-center px-2 py-2 rounded-r-md   bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 border-none"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
     </div>
-     </div></div>
-
-     <MostrarDialog show={showDialog} message={dialogMessage} onClose={() => setShowDialog(false)} />
-
     </section>
 )
 }

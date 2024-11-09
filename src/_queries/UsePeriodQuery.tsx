@@ -18,12 +18,12 @@ import axios from "axios";
   };
 
   /* Post */
-  export  const auxPostTurnos = (data) => {
+  export  const auxPostPeriod = (data) => {
     return (axios.post(`http://localhost:8000/api/turnos/`, data));
   }
 
   /* Put */
-  export  const auxPutTurnos = (data) => {
+  export  const auxPutPeriod = (data) => {
     return (axios.put(`http://localhost:8000/api/turnos/${data.id}`, data));
   }
 
@@ -37,7 +37,7 @@ export const usePostPeriod = () => {
   const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
-    mutationFn: auxPostTurnos,
+    mutationFn: auxPostPeriod,
       onSuccess: () => {
         queryClient.invalidateQueries({queryKey: ['turnos']});
         setResp(`(${count}) Operação realizada com sucesso!`);
@@ -76,7 +76,7 @@ export const usePutPeriod = () => {
   const queryClient = useQueryClient();
 
   const { mutate } = useMutation({
-    mutationFn: auxPutTurnos,
+    mutationFn: auxPutPeriod,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos'] });
       setResp(`(${count}) Operação realizada com sucesso!`);

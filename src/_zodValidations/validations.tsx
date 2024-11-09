@@ -346,4 +346,16 @@ export const  numeroCasaZod = z
     .positive({ message: 'A ordem deve ser positivo.' })
     .min(1, { message: 'A ordem no minimo deve ser 1' })
     .max(4, { message: 'A ordem no máximo deve ser 4' })
- 
+  
+  export const matriculaAberta = z
+    .boolean({
+      required_error: 'O status da matricula é obrigatório.',
+      invalid_type_error: 'O status da matricula deve ser boolean.',
+    })
+    .default(false)
+    .optional()
+
+    export const activo=  z.boolean({
+      required_error: 'O status do ano lectivo é obrigatório.',
+      invalid_type_error: 'O status do ano lectivo deve ser boolean.',
+    })
