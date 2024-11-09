@@ -63,12 +63,13 @@ import axios from "axios";
 export const usePostTeacher = () => {
   const [postError, setResp] = React.useState<string>(null);
   const [postLevel, setLevel] = React.useState<number>(0)
+  const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: auxPostTeacher,
       onSuccess: () => {
         queryClient.invalidateQueries({queryKey: ['professores']});
-        setResp(' Operação realizada com sucesso!')
+        setResp(`(${count}) Operação realizada com sucesso!`);
         setLevel(1);
       },
       onError: (error) => {
@@ -76,10 +77,12 @@ export const usePostTeacher = () => {
           if (error.response && error.response.data) {
             const err = error.response.data?.errors;
             const errorMessages = collectErrorMessages(err);
-            setResp(errorMessages[0])
+            setResp(`(${count}) ${errorMessages[0]}!`);
             setLevel(2);
            }
           }
+      }, onMutate() {
+        setCount(prev=>prev+1);
       }
   });
   return { postTeacher: mutate, postError, postLevel};
@@ -88,13 +91,13 @@ export const usePostTeacher = () => {
 export const usePostClassToTeacher = () => {
   const [postClassToError, setResp] = React.useState<string>(null);
   const [postClassToLevel, setLevel] = React.useState<number>(0)
+  const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: auxPostClassToTeacher,
       onSuccess: () => {
         queryClient.invalidateQueries({queryKey: ['professores']});
-        setResp(' Operação realizada com sucesso!')
-        console.log("successs")
+        setResp(`(${count}) Operação realizada com sucesso!`);
         setLevel(1);
       },
       onError: (error) => {
@@ -102,10 +105,12 @@ export const usePostClassToTeacher = () => {
           if (error.response && error.response.data) {
             const err = error.response.data?.errors;
             const errorMessages = collectErrorMessages(err);
-            setResp(errorMessages[0])
+            setResp(`(${count}) ${errorMessages[0]}`);
             setLevel(2);
            }
           }
+      }, onMutate() {
+        setCount(prev=>prev+1);
       }
   });
   return { postClassToTeacher: mutate, postClassToError, postClassToLevel};
@@ -114,22 +119,25 @@ export const usePostClassToTeacher = () => {
 export const usePostMatchSubjectTeacher = () => {
   const [postMatchSubjectError, setResp] = React.useState<string>(null);
   const [postMatchSubjectLevel, setLevel] = React.useState<number>(0)
+  const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: auxPostMatchSubjectTeacher,
       onSuccess: () => {
         queryClient.invalidateQueries({queryKey: ['professores']});
-        setResp(' Operação realizada com sucesso!')
+        setResp(`(${count}) Operação realizada com sucesso!`);
         setLevel(1);
       },
       onError: (error) => {
         if(axios.isAxiosError(error)){
           if (error.response && error.response.data) {
             const err = error?.response?.data?.errors?.disciplinas[0];
-            setResp(err)
+            setResp(`(${count}) ${err}`);
             setLevel(2);
            }
           }
+      }, onMutate() {
+        setCount(prev=>prev+1);
       }
   });
   return { postMatchTeacher: mutate, postMatchSubjectError, postMatchSubjectLevel};
@@ -139,22 +147,25 @@ export const usePostMatchSubjectTeacher = () => {
 export const usePostDisMatchSubjectTeacher = () => {
   const [postDisMatchSubjectError, setResp] = React.useState<string>(null);
   const [postDisMatchSubjectLevel, setLevel] = React.useState<number>(0)
+  const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: auxPostDisMatchSubjectTeacher,
       onSuccess: () => {
         queryClient.invalidateQueries({queryKey: ['professores']});
-        setResp(' Operação realizada com sucesso!')
+        setResp(`(${count}) Operação realizada com sucesso!`);
         setLevel(1);
       },
       onError: (error) => {
         if(axios.isAxiosError(error)){
           if (error.response && error.response.data) {
             const err = error?.response?.data?.errors?.disciplinas[0];
-            setResp(err)
+            setResp(`(${count}) ${err}`);
             setLevel(2);
            }
           }
+      }, onMutate() {
+        setCount(prev=>prev+1);
       }
   });
   return { postDisMtachTeacher: mutate, postDisMatchSubjectError, postDisMatchSubjectLevel};
@@ -164,23 +175,26 @@ export const usePostDisMatchSubjectTeacher = () => {
 export const usePutTeacher = () => {
   const [updateError, setResp] = React.useState<string>(null);
   const [updateLevel, setLevel] = React.useState<number>(0)
+  const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
 	const { mutate } = useMutation({
 		mutationFn: auxPutTeacher,
 	  onSuccess: () => {
 	  	queryClient.invalidateQueries({queryKey: ['professores']});
-      setResp(' Operação realizada com sucesso!')
-      setLevel(1);
+      setResp(`(${count}) Operação realizada com sucesso!`);
+        setLevel(1);
 	  },
     onError: (error) => {
       if(axios.isAxiosError(error)){
         if (error.response && error.response.data) {
           const err = error.response.data?.errors;
           const errorMessages = collectErrorMessages(err);
-          setResp(errorMessages[0])
+          setResp(`(${count}) ${errorMessages[0]}`);
           setLevel(2);
          }
         }
+    }, onMutate() {
+      setCount(prev=>prev+1);
     }
   }
 	);

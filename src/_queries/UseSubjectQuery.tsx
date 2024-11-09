@@ -38,75 +38,90 @@ import axios from "axios";
 //Post
 
 export const usePostSubject = () => {
-   const [responsePostSubject, setErrorMessage] = React.useState<string | null>(null);
- 
+  const [postError, setResp] = React.useState<string>('');
+  const [postLevel, setLevel] = React.useState<number>(null)
+  const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: auxPostSubject,
       onSuccess: () => {
         queryClient.invalidateQueries({queryKey: ['disciplinas']});
-        setErrorMessage(null);
-      },
-      onError: (error) => {
-        if(axios.isAxiosError(error)){
-          if (error.response && error.response.data) {
-          const err = error.response?.data?.errors?.disciplinas;
-          const errorMessages = collectErrorMessages(err);
-          setErrorMessage(errorMessages[0]);
-        }
-          }
-      }
-  });
-  return { postSubject: mutate, responsePostSubject };
-};
-
-export const usePostMatchCurseToSubject = () => {
-  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
-  const queryClient = useQueryClient();
-  const { mutate } = useMutation({
-    mutationFn: auxPostMatchCurseToSubject,
-      onSuccess: () => {
-        queryClient.invalidateQueries({queryKey: ['disciplinas']});
-        setErrorMessage(null);
+        setResp(`(${count}) Operação realizada com sucesso!`);
+        setLevel(1);
       },
       onError: (error) => {
         if(axios.isAxiosError(error)){
           if (error.response && error.response.data) {
           const err = error.response?.data?.errors;
-          console.log('Processed error:', err);
           const errorMessages = collectErrorMessages(err);
-          setErrorMessage("Disciplina Já Registrada Ao Cursos");
+          setResp(`(${count}) ${errorMessages[0]}`)
+          setLevel(2);
+        }
+          }
+      }, onMutate() {
+        setCount(prev=>prev+1);
+      },
+  });
+  return { postSubject: mutate, postError, postLevel };
+};
+
+export const usePostMatchCurseToSubject = () => {
+  const [postMatchError, setResp] = React.useState<string>('');
+  const [postMatchLevel, setLevel] = React.useState<number>(null)
+  const [count, setCount] = React.useState<number>(0);
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation({
+    mutationFn: auxPostMatchCurseToSubject,
+      onSuccess: () => {
+        queryClient.invalidateQueries({queryKey: ['disciplinas']});
+        setResp(`(${count}) Operação realizada com sucesso!`)
+        setLevel(1);
+      },
+      onError: (error) => {
+        if(axios.isAxiosError(error)){
+          if (error.response && error.response.data) {
+          const err = error.response?.data?.errors?.disciplinas[0];
+          setResp(`(${count}) ${err}`)
+          setLevel(2);
         }
 
           }
+      }, onMutate() {
+        setCount(prev=>prev+1);
       }
   });
-  return { postMatchSubject: mutate, error: errorMessage };
+  return { postMatchSubject: mutate, postMatchError, postMatchLevel };
 };
 
 //Put
-
 export const usePutSubject = () => {
-  const [responsePutSubject, setResp] = React.useState<string>(null);
+  const [putSubjectError, setResp] = React.useState<string>('');
+  const [putSubjectLevel, setLevel] = React.useState<number>(null)
+  const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
-	const { mutate } = useMutation({
+	const { mutate, variables } = useMutation({
 		mutationFn: auxPutSubject,
 	  onSuccess: () => {
 	  	queryClient.invalidateQueries({queryKey: ['disciplinas']});
-      setResp(null);
+      setResp(`(${count}) Operação realizada com sucesso!`)
+      setLevel(1);
 	  },
     onError: (error) => {
       if(axios.isAxiosError(error)){
         if (error.response && error.response.data) {
           const err = error.response.data?.errors;
           const errorMessages = collectErrorMessages(err);
-          setResp(errorMessages[0])
+          console.log(err)
+          setResp(`(${count}) ${errorMessages[0]}`)
+          setLevel(2);
          }
         }
-    }
+    }, onMutate() {
+      setCount(prev=>prev+1);
+    },
   }
 	);
-	return { putSubject: mutate, responsePutSubject };
+	return { putSubject: mutate, putSubjectError, putSubjectLevel };
 }
 
 //Get

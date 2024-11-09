@@ -17,8 +17,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
-import { AlertTriangle,ChevronLeft, ChevronRight, EditIcon, Loader, SaveIcon, Search, Trash} from 'lucide-react'
-import { InfoIcon, CombineIcon } from 'lucide-react'
+import { AlertTriangle,ChevronLeft, ChevronRight, EditIcon, Link2, Loader, SaveIcon, Search, Trash, InfoIcon, Trash2, Trash2Icon} from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea'
 import { nomeCursoZod, descricaoZod, duracaoZod, disciplinas, custoMatricula, ordem, classe } from '@/_zodValidations/validations'
@@ -33,6 +32,7 @@ import MostrarDialog from './MostrarDialog';
 import { useGetCurseQuery, useGetIdCurseQuery, usePostCurse, usePostDisMatchSubjectToCurse, usePostGradeToCurse, usePostMatchSubjectToCurse, usePutCurse } from '@/_queries/UseCurseQuery'
 import { useGetSubjectQuery } from '@/_queries/UseSubjectQuery'
 import { AlertErro, AlertSucesso } from './Alert'
+import { CombineButton, CurseButton, EditButton, GradeButton, InfoButton, TrashButton } from './MyButton'
 
 const TFormCreate =  z.object({
   nome: nomeCursoZod,
@@ -157,7 +157,6 @@ const formConnect  = useForm<z.infer<typeof TFormConnect>>({
 
   const { putCurse, putError, putLevel } = usePutCurse();
   const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
-    e.preventDefault();
     putCurse(data);
   }
 
@@ -172,8 +171,7 @@ const formConnect  = useForm<z.infer<typeof TFormConnect>>({
       <Dialog >
           <DialogTrigger asChild >
           <div title='actualizar' className='relative flex justify-center items-center'>
-          <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-            <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
+            <EditButton/>
             </div>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
@@ -264,8 +262,7 @@ const formConnect  = useForm<z.infer<typeof TFormConnect>>({
       <Dialog>
     <DialogTrigger asChild>
     <div title='cadastrar classe' className='relative flex justify-center items-center'>
-    <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-      <Button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
+      <GradeButton />
       </div>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
@@ -338,8 +335,7 @@ const formConnect  = useForm<z.infer<typeof TFormConnect>>({
       <Dialog>
             <DialogTrigger asChild >
             <div title='vincular' className='relative flex justify-center items-center'>
-            <CombineIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-              <Button className='h-7 px-5 bg-yellow-600 text-white font-semibold hover:bg-yellow-600 rounded-sm border-yellow-600'></Button>
+              <CombineButton/>
               </div>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] bg-white">
@@ -393,8 +389,7 @@ const formConnect  = useForm<z.infer<typeof TFormConnect>>({
       <Dialog>
             <DialogTrigger asChild >
             <div title='desvincular' className='relative flex justify-center items-center'>
-            <Trash className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-              <Button className='h-7 px-5 bg-red-600 text-white font-semibold hover:bg-red-600 rounded-sm border-red-600'></Button>
+              <TrashButton/>
               </div>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] bg-white">
@@ -446,12 +441,11 @@ const formConnect  = useForm<z.infer<typeof TFormConnect>>({
       </DialogContent>
       </Dialog>
       <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>
-            
       <Popover >
       <PopoverTrigger asChild className='bg-white'>
 
-      <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
-        <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600'></Button>
+      <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  
+        <InfoButton/>
         </div>
       </PopoverTrigger >
       <PopoverContent className="w-80 bg-white">
@@ -499,12 +493,9 @@ const formConnect  = useForm<z.infer<typeof TFormConnect>>({
     
       <section  className="m-0 w-screen h-screen  bg-gray-50">
       <Header />
-      { (postLevel === 1) && (
-        <AlertSucesso message={postError} />  )
-      }
-      { (postLevel === 2) && (
-          <AlertErro message={postError} />  )
-      }
+      { postLevel === 1 && <AlertSucesso message={postError} /> }
+      { postLevel === 2 && <AlertErro message={postError} /> }
+
       { (putLevel === 1) && (
         <AlertSucesso message={putError} />  )
       }
@@ -542,8 +533,7 @@ const formConnect  = useForm<z.infer<typeof TFormConnect>>({
                <Dialog>
     <DialogTrigger asChild>
     <div title='cadastrar' className='relative flex justify-center items-center'>
-    <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-      <Button className='h-8 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
+      <CurseButton />
       </div>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">

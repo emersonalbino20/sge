@@ -32,24 +32,31 @@ import axios from "axios";
 //Post
 
 export const usePostPeriod = () => {
-  const [responsePostPeriod, setResp] = React.useState<string>(null);
+  const [postError, setResp] = React.useState<string>('');
+  const [postLevel, setLevel] = React.useState<number>(null)
+  const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: auxPostTurnos,
       onSuccess: () => {
         queryClient.invalidateQueries({queryKey: ['turnos']});
+        setResp(`(${count}) Operação realizada com sucesso!`);
+        setLevel(1);
       },
       onError: (error) => {
         if(axios.isAxiosError(error)){
           if (error.response && error.response.data) {
             const err = error.response.data?.errors;
             const errorMessages = collectErrorMessages(err);
-            setResp(errorMessages[0])
+            setResp(`(${count}) ${errorMessages[0]}`);
+            setLevel(2);
            }
           }
+      }, onMutate() {
+        setCount(prev=>prev+1);
       }
   });
-  return { postPeriod: mutate, responsePostPeriod };
+  return { postPeriod: mutate, postLevel, postError };
 };
 
 //Put
@@ -63,48 +70,34 @@ interface QueryData {
 }
 
 export const usePutPeriod = () => {
-  const [responsePutPeriod, setResp] = React.useState<string | null>(null);
+  const [putError, setResp] = React.useState<string>('');
+  const [putLevel, setLevel] = React.useState<number>(null)
+  const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
 
   const { mutate } = useMutation({
     mutationFn: auxPutTurnos,
-    onMutate: async (newData: TurnoData) => {
-      await queryClient.cancelQueries({ queryKey: ['turnos'] });
-
-      const previousData = queryClient.getQueryData<QueryData>(['turnos']);
-
-      queryClient.setQueryData<QueryData>(['turnos'], (old) => {
-        if (!old) return { data: [newData] };
-        return {
-          ...old,
-          data: [...old.data, newData]
-        };
-      });
-
-      return { previousData };
-    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos'] });
+      setResp(`(${count}) Operação realizada com sucesso!`);
+      setLevel(1);
     },
-    onError: (error, _, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(['turnos'], context.previousData);
-      }
-      
+    onError: (error) => {
       if (axios.isAxiosError(error)) {
         if (error.response?.data) {
           const err = error.response.data?.errors;
           const errorMessages = collectErrorMessages(err);
           setResp(errorMessages[0]);
+          setResp(`(${count}) Operação realizada com sucesso!`);
+          setLevel(2);
         }
       }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['turnos'] });
-    },
+    }, onMutate() {
+      setCount(prev=>prev+1);
+    }
   });
 
-  return { putPeriod: mutate, responsePutPeriod };
+  return { putPeriod: mutate, putError, putLevel };
 };
 
 //Get

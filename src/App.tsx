@@ -6,6 +6,7 @@ import SistemaEscolar from "./_pages/SistemaEscolar";
 import TabelaResponsiva from "./_pages/TabelaResponsiva";
 import Index from "./_pages/Index";
 import PaginaExemplo from "./_pages/PaginaExemplo";
+import ConsultasAcademicas from "./_pages/ConsultasAcdemicas";
 
 function App(){
   return  <AppRoutes/>;

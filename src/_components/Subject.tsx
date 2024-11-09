@@ -23,7 +23,7 @@ import { InfoIcon } from 'lucide-react'
 import { UserPlus } from 'lucide-react'
 import { GraduationCap as Cursos } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea'
-import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, nomeCursoZod, descricaoZod, duracaoZod, cursos } from '@/_zodValidations/validations'
+import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, nomeCursoZod, descricaoZod, duracaoZod, cursos, disciplinas } from '@/_zodValidations/validations'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, useFieldArray } from 'react-hook-form'
@@ -36,6 +36,8 @@ import { animateBounce, animatePulse } from '@/AnimationPackage/Animates'
 import MostrarDialog from './MostrarDialog';
 import { useGetIdSubjectQuery, useGetSubjectQuery, usePostMatchCurseToSubject, usePostSubject, usePutSubject } from '@/_queries/UseSubjectQuery'
 import { useGetCurseQuery } from '@/_queries/UseCurseQuery'
+import { CombineButton, EditButton, InfoButton, SubjectButton } from './MyButton'
+import { AlertErro, AlertSucesso } from './Alert'
 
 
 const TFormCreate =  z.object({
@@ -52,7 +54,7 @@ const TFormUpdate =  z.object({
 /*Vinculo de disciplina e curso*/
 const TFormConnect =  z.object({
   disciplinaId: z.number(),
-  cursoId: cursos
+  cursoId: cursos,
 })
 
 export default function Subject(){
@@ -87,36 +89,17 @@ export default function Subject(){
    };
 
 //Post 
-  const [showDialog, setShowDialog] = React.useState(false);
-  const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
-
-  const { postSubject, responsePostSubject } = usePostSubject();
+  const { postSubject, postError, postLevel } = usePostSubject();
   const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>,e) => {
     e.preventDefault();
     postSubject(data);
-    if( responsePostSubject )
-      {
-        setDialogMessage(responsePostSubject);
-        setShowDialog(true);
-      }else{
-        setDialogMessage(null);
-        setShowDialog(true)
-	}
 }
 
-  const { postMatchSubject, error } = usePostMatchCurseToSubject();
+  const { postMatchSubject, postMatchError, postMatchLevel } = usePostMatchCurseToSubject();
   
   const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
     e.preventDefault();
     postMatchSubject(data);
-    if (error) {
-      setDialogMessage(error);
-      setShowDialog(true);
-    } else {
-      setDialogMessage(null);
-      setShowDialog(true);
-    }
-
   }
 
 //Put
@@ -128,19 +111,11 @@ export default function Subject(){
       formUpdate.setValue('descricao', dataSubjectId?.data?.descricao);
     }, [buscar, isFetched])
 
-    const { putSubject, responsePutSubject } = usePutSubject();
+    const { putSubject, putSubjectError, putSubjectLevel } = usePutSubject();
 
     const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
       e.preventDefault();
       putSubject(data);
-      if( responsePutSubject )
-        {
-          setDialogMessage(responsePutSubject);
-          setShowDialog(true);
-        }else{
-          setDialogMessage(null);
-          setShowDialog(true);
-        }
     }
 
     const putId = (id) => {
@@ -154,8 +129,7 @@ export default function Subject(){
          <Dialog >
           <DialogTrigger asChild >
           <div title='actualizar' className='relative flex justify-center items-center'>
-          <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-            <Button className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
+            <EditButton/>
             </div>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
@@ -214,8 +188,7 @@ export default function Subject(){
         <Dialog>
         <DialogTrigger asChild >
         <div title='vincular' className='relative flex justify-center items-center'>
-        <CombineIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-          <Button className='h-7 px-5 bg-yellow-600 text-white font-semibold hover:bg-yellow-600 rounded-sm border-yellow-600'></Button>
+          <CombineButton/>
           </div>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px] bg-white">
@@ -270,8 +243,8 @@ export default function Subject(){
               <Popover >
         <PopoverTrigger asChild className='bg-white'>
 
-        <div className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
-          <Button className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600'></Button>
+        <div className='relative flex justify-center items-center cursor-pointer'>
+          <InfoButton/>
           </div>
         </PopoverTrigger >
         <PopoverContent className="w-80 bg-white">
@@ -312,7 +285,12 @@ export default function Subject(){
     return (
       <div className="m-0 w-screen h-screen  bg-gray-50">
        <Header />
-
+       { postLevel === 1 && <AlertSucesso message={postError} /> }
+      { postLevel === 2 && <AlertErro message={postError} /> }
+      { postMatchLevel === 1 && <AlertSucesso message={postMatchError} /> }
+      { postMatchLevel === 2 && <AlertErro message={postMatchError} /> }
+      { putSubjectLevel === 1 && <AlertSucesso message={putSubjectError} /> }
+      { putSubjectLevel === 2 && <AlertErro message={putSubjectError} /> }
      <div className="w-full bg-white p-4 rounded-lg shadow">
       
       <div className="mb-4 flex flex-col sm:flex-row justify-between items-center">
@@ -326,8 +304,7 @@ export default function Subject(){
              <Dialog >
     <DialogTrigger asChild>
     <div title='cadastrar' className='relative flex justify-center items-center'>
-    <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-      <Button className='h-8 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
+      <SubjectButton/>
       </div>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
@@ -509,8 +486,6 @@ export default function Subject(){
         </div>
       </div>
     </div>
-     <MostrarDialog show={showDialog} message={dialogMessage} onClose={() => setShowDialog(false)} />
-
     </div>
 
 )

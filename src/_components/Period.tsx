@@ -31,6 +31,8 @@ import { animateBounce, animatePulse, animateShake } from '@/AnimationPackage/An
 import MostrarDialog from './MostrarDialog';
 import { useGetIdPeriodQuery, useGetPeriodQuery, usePostPeriod, usePutPeriod } from '@/_queries/UsePeriodQuery'
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { EditButton, InfoButton, PeriodButton } from './MyButton'
+import { AlertErro, AlertSucesso } from './Alert'
 
 const TFormCreate =  z.object(
 {
@@ -64,21 +66,10 @@ export default function Period(){
   const { dataTurnoById, isFetchedTurnoById } = useGetIdPeriodQuery(buscar);
 
   //Post
-  const [showDialog, setShowDialog] = React.useState(false);
-  const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
-
-  const { postPeriod, responsePostPeriod } = usePostPeriod();
+  const { postPeriod, postError, postLevel } = usePostPeriod();
   const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>,e) => {
     e.preventDefault();
     postPeriod(data);
-    if( responsePostPeriod !== null )
-    {
-      setDialogMessage(responsePostPeriod);
-      setShowDialog(true);
-    }else{
-      setDialogMessage(null);
-      setShowDialog(true);
-    }
   }
 
   //Put
@@ -90,18 +81,10 @@ export default function Period(){
       formUpdate.setValue('termino', dataTurnoById?.data?.termino);
     }, [buscar, isFetchedTurnoById])
 
-  const { putPeriod, responsePutPeriod } = usePutPeriod();
+  const { putPeriod, putError, putLevel } = usePutPeriod();
   const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>,e) => {
     e.preventDefault();
     putPeriod(data);
-    if( responsePutPeriod !== null )
-    {
-      setDialogMessage(responsePutPeriod);
-      setShowDialog(true);
-    }else{
-      setDialogMessage(null);
-      setShowDialog(true);
-    }
   }
 
   const putId = (id) => {
@@ -115,8 +98,7 @@ export default function Period(){
       <Dialog >
             <DialogTrigger asChild >
             <div title='actualizar' className='relative flex justify-center items-center'>
-            <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-              <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
+              <EditButton/>
               </div>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] bg-white">
@@ -209,8 +191,8 @@ export default function Period(){
         <Popover >
           <PopoverTrigger asChild className='bg-white'>
 
-          <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
-            <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600'></Button>
+          <div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  
+            <InfoButton/>
             </div>
           </PopoverTrigger >
           <PopoverContent className="w-80 bg-white">
@@ -260,7 +242,10 @@ export default function Period(){
     return (
       <section className="m-0 w-screen h-screen  bg-gray-50">
       <Header />
-       
+      { postLevel === 1 && <AlertSucesso message={postError} /> }
+      { postLevel === 2 && <AlertErro message={postError} /> }
+      { putLevel === 1 && <AlertSucesso message={putError} /> }
+      { putLevel === 2 && <AlertErro message={putError} /> }
      <div className="w-full bg-white p-4 rounded-lg shadow">
       
       <div className="mb-4 flex flex-col sm:flex-row justify-between items-center">
@@ -275,8 +260,7 @@ export default function Period(){
         <Dialog>
           <DialogTrigger asChild>
           <div title='cadastrar' className='relative flex justify-center items-center'>
-          <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-            <Button className='h-8 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
+            <PeriodButton/>
             </div>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
@@ -471,7 +455,6 @@ export default function Period(){
         </div>
       </div>
     </div>
-     <MostrarDialog show={showDialog} message={dialogMessage} onClose={() => setShowDialog(false)} />
     </section>
        
 )

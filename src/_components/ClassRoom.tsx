@@ -35,6 +35,7 @@ import { useGetClassRoomQuery, useGetIdClassRoomdQuery, usePostClassRoom, usePos
 import { AlertErro, AlertSucesso } from './Alert'
 import { useGetCurseQuery, useGetIdGradeCurseQuery } from '@/_queries/UseCurseQuery'
 import { useGetPeriodQuery } from '@/_queries/UsePeriodQuery'
+import { ClassButton, ClassRoomButton, CombineButton, EditButton, InfoButton } from './MyButton'
 
 const TFormCreate =  z.object(
 {
@@ -127,8 +128,7 @@ export default function ClassRoom(){
       <Dialog >
           <DialogTrigger asChild >
           <div title='actualizar' className='relative flex justify-center items-center'>
-          <EditIcon className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-            <Button  className='h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
+            <EditButton/>
             </div>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
@@ -221,8 +221,7 @@ export default function ClassRoom(){
       <Dialog>
     <DialogTrigger asChild>
     <div title='cadastrar turma' className='relative flex justify-center items-center'>
-      <Combine className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-      <Button className='h-7 px-5 bg-orange-600 text-white font-semibold hover:bg-orange-500 border-orange-500 rounded-sm'></Button>
+      <ClassButton/>
       </div>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">
@@ -354,8 +353,8 @@ export default function ClassRoom(){
       <Popover >
 <PopoverTrigger asChild className='bg-white'>
 
-<div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>  <InfoIcon className='w-5 h-4 absolute text-white'/> 
-  <Button  className='h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600'></Button>
+<div title='ver dados' className='relative flex justify-center items-center cursor-pointer'>
+      <InfoButton/>
   </div>
 </PopoverTrigger >
 <PopoverContent className="w-80 bg-white">
@@ -434,8 +433,7 @@ export default function ClassRoom(){
              <Dialog>
     <DialogTrigger asChild>
     <div title='cadastrar' className='relative flex justify-center items-center'>
-    <Cursos className='w-5 h-4 absolute text-white font-extrabold cursor-pointer'/>
-      <Button className='h-8 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm'></Button>
+      <ClassRoomButton/>
       </div>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px] bg-white">

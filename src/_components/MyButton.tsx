@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { EditIcon, CombineIcon, Trash, InfoIcon, UserPlus, LucideLibrary, Save } from 'lucide-react';
+import { EditIcon, InfoIcon, UserPlus, LucideLibrary, Save, Trash2, Link2, GraduationCap, Building2, Users, BookOpen, Sun, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 
@@ -14,7 +14,7 @@ export function EditButton(Icon)
         <EditIcon 
         className={ClassIcon}/> 
         <Button 
-        className="h-7 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm border-blue-600" ></Button>
+        className="h-8 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm border-blue-600" ></Button>
         </>
     );
 }
@@ -26,7 +26,7 @@ export function SubmitButton(Icon)
         <Save 
         className={ClassIcon}/> 
         <Button 
-        className="h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600" ></Button>
+        className="h-8 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600" ></Button>
         </>
     );
 }
@@ -36,10 +36,10 @@ export function CombineButton()
     return (
         <>
        
-            <CombineIcon
+            <Link2
              className={ClassIcon}/>
             <Button 
-             className="h-7 px-5 bg-yellow-600 text-white font-semibold hover:bg-yellow-600 rounded-sm border-yellow-600"></Button>
+             className="h-8 px-5 bg-yellow-600 text-white font-semibold hover:bg-yellow-500 rounded-sm border-yellow-600"></Button>
         </>
     );
 }
@@ -48,10 +48,10 @@ export function TrashButton()
 {
     return (
         <>
-            <Trash 
+            <Trash2 
             className={ClassIcon}/>
             <Button 
-            className="h-7 px-5 bg-red-600 text-white font-semibold hover:bg-red-600 rounded-sm border-red-600"></Button>
+            className="h-8 px-5 bg-red-600 text-white font-semibold hover:bg-red-500 rounded-sm border-red-600"></Button>
         </>
     );
 }
@@ -63,7 +63,7 @@ export function InfoButton()
             <InfoIcon 
             className={ClassIcon}/>
             <Button 
-            className="h-7 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600"></Button>
+            className="h-8 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600"></Button>
         </>
     );
 }
@@ -87,8 +87,79 @@ export function LibraryButton()
             <LucideLibrary
             className={ClassIcon}
             />
-            <Button className='h-7 px-5 bg-amber-400 text-white font-semibold hover:bg-amber-400 rounded-sm border-amber-400'></Button>
+            <Button className='h-8 px-5 bg-amber-400 text-white font-semibold hover:bg-amber-400 rounded-sm border-amber-400'></Button>
         </>
     );
 }
 
+export function CurseButton()
+{
+    return (
+        <>
+            <LucideLibrary
+            className={ClassIcon}
+            />
+            <Button className='h-8 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm border-blue-600'></Button>
+        </>
+    );
+}
+
+export function GradeButton()
+{
+    return (
+        <>
+            <GraduationCap
+            className={ClassIcon}
+            />
+            <Button className='h-8 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm border-blue-600'></Button>
+        </>
+    );
+}
+
+export function ClassRoomButton()
+{
+    return (
+        <>
+            <Building2
+            className={ClassIcon}
+            />
+            <Button className='h-8 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm border-blue-600'></Button>
+        </>
+    );
+}
+
+export function ClassButton()
+{
+    return (
+        <>
+            <Users
+            className={ClassIcon}
+            />
+            <Button className='h-8 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm border-blue-600'></Button>
+        </>
+    );
+}
+
+export function SubjectButton()
+{
+    return (
+        <>
+            <BookOpen
+            className={ClassIcon}
+            />
+            <Button className='h-8 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm border-blue-600'></Button>
+        </>
+    );
+}
+
+export function PeriodButton()
+{
+    return (
+        <>
+            <Calendar
+            className={ClassIcon}
+            />
+            <Button className='h-8 px-5 bg-blue-600 text-white font-semibold hover:bg-blue-500 rounded-sm border-blue-600'></Button>
+        </>
+    );
+}

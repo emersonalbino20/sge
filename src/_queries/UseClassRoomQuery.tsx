@@ -41,12 +41,13 @@ import axios from "axios";
 export const usePostClassRoom = () => {
   const [postError, setResp] = React.useState<string>(null);
   const [postLevel, setLevel] = React.useState<number>(0)
+  const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: auxPostClassRoom,
       onSuccess: () => {
         queryClient.invalidateQueries({queryKey: ['salas']});
-        setResp(' Operação realizada com sucesso!')
+        setResp(`(${count}) Operação realizada com sucesso!`);
         setLevel(1);
       },
       onError: (error) => {
@@ -54,10 +55,12 @@ export const usePostClassRoom = () => {
           if (error.response && error.response.data) {
             const err = error.response.data?.errors;
             const errorMessages = collectErrorMessages(err);
-            setResp(errorMessages[0])
+            setResp(`(${count}) ${errorMessages[0]}`);
             setLevel(2);
            }
           }
+      }, onMutate() {
+        setCount(prev=>prev+1);
       }
   });
   return { postClassRoom: mutate, postError, postLevel};
@@ -66,12 +69,13 @@ export const usePostClassRoom = () => {
 export const usePostClassToClassRoom = () => {
   const [postClassError, setResp] = React.useState<string>(null);
   const [postClassLevel, setLevel] = React.useState<number>(0)
+  const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: auxPostClassToClassRoom,
       onSuccess: () => {
         queryClient.invalidateQueries({queryKey: ['salas']});
-        setResp(' Operação realizada com sucesso!')
+        setResp(`(${count}) Operação realizada com sucesso!`);
         setLevel(1);
       },
       onError: (error) => {
@@ -81,10 +85,14 @@ export const usePostClassToClassRoom = () => {
             const errorMessages = collectErrorMessages(err);
             console.log(errorMessages)
             /*Teste de error*/
-            setResp("A turma já existe!");
             setLevel(2);
+            setResp(`(${count}) A turma já existe!`);
+            setLevel(2);
+
            }
           }
+      }, onMutate() {
+        setCount(prev=>prev+1);
       }
   });
   return { postClass: mutate, postClassError, postClassLevel};
@@ -94,12 +102,13 @@ export const usePostClassToClassRoom = () => {
 export const usePutClassRoom = () => {
   const [updateError, setResp] = React.useState<string>(null);
   const [updateLevel, setLevel] = React.useState<number>(0)
+  const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
 	const { mutate } = useMutation({
 		mutationFn: auxPutClassRoom,
 	  onSuccess: () => {
 	  	queryClient.invalidateQueries({queryKey: ['salas']});
-      setResp(' Operação realizada com sucesso!')
+      setResp(`(${count}) Operação realizada com sucesso!`);
       setLevel(1);
 	  },
     onError: (error) => {
@@ -107,10 +116,12 @@ export const usePutClassRoom = () => {
         if (error.response && error.response.data) {
           const err = error.response.data?.errors;
           const errorMessages = collectErrorMessages(err);
-          setResp(errorMessages[0])
+          setResp(`(${count}) ${errorMessages[0]}`);
           setLevel(2);
          }
         }
+    }, onMutate() {
+      setCount(prev=>prev+1);
     }
   }
 	);

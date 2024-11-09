@@ -19,7 +19,7 @@ import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, disciplinas,
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Select from 'react-select';
-import { AroundDiv, CombineButton, EditButton, InfoButton, LibraryButton, TrashButton, UserPlusButton } from './MyButton'
+import { AroundDiv, CombineButton, EditButton, GradeButton, InfoButton, LibraryButton, TrashButton, UserPlusButton } from './MyButton'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import Header from './Header'
 import { useHookFormMask } from 'use-mask-input'
@@ -288,8 +288,8 @@ export default function Teacher (){
           </Dialog>
           <Dialog >
       <DialogTrigger asChild >
-      <div title='Add classes' className={AroundDiv} >
-          <LibraryButton/>
+      <div title='delegar turma' className={AroundDiv} >
+          <GradeButton/>
       </div>
       </DialogTrigger>
       <DialogContent >
