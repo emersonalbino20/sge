@@ -385,10 +385,10 @@ const handleSubmitPatchAno = (bool) => {
 </PopoverContent>
 </Popover>
       </div>
-      <Button title='activar' className={`h-8 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600`} onClick={()=>{handleSubmitPatchAno(true)
-      }}>Yes</Button>
+      <Button title='activar como ano corrente' className={`h-8 px-5 bg-green-600 text-white font-semibold hover:bg-green-500 rounded-sm border-green-600`} onClick={()=>{handleSubmitPatchAno(true)
+      }}>Activa</Button>
       <Button title='desactivar' className='h-8 px-5 bg-red-600 text-white font-semibold hover:bg-red-500 rounded-sm border-red-600' onClick={()=>{handleSubmitPatchAno(false)
-      }}>No</Button>
+      }}>desactivar</Button>
       </>
   )
   const [pagina, setPagina] = React.useState(1);
