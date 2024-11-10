@@ -19,7 +19,7 @@ import { dataNascimentoZod, emailZod, nomeCompletoZod, telefoneZod, disciplinas,
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Select from 'react-select';
-import { AroundDiv, CombineButton, EditButton, GradeButton, InfoButton, LibraryButton, TrashButton, UserPlusButton } from './MyButton'
+import { AroundDiv, ClassButton, CombineButton, EditButton, GradeButton, InfoButton, LibraryButton, TrashButton, UserPlusButton } from './MyButton'
 import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table'
 import Header from './Header'
 import { useHookFormMask } from 'use-mask-input'
@@ -115,8 +115,9 @@ export default function Teacher (){
   const { data: dataCurses } = useGetCurseQuery();
   const { data: dataSubjets } = useGetSubjectQuery();
   const { dataGradesCurse } = useGetIdGradeCurseQuery(fieldCurso);
+  
   const { dataClassGradeId } = useGetIdClassFromGradedQuery(fieldClasse);
-  const { dataTeacherSubjects } = useGetIdTeacherSubjectsdQuery(buscar);
+  const { dataTeacherSubjects, subjectFetched } = useGetIdTeacherSubjectsdQuery(buscar);
   const { dataTeacherGrades } = useGetIdTeacherGradesdQuery(buscar);
 
   //Vincular um professor a multiplas disciplinas
@@ -140,11 +141,13 @@ export default function Teacher (){
   const { postMatchTeacher, postMatchSubjectError, postMatchSubjectLevel } = usePostMatchSubjectTeacher();
   const handleSubmitConnect = async (data: z.infer<typeof TFormConnect>,e) => {
     postMatchTeacher(data);
+
   }
 
   const { postDisMtachTeacher, postDisMatchSubjectError, postDisMatchSubjectLevel } = usePostDisMatchSubjectTeacher();
   const handleSubmitUnConnect = async (data: z.infer<typeof  TFormUnConnect>,e) => {
     postDisMtachTeacher(data)
+    
   }
 
   const{ postClassToTeacher, postClassToError, postClassToLevel } = usePostClassToTeacher();
@@ -163,7 +166,7 @@ export default function Teacher (){
       formUpdate.setValue('telefone', dataTeacherId?.data?.contacto?.telefone)
       formUpdate.setValue('email', dataTeacherId?.data?.contacto?.email)
       formUpdate.setValue('id', dataTeacherId?.data?.id)
-    },[buscar, isFetched])
+    },[buscar, isFetched, subjectFetched])
    
     const { putTeacher, updateError, updateLevel } = usePutTeacher();
     const handleSubmitUpdate = async (data: z.infer<typeof TFormUpdate>) => {
@@ -289,7 +292,7 @@ export default function Teacher (){
           <Dialog >
       <DialogTrigger asChild >
       <div title='delegar turma' className={AroundDiv} >
-          <GradeButton/>
+          <ClassButton/>
       </div>
       </DialogTrigger>
       <DialogContent >

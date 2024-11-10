@@ -11,7 +11,7 @@
 }
 
 .active .step{
-    @apply bg-sky-600;
+    @apply bg-blue-600;
 }
 
 .complete .step{

@@ -379,7 +379,7 @@ const [idAno, setIdAno] = React.useState<number>(0);
                         }
                       }else{setCurrentStep(1)}
                       
-                      }} className={`${animatePing} responsive-button bg-sky-700 hover:bg-sky-600 border-sky-700`}>Próximo</button>
+                      }} className={`${animatePing} responsive-button bg-blue-700 hover:bg-blue-600 border-blue-700`}>Próximo</button>
                 </div>
                 </form>
                 </Form>

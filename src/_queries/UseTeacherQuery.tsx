@@ -75,9 +75,9 @@ export const usePostTeacher = () => {
       onError: (error) => {
         if(axios.isAxiosError(error)){
           if (error.response && error.response.data) {
-            const err = error.response.data?.errors;
-            const errorMessages = collectErrorMessages(err);
-            setResp(`(${count}) ${errorMessages[0]}!`);
+            const err = error.response.data?.errors || error.response.data?.message;
+            console.log(error)
+            setResp(`(${count}) ${err}`);
             setLevel(2);
            }
           }
@@ -121,10 +121,11 @@ export const usePostMatchSubjectTeacher = () => {
   const [postMatchSubjectLevel, setLevel] = React.useState<number>(0)
   const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
-  const { mutate } = useMutation({
+  const { mutate, variables } = useMutation({
     mutationFn: auxPostMatchSubjectTeacher,
       onSuccess: () => {
         queryClient.invalidateQueries({queryKey: ['professores']});
+        console.log(variables)
         setResp(`(${count}) Operação realizada com sucesso!`);
         setLevel(1);
       },
@@ -149,7 +150,7 @@ export const usePostDisMatchSubjectTeacher = () => {
   const [postDisMatchSubjectLevel, setLevel] = React.useState<number>(0)
   const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
-  const { mutate } = useMutation({
+  const { mutate, variables } = useMutation({
     mutationFn: auxPostDisMatchSubjectTeacher,
       onSuccess: () => {
         queryClient.invalidateQueries({queryKey: ['professores']});
@@ -204,18 +205,18 @@ export const usePutTeacher = () => {
 //Get
 
 export const useGetTeacherQuery = () => {
-    const { data, isLoading, isError } = useQuery(
+    const { data, isLoading, isError, refetch } = useQuery(
         {
           queryKey: ['professores'],
           queryFn: () => axios.get("http://localhost:8000/api/professores/")
         }
       );
     
-      return { data, isLoading, isError };
+      return { data, isLoading, isError, refetch };
   };
 
 export const useGetIdTeacherdQuery = (id: string) => {
-    const { data, isFetched } = useQuery(
+    const { data, isFetched, dataUpdatedAt, } = useQuery(
         {
           queryKey: ['professores', id],
           queryFn: () => axios.get(`http://localhost:8000/api/professores/${id}`),
@@ -223,7 +224,7 @@ export const useGetIdTeacherdQuery = (id: string) => {
         }
       );
     
-      return { dataTeacherId: data, isFetched};
+      return { dataTeacherId: data, isFetched, dataUpdatedAt};
 };
 
 export const useGetIdTeacherSubjectsdQuery = (id: string) => {
@@ -235,11 +236,11 @@ export const useGetIdTeacherSubjectsdQuery = (id: string) => {
       }
     );
   
-    return { dataTeacherSubjects: data};
+    return { dataTeacherSubjects: data, subjectFetched: isFetched};
 };
 
 export const useGetIdTeacherGradesdQuery = (id: string) => {
-  const { data, isFetched } = useQuery(
+  const { data, isFetched, dataUpdatedAt } = useQuery(
       {
         queryKey: ['classesprofessores', id],
         queryFn: () => axios.get(`http://localhost:8000/api/professores/${id}/classes`),

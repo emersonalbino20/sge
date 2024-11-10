@@ -5,7 +5,7 @@ import {PrivateRoutes, ProtectLogin} from "./PrivateRoutes";
 
 const Index = lazy(()=>import('../_pages/Index'))
 const HomePage = lazy(()=>import('../_pages/HomePage'))
-const StudentInsertPage = lazy(()=>import('../_pages/StudentInsertPage'))
+const StudentEnrollmentPage = lazy(()=>import('../_pages/StudentEnrollmentPage'))
 const StudentListPage = lazy(()=>import('../_pages/StudentListPage'))
 const TeacherPage = lazy(()=>import('../_pages/TeacherPage'))
 const PersonInchargePage = lazy(()=>import('../_pages/PersonInchargePage'))
@@ -30,7 +30,7 @@ export default function AppRoutes(){
                 </Route>
                 <Route element={<PrivateRoutes/>}>
                     <Route path="/Home" element={<HomePage/>} />
-                    <Route path="/StudentInsertPage" element={<StudentInsertPage/>}/>
+                    <Route path="/StudentEnrollmentPage" element={<StudentEnrollmentPage/>}/>
                     <Route path="/StudentListPage" element={<StudentListPage/>}/>
                     <Route path="/TeacherPage" element={<TeacherPage/>}/>
                     <Route path="/PersonInchargePage" element={<PersonInchargePage/>}/>

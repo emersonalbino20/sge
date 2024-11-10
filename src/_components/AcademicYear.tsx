@@ -134,7 +134,7 @@ const handleSubmitPatchAno = (bool) => {
     setBuscar(id)
   }
     
-  const colunas = ["Id", "Nome", "Ações"];
+  const colunas = ["Id", "Nome", "Estado", "Ações"];
 
   const renderAcoes = () => (
         <> 
@@ -624,7 +624,7 @@ const handleSubmitPatchAno = (bool) => {
           {isLoading &&
               
               <tr className='w-96 h-32'>
-              <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
+              <td rowSpan={4} colSpan={4} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                   <div >
                   <Loader className={`${animatePulse} inline-block .Loading-alert`}/>
                   <p className='text-red-500'>Carregando</p>
@@ -635,7 +635,7 @@ const handleSubmitPatchAno = (bool) => {
             }
             {(isError || dadosPaginados?.length === 0) &&
              <tr className='w-96 h-32'>
-             <td rowSpan={3} colSpan={3} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
+             <td rowSpan={4} colSpan={4} className='w-full text-center text-xl text-red-500 md:text-2xl lg:text-2xl'>
                <div>
                <AlertTriangle className={`${animateBounce} inline-block triangle-alert`}/>
                     <p className='text-red-500'>Nenum Registro Foi Encontrado</p>
@@ -652,6 +652,15 @@ const handleSubmitPatchAno = (bool) => {
                   <div className="text-sm text-gray-500">{turno.nome}</div>
                 </td>
                 
+                <td className="px-6 py-4 whitespace-nowrap">
+                {turno.activo ?
+                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                    Activo
+                  </span> : <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-fullbg-red-100 text-red-800">
+                    Desactivo
+                  </span>
+                  }
+                </td>
                 <td className="py-4 whitespace-nowrap text-right text-sm font-medium flex space-x-2" onClick={()=>{
                            putId(turno.id)
                          }}>

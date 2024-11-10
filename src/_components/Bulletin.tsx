@@ -376,7 +376,7 @@ export default function Bulletin() {
                           setShowDialog(true);           
                         }
                       }else{setCurrentStep(1)}
-                      }} className='active:animate-ping animate-once animate-duration-500 animate-delay-400 animate-ease-out bg-sky-700 hover:bg-sky-600 text-base sm:text-sm md:text-[10px] lg:text-[12px] xl:text-[16px] text-white font-semibold px-3 py-1 sm:py-[2px] lg:py-1 xl:py-2 border-sky-700'>Próximo</button>
+                      }} className='active:animate-ping animate-once animate-duration-500 animate-delay-400 animate-ease-out bg-blue-700 hover:bg-blue-600 text-base sm:text-sm md:text-[10px] lg:text-[12px] xl:text-[16px] text-white font-semibold px-3 py-1 sm:py-[2px] lg:py-1 xl:py-2 border-blue-700'>Próximo</button>
                 </div>
                 </form>
                 </Form>

@@ -17,46 +17,58 @@ import MostrarDialog from './MostrarDialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import { collectErrorMessages, matriculaAluno } from '@/_queries/Alunos'
+import { useGetCurseQuery, useGetIdGradeCurseQuery } from '@/_queries/UseCurseQuery'
+import { useGetIdClassFromGradedQuery } from '@/_queries/UseGradeQuery'
+import { usePostStudent } from '@/_queries/UseStudentQuery'
+import { useGetParentQuery } from '@/_queries/UseParentQuery'
+import { useGetPaymentQuery } from '@/_queries/UsePaymentQuery'
+import { AlertErro, AlertSucesso } from './Alert'
 
 const TFormCreate =  z.object({
-    nomeCompleto: nomeCompletoZod,
-    nomeCompletoPai: nomeCompletoZod,
-    nomeCompletoMae: nomeCompletoZod,
-    numeroBi: numeroBiZod,
-    dataNascimento: dataNascimentoZod,
-    genero: generoZod,
-    bairro: bairroZod,//o bairro não pode começar com um número
-    rua: ruaZod,
-    numeroCasa: z.number(),
-    telefone: telefoneZod,
-    email: emailZod,
+    cursoId: z.number(),
     classeId: z.number(),
-    metodoId: z.number(),
     turmaId: z.number(),
-    turnoId: z.number(),
-    responsaveis: z.array(
-        z.object(
-            {
-                nomeCompleto: nomeCompletoZod,
-                parentescoId: z.number(),
-                endereco: z.object({
-                    bairro: bairroZod,
-                    rua: ruaZod,
-                    numeroCasa: z.number(),
-                }),
-                contacto: z.object({
-                    telefone: telefoneZod,
-                    email: emailZod
-                })
-            }
-        )
+    metodoPagamentoId: z.number(),
+    aluno: z.object({
+        nomeCompleto: nomeCompletoZod,
+        nomeCompletoPai: nomeCompletoZod,
+        nomeCompletoMae: nomeCompletoZod,
+        numeroBi: numeroBiZod,
+        dataNascimento: dataNascimentoZod,
+        genero: generoZod,
+        endereco: z.object({
+            bairro: bairroZod,
+            rua: ruaZod,
+            numeroCasa: z.number()
+        }),
+        contacto: z.object({
+            telefone: telefoneZod,
+            email: emailZod
+        }),
+        responsaveis: z.array(
+            z.object({
+            nomeCompleto: nomeCompletoZod,
+            parentescoId: z.number(),
+            endereco: z.object({
+                bairro: bairroZod,
+                rua: ruaZod,
+                numeroCasa: z.number(),
+            }),
+            contacto: z.object({
+                telefone: telefoneZod,
+                email: emailZod
+            })
+        }
     )
+    )
+    })
 })
 
-export default function FormStudent(){
+export default function StudentEnrollment(){
 const form  = useForm<z.infer<typeof TFormCreate>>
 ({ mode: 'all', resolver: zodResolver(TFormCreate),
 defaultValues:{
+    aluno:{
     responsaveis:
         [{
         nomeCompleto: '',
@@ -68,113 +80,29 @@ defaultValues:{
         contacto: {
             telefone: '',
         }        
-    }]
+    }]}
 }
 })
 const {control, watch, formState:{ errors, isValid }, register} = form;
 //use of useFieldArray to create dynamic fields
 const { fields, append, remove } =
-    useFieldArray({
-        name: 'responsaveis',
-        control
-    })
+useFieldArray({
+    name: 'aluno.responsaveis',
+    control
+})
 
-const [fieldNome, fieldBi, fieldGenero, fieldTelefone, fieldDataNascimento, fieldNumeroCasa, fieldBairro, fieldRua, fieldNomeCompleMae, fieldNomeCompletoPai, fieldRespNome, fieldRespParentescoId, fieldRespBairro, fieldRespRua, fieldRespNumeroCasa, fieldRespTelefone, fieldClasseId, fieldTurmaId, fieldTurnoId, fieldMetodoId] = watch(["nomeCompleto", "genero", "numeroBi", "dataNascimento", "telefone", "numeroCasa", "bairro", "rua", "nomeCompletoMae", "nomeCompletoPai", "responsaveis.0.nomeCompleto", "responsaveis.0.parentescoId", "responsaveis.0.endereco.bairro", "responsaveis.0.endereco.rua",
-"responsaveis.0.endereco.numeroCasa",
-"responsaveis.0.contacto.telefone", "classeId", "turmaId", "turnoId", "metodoId"]);  
-/*Área q implementa o código pra pesquisar cursos*/
-const [metodo, setMetodo] = React.useState([]);
-const [ano, setAno] = React.useState();
-const [classe, setClasse] = React.useState([]);
-const [turma, setTurma] = React.useState([]);
-const [turno, setTurno] = React.useState([]);
-const [idCurso, setIdCurso] = React.useState(0);
-const [idClasse, setIdClasse] = React.useState(0);
-const [dataApiCursos, setDataApiCursos] = React.useState([]);
+const [fieldNome, fieldBi, fieldGenero, fieldTelefone, fieldDataNascimento, fieldNumeroCasa, fieldBairro, fieldRua, fieldNomeCompleMae, fieldNomeCompletoPai, fieldRespNome, fieldRespParentescoId, fieldRespBairro, fieldRespRua, fieldRespNumeroCasa, fieldRespTelefone, fieldCursoId, fieldClasseId, fieldTurmaId, fieldMetodoId] = watch(["aluno.nomeCompleto", "aluno.genero", "aluno.numeroBi", "aluno.dataNascimento", "aluno.contacto.telefone", "aluno.endereco.numeroCasa", "aluno.endereco.bairro", "aluno.endereco.rua", "aluno.nomeCompletoMae", "aluno.nomeCompletoPai", "aluno.responsaveis.0.nomeCompleto", "aluno.responsaveis.0.parentescoId", "aluno.responsaveis.0.endereco.bairro", "aluno.responsaveis.0.endereco.rua",
+"aluno.responsaveis.0.endereco.numeroCasa",
+"aluno.responsaveis.0.contacto.telefone", "cursoId", "classeId", "turmaId", "metodoPagamentoId"]);  
 
-React.useEffect( () => {
-    const respFetchCursos = async () => {
-          const resp = await fetch ("http://localhost:8000/api/cursos");
-          const respJson = await resp.json();
-          setDataApiCursos(respJson.data)
-
-          const resppay = await fetch ("http://localhost:8000/api/metodos-pagamento");
-          const resppayJson = await resppay.json();
-          setMetodo(resppayJson.data);
-
-          const resplectivo = await fetch ("http://localhost:8000/api/ano-lectivos");
-          const resplectivoJson = await resplectivo.json();
-          let meuarray = resplectivoJson.data.find((c)=>{
-            return c.activo === true
-          })
-          setAno(meuarray.nome)
-          if (idCurso > 0)
-          {
-            const respclasse = await fetch (`http://localhost:8000/api/cursos/${idCurso}/classes`);
-            const respclasseJson = await respclasse.json();
-            setClasse(respclasseJson.data)
-          }
-          if (idClasse > 0)
-          {
-            const respturma = await fetch (`http://localhost:8000/api/classes/${idClasse}/turmas`);
-            const respturmaJson = await respturma.json();
-            setTurma(respturmaJson.data)
-          }
-          const respturno = await fetch ("http://localhost:8000/api/turnos/");
-          const respturnoJson = await respturno.json();
-          setTurno(respturnoJson.data)
-    } 
-     respFetchCursos()
-},[idCurso, idClasse])
-
-
-/*Buscar dados do parentetesco*/
-const[parentesco, setParentesco] = React.useState([]);
-React.useEffect(()=>{
-    const search = async () => {
-        const resp = await fetch(`http://localhost:8000/api/parentescos/`);
-        const respJson = await resp.json()
-        setParentesco(respJson.data)
-    }
-    search()
-},[])
-
-
-    const [showDialog, setShowDialog] = React.useState(false);
-    const [dialogMessage, setDialogMessage] = React.useState<string | null>(null);
 const handleSubmitCreates = async (dados: z.infer<typeof TFormCreate>) => {
-    const data = {
-        classeId: dados.classeId,
-        cursoId: idCurso,
-        turmaId: dados.turmaId,
-        turnoId: dados.turnoId,
-        metodoPagamentoId: dados.metodoId,
-        aluno: {
-          nomeCompleto: dados.nomeCompleto,
-          nomeCompletoPai: dados.nomeCompletoPai,
-          nomeCompletoMae: dados.nomeCompletoMae,
-          numeroBi: dados.numeroBi,
-          dataNascimento: dados.dataNascimento,
-          genero: dados.genero,
-          endereco: {
-            bairro: dados.bairro,
-            rua: dados.rua,
-            numeroCasa: dados.numeroCasa
-          },
-          contacto: {
-            telefone: dados.telefone,
-            email: dados.email
-          },
-          responsaveis: dados.responsaveis
-        }
-      }
       try {
     const response = await fetch('http://localhost:8000/api/matriculas/',{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(dados)
         });
         
         if (response.ok) {
@@ -186,13 +114,13 @@ const handleSubmitCreates = async (dados: z.infer<typeof TFormCreate>) => {
             document.body.appendChild(a);
             a.click();
             a.remove();
-            setDialogMessage(null);
-            setShowDialog(true);
+            //setDialogMessage(null);
+            //setShowDialog(true);
         } else {
             const errorData = await response.json();
             
-            setShowDialog(true);
-            console.error('Erro ao gerar PDF:', response.statusText, errorData);
+            //setShowDialog(true);
+           /* console.error('Erro ao gerar PDF:', response.statusText, errorData);
             let index = Object.values(errorData.errors.aluno)
             let conv = parseInt(String(Object.keys(index)))
             if (Object.keys(errorData.errors.aluno)[0] == "numeroBi")
@@ -210,7 +138,7 @@ const handleSubmitCreates = async (dados: z.infer<typeof TFormCreate>) => {
             if (Object.values(Object.values(errorData.errors.aluno)[0])[0] == "responsaveis não podem conter contactos duplicados.")
             {
                 setDialogMessage("responsaveis não podem conter contactos duplicados.")
-            }
+            }*/
 
         }
     }catch(error){
@@ -218,89 +146,25 @@ const handleSubmitCreates = async (dados: z.infer<typeof TFormCreate>) => {
     }
         
     }
+//Get
+const { data: dataCurses } = useGetCurseQuery();
+const { data: dataParents } = useGetParentQuery();
+const { data: dataPayment } = useGetPaymentQuery();
+const { dataGradesCurse } = useGetIdGradeCurseQuery(fieldCursoId);
+const { dataClassGradeId } = useGetIdClassFromGradedQuery(fieldClasseId);
+//Post
+const { postStudent, postError, postLevel } = usePostStudent();
+const handleSubmitCreate = async (data: z.infer<typeof TFormCreate>) => {
+    postStudent(data);
+}
 
-    const queryClient = useQueryClient();
-
-    const {mutate: postMutationMatriculaAlunos, error} = useMutation({
-        mutationFn: matriculaAluno,
-        onSuccess: (response) => {
-            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-            window.open(url, '_blank');
-            queryClient.invalidateQueries({queryKey: ["alunosTurmaId", fieldClasseId, fieldTurmaId]});
-        },
-        onError: (error) => {
-        if(axios.isAxiosError(error)){
-            
-            if (error.response && error.response.data) {
-                const err = error.response.data?.errors;
-                const errorMessages = collectErrorMessages(err);
-                let from = String(Object.keys(error.response?.data?.errors?.aluno)) ? 'Responsavél' : 'Aluno';
-
-                console.log(String(errorMessages))
-                setDialogMessage(from+": "+String(errorMessages));
-                setShowDialog(true);
-                }
-            }
-        }
-      });
-    
-      const handleSubmitCreate = async (dados: z.infer<typeof TFormCreate>,e) => {
-        e.preventDefault();
-        const data = {
-            classeId: dados.classeId,
-            cursoId: idCurso,
-            turmaId: dados.turmaId,
-            turnoId: dados.turnoId,
-            metodoPagamentoId: dados.metodoId,
-            aluno: {
-              nomeCompleto: dados.nomeCompleto,
-              nomeCompletoPai: dados.nomeCompletoPai,
-              nomeCompletoMae: dados.nomeCompletoMae,
-              numeroBi: dados.numeroBi,
-              dataNascimento: dados.dataNascimento,
-              genero: dados.genero,
-              endereco: {
-                bairro: dados.bairro,
-                rua: dados.rua,
-                numeroCasa: dados.numeroCasa
-              },
-              contacto: {
-                telefone: dados.telefone,
-                email: dados.email
-              },
-              responsaveis: dados.responsaveis
-            }
-          }
-        postMutationMatriculaAlunos(data)
-       }
-
-    const step = ['Info. Aluno', 'Info. Encarregado', 'Último Passo'];
-    const[ currentStep, setCurrentStep ] = React.useState<number>(1);
-    const[ complete, setComplete ] = React.useState<boolean>(false);
-    const registerWithMask = useHookFormMask(register);
-    const [idAno, setIdAno] = React.useState<number>(0);
-    React.useEffect(() => {
-      const search = async () => {
-        const resp = await fetch(`http://localhost:8000/api/ano-lectivos/`);
-          const receve = await resp.json()
-          var meuarray = receve.data.find((c)=>{
-            return c.activo === true
-          })
-          setIdAno(meuarray.id)
-      };
-      search();
-    }, []);
+const step = ['Info. Aluno', 'Info. Encarregado', 'Último Passo'];
+const[ currentStep, setCurrentStep ] = React.useState<number>(1);
+const[ complete, setComplete ] = React.useState<boolean>(false);
+const registerWithMask = useHookFormMask(register);
 return(
-    <>  { idAno == 0 ? <div className='w-screen min-h-screen bg-scroll bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300 flex items-center justify-center'>
-    <div className='w-full text-center text-4xl text-red-600 md:text-2xl lg:text-2xl'>
-        <div >
-        <AlertTriangle className={`${animateBounce} inline-block h-7 w-7 md:h-12 lg:h-12 md:w-12 lg:w-12`}/>
-            <p className='text-red-500'>SELECIONE O ANO LECTIVO</p>
-            <p className='text-red-500 italic font-semibold text-sm cursor-pointer'><Link to={'/AcademicYearPage'}>Selecionar agora</Link></p>
-        </div>
-    </div>
-      </div> : (
-    <div className='w-screen h-screen bg-gradient-to-r from-gray-400 via-gray-100 to-gray-300  grid-flow-col grid-cols-3'>
+    <> 
+    <div className='m-0 w-screen h-screen  bg-gray-50'>
           <Header />
           
          <div className='w-full flex items-center justify-center'>
@@ -331,7 +195,7 @@ return(
                 <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
-                    name="nomeCompleto"
+                    name="aluno.nomeCompleto"
                     render={({field})=>(
                     <FormItem>
                         <label>Nome Completo<span className='text-red-500'>*</span></label>
@@ -339,7 +203,7 @@ return(
                        
                         <Input type='text' {...field} 
                         
-                        className={errors.nomeCompleto?.message && 
+                        className={errors?.aluno?.nomeCompleto?.message && 
                         `input-error ${animateShake}`}/>
                         
                         </FormControl>
@@ -352,13 +216,13 @@ return(
                 <div className='flex flex-col w-full mb-2'>
                 <FormField
                 control={form.control}
-                name="genero"
+                name="aluno.genero"
                 render={({field})=>(
                 <FormItem>
                      <label >Gênero<span className='text-red-500'>*</span></label>
                     <FormControl>
                     
-                     <select {...field} className={errors.genero?.message && 
+                     <select {...field} className={errors?.aluno?.genero?.message && 
                         `${animateShake} select-error`}>
                         <option>Selecione o gênero</option>
                         <option value="M">Masculino</option>
@@ -377,13 +241,13 @@ return(
                 <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
-                    name="numeroBi"
+                    name="aluno.numeroBi"
                     render={({field})=>(
                     <FormItem>
                         <label >Número do BI<span className='text-red-500'>*</span></label>
                         <FormControl>
                         <Input type='text' maxLength={14} {...field} 
-                        className={errors.numeroBi?.message && `input-error ${animateShake}`}/>
+                        className={errors?.aluno?.numeroBi?.message && `input-error ${animateShake}`}/>
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
                     </FormItem>
@@ -393,12 +257,12 @@ return(
                 <div className='flex flex-col mb-2 w-full'>
                 <FormField
                 control={form.control}
-                name="dataNascimento"
+                name="aluno.dataNascimento"
                 render={({field})=>(
                 <FormItem>
                      <label >Data de Nasc.<span className='text-red-500'>*</span></label>
                     <FormControl>
-                        <Input type='date' className={errors.dataNascimento?.message && `input-error ${animateShake}`} {...field} />
+                        <Input type='date' className={errors?.aluno?.dataNascimento?.message && `input-error ${animateShake}`} {...field} />
                     </FormControl>
                     <FormMessage className='text-red-500 text-xs'/>
                 </FormItem>
@@ -410,14 +274,14 @@ return(
                 <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
-                    name="email"
+                    name="aluno.contacto.email"
                     render={({field})=>(
                     <FormItem>
                          <label >Email</label>
                         <FormControl>
                         <Input type='email' {...field} 
                         
-                        className={errors.email?.message && `input-error ${animateShake}`}/>
+                        className={errors?.aluno?.contacto?.email?.message && `input-error ${animateShake}`}/>
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
                     </FormItem>
@@ -427,12 +291,12 @@ return(
                 <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
-                    name="telefone"
+                    name="aluno.contacto.telefone"
                     render={({field})=>(
                     <FormItem>
                          <label >Telefone<span className='text-red-500'>*</span></label>
                         <FormControl>
-                        <Input {...registerWithMask('telefone',['999999999'], {required: true})}  className={errors.telefone?.message && `input-error ${animateShake}`}/>
+                        <Input {...registerWithMask('aluno.contacto.telefone',['999999999'], {required: true})}  className={errors?.aluno?.contacto?.telefone?.message && `input-error ${animateShake}`}/>
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
                     </FormItem>
@@ -444,14 +308,14 @@ return(
                 <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
-                    name="numeroCasa"
+                    name="aluno.endereco.numeroCasa"
                     render={({field})=>(
                     <FormItem>
                          <label >Número da Residência<span className='text-red-500'>*</span></label>
                         <FormControl>
                         <Input type='number' {...field} 
                         
-                        className={errors.numeroCasa?.message && `input-error ${animateShake}`} min={0} {...field} onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
+                        className={errors?.aluno?.endereco?.numeroCasa?.message && `input-error ${animateShake}`} min={0} {...field} onChange={(e)=>{ field.onChange(parseInt(e.target.value))}}/>
                         
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -462,14 +326,14 @@ return(
                 <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
-                    name="bairro"
+                    name="aluno.endereco.bairro"
                     render={({field})=>(
                     <FormItem>
                          <label >Bairro<span className='text-red-500'>*</span></label>
                         
                         <FormControl>
                         <Input type='text' {...field} 
-                        className={errors.bairro?.message &&  `input-error ${animateShake}`} />
+                        className={errors?.aluno?.endereco?.bairro?.message &&  `input-error ${animateShake}`} />
                         
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -480,14 +344,14 @@ return(
                 <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
-                    name="rua"
+                    name="aluno.endereco.rua"
                     render={({field})=>(
                     <FormItem>
                          <label >Rua<span className='text-red-500'>*</span></label>
                         <FormControl>
                         <Input type='text' {...field} 
                         
-                        className={errors.rua?.message && `input-error ${animateShake}`} />
+                        className={errors?.aluno?.endereco?.rua?.message && `input-error ${animateShake}`} />
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
                     </FormItem>
@@ -499,7 +363,7 @@ return(
                 <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
-                    name="nomeCompletoPai"
+                    name="aluno.nomeCompletoPai"
                     render={({field})=>(
                     <FormItem>
                          <label >Nome do Pai<span className='text-red-500'>*</span></label>
@@ -507,7 +371,7 @@ return(
                         <FormControl>
                         <Input type='text' {...field} 
                         
-                        className={errors.nomeCompletoPai?.message && `input-error ${animateShake}`} />
+                        className={errors?.aluno?.nomeCompletoPai?.message && `input-error ${animateShake}`} />
                         
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -518,7 +382,7 @@ return(
                 <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
-                    name="nomeCompletoMae"
+                    name="aluno.nomeCompletoMae"
                     render={({field})=>(
                     <FormItem>
                          <label>Nome da Mãe<span className='text-red-500'>*</span></label>
@@ -526,7 +390,7 @@ return(
                         <FormControl>
                         <Input type='text' {...field} 
                         
-                        className={errors.nomeCompletoMae?.message && `input-error ${animateShake}`} />
+                        className={errors?.aluno?.nomeCompletoMae?.message && `input-error ${animateShake}`} />
                         
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
@@ -552,7 +416,7 @@ return(
                             <div className='flex flex-col w-full'>
                                 <FormField
                                 control={form.control}
-                                name={`responsaveis.${index}.nomeCompleto`} 
+                                name={`aluno.responsaveis.${index}.nomeCompleto`} 
                                 render={({field})=>(
                                     
                                 <FormItem>
@@ -562,7 +426,7 @@ return(
                                     <Input type='text' {...field} 
                         
                                      className={
-                                errors.responsaveis?.[index]?.nomeCompleto?.message && `input-error ${animateShake}`} />
+                                errors?.aluno?.responsaveis?.[index]?.nomeCompleto?.message && `input-error ${animateShake}`} />
                                     </FormControl>
                                     <FormMessage className='text-red-500 text-xs'/>
                                 </FormItem>
@@ -572,7 +436,7 @@ return(
                         <div className='flex flex-col w-full'>
                             <FormField
                             control={form.control}
-                            name={`responsaveis.${index}.parentescoId`}
+                            name={`aluno.responsaveis.${index}.parentescoId`}
                             
                             render={({field})=>(
                             <FormItem>
@@ -580,13 +444,13 @@ return(
                                 
                                 <FormControl>
                                 <select {...field} 
-                                className={errors.responsaveis?.[index]?.parentescoId?.message && `${animateShake} select-error`}
+                                className={errors?.aluno?.responsaveis?.[index]?.parentescoId?.message && `${animateShake} select-error`}
                                 onChange={(e)=>{field.onChange(parseInt(e.target.value))
                             
                         }}>
                       <option >Selecione o grau</option>
                         {
-                              parentesco.map((field)=>{
+                              dataParents?.data?.data?.map((field)=>{
                                   return <option value={`${field.id}`}>{field.nome}</option>
                               })
                         }
@@ -603,13 +467,13 @@ return(
                             <div className='flex flex-col w-full'>
                             <FormField
                             control={form.control}
-                            name={`responsaveis.${index}.contacto.telefone`}
+                            name={`aluno.responsaveis.${index}.contacto.telefone`}
                             render={({field})=>(
                             <FormItem>
                                 <label >Telefone<span className='text-red-500'>*</span></label>
                                 
                                 <FormControl>
-                                <Input {...registerWithMask(`responsaveis.${index}.contacto.telefone`,['999999999'], {required: true})}  className={errors.responsaveis?.[index]?.contacto?.telefone?.message && `input-error ${animateShake}`}
+                                <Input {...registerWithMask(`aluno.responsaveis.${index}.contacto.telefone`,['999999999'], {required: true})}  className={errors?.aluno?.responsaveis?.[index]?.contacto?.telefone?.message && `input-error ${animateShake}`}
                                 />
                                 </FormControl>
                                 <FormMessage className='text-red-500 text-xs'/>
@@ -620,12 +484,12 @@ return(
                             <div className='flex flex-col w-full'>
                                 <FormField
                                 control={form.control}
-                                name={`responsaveis.${index}.contacto.email`}
+                                name={`aluno.responsaveis.${index}.contacto.email`}
                                 render={({field})=>(
                                 <FormItem>
                                     <label >Email</label>
                                     <FormControl>
-                                    <Input type='text' {...field} className={errors.responsaveis?.[index]?.contacto?.email?.message && `input-error ${animateShake}`}/>
+                                    <Input type='text' {...field} className={errors?.aluno?.responsaveis?.[index]?.contacto?.email?.message && `input-error ${animateShake}`}/>
                                     </FormControl>
                                     <FormMessage className='text-red-500 text-xs'/>
                                 </FormItem>
@@ -638,13 +502,13 @@ return(
                         <div className='flex flex-col w-full'>
                             <FormField
                             control={form.control}
-                            name={`responsaveis.${index}.endereco.numeroCasa`}
+                            name={`aluno.responsaveis.${index}.endereco.numeroCasa`}
                             render={({field})=>(
                             <FormItem>
                                 <label >Número da Residência<span className='text-red-500'>*</span></label>
                                 
                                 <FormControl>
-                                <Input type='number' min={1} {...field}  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}} className={errors.responsaveis?.[index]?.endereco?.numeroCasa?.message && `input-error ${animateShake}`}/>
+                                <Input type='number' min={1} {...field}  onChange={(e)=>{ field.onChange(parseInt(e.target.value))}} className={errors?.aluno?.responsaveis?.[index]?.endereco?.numeroCasa?.message && `input-error ${animateShake}`}/>
                                 </FormControl>
                                 <FormMessage className='text-red-500 text-xs'/>
                             </FormItem>
@@ -654,12 +518,12 @@ return(
                         <div className='flex flex-col w-full'>
                         <FormField
                         control={form.control}
-                        name={`responsaveis.${index}.endereco.bairro`}
+                        name={`aluno.responsaveis.${index}.endereco.bairro`}
                         render={({field})=>(
                         <FormItem>
                             <label >Bairro<span className='text-red-500'>*</span></label>
                             <FormControl>
-                            <Input type='text' {...field} className={errors.responsaveis?.[index]?.endereco?.bairro?.message && `input-error ${animateShake}`} />
+                            <Input type='text' {...field} className={errors?.aluno?.responsaveis?.[index]?.endereco?.bairro?.message && `input-error ${animateShake}`} />
                             </FormControl>
                             <FormMessage className='text-red-500 text-xs'/>
                         </FormItem>
@@ -669,12 +533,12 @@ return(
                 <div className='flex flex-col w-full'>
                     <FormField
                     control={form.control}
-                    name={`responsaveis.${index}.endereco.rua`}
+                    name={`aluno.responsaveis.${index}.endereco.rua`}
                     render={({field})=>(
                     <FormItem>
                         <label >Rua<span className='text-red-500'>*</span></label>
                         <FormControl>
-                        <Input type='text' {...field} className={errors.responsaveis?.[index]?.endereco?.rua?.message && `input-error ${animateShake}`}/>
+                        <Input type='text' {...field} className={errors?.aluno?.responsaveis?.[index]?.endereco?.rua?.message && `input-error ${animateShake}`}/>
                         </FormControl>
                         <FormMessage className='text-red-500 text-xs'/>
                     </FormItem>
@@ -705,24 +569,30 @@ return(
             {currentStep === 3 &&
             <fieldset className='animate-fade-left animate-once animate-duration-[550ms] animate-delay-[400ms] animate-ease-in'>
             <div className='legend-div'>Informações Essenciais</div>
+            { (postLevel === 1) &&(
+            <AlertSucesso message={postError} />  
+            )
+            }
+            { (postLevel === 2) &&(
+            <AlertErro message={postError} /> )
+            }
             <div className='flex flex-col space-y-3 mb-2'>
                 <div className='flex flex-row space-x-3 mb-2'>
                 <div className='flex flex-col w-full'>
                     <FormField
-                    name=''
+                    control={form.control}
+                    name='cursoId'
                     render={({field})=>(
                     <FormItem>
                         <label >Cursos<span className='text-red-500'>*</span></label>
                         <FormControl>
                     <select {...field} onChange={(e) => {
-                        field.onChange(
-                            parseInt(e.target.value, 10),
-                            setIdCurso(parseInt(e.target.value, 10) || 0))
+                        field.onChange(parseInt(e.target.value, 10))
                         }}>
                         <option >Selecione o curso</option>
                         {
                             
-                        dataApiCursos.map((field)=>{
+                        dataCurses?.data?.data?.map((field)=>{
                             return (<option value={`${field.id}`}>{field.nome}
                             </option>
                             )
@@ -745,11 +615,10 @@ return(
                         <label>Classes<span className='text-red-500'>*</span></label>
                         <FormControl>
                         <select {...field} className={errors.classeId?.message && `${animateShake} select-error`}onChange={(e)=>{field.onChange(parseInt(e.target.value))
-                            setIdClasse(parseInt(e.target.value, 10) || 0)
                           }}>
                         <option >Selecione a classe</option>
                         {
-                              classe.map((field)=>{
+                              dataGradesCurse?.data?.data?.map((field)=>{
                                   return <option value={`${field.id}`}>{field.nome}</option>
                               })
                         }
@@ -774,31 +643,7 @@ return(
                           }}>
                         <option >Selecione a turma</option>
                         {
-                              turma.map((field)=>{
-                                  return <option value={`${field.id}`}>{field.nome}</option>
-                              })
-                        }
-                    </select>
-                        </FormControl>
-                        <FormMessage className='text-red-500 text-xs'/>
-                    </FormItem>)
-                    }
-                    />
-                    </div>
-                    <div className='flex flex-col w-full'>
-                    <FormField
-                    control={form.control}
-                    name='turnoId'
-                    render={({field})=>(
-                    <FormItem>
-                        <label >Turnos<span className='text-red-500'>*</span></label>
-                        <FormControl>
-                        <select {...field} className={errors.turmaId?.message && `${animateShake} select-error`}onChange={(e)=>{field.onChange(parseInt(e.target.value))
-                            
-                          }}>
-                        <option >Selecione a turno</option>
-                        {
-                              turno.map((field)=>{
+                              dataClassGradeId?.data?.data?.map((field)=>{
                                   return <option value={`${field.id}`}>{field.nome}</option>
                               })
                         }
@@ -814,17 +659,16 @@ return(
                 <div className='col-span-1'>
                     <FormField
                     control={form.control}
-                    name='metodoId'
+                    name='metodoPagamentoId'
                     render={({field})=>(
                     <FormItem>
                         
                         <FormControl>
-                        <select {...field} className={errors.metodoId?.message && `${animateShake} select-error`}onChange={(e)=>{field.onChange(parseInt(e.target.value))
-                            setIdClasse(parseInt(e.target.value, 10) || 0)
+                        <select {...field} className={errors.metodoPagamentoId?.message && `${animateShake} select-error`}onChange={(e)=>{field.onChange(parseInt(e.target.value))
                           }}>
                         <option >Pagar Em<span className='text-red-500'>*</span></option>
                         {
-                              metodo.map((field)=>{
+                              dataPayment?.data?.data?.map((field)=>{
                                   return <option value={`${field.id}`}>{field.nome}</option>
                               })
                         }
@@ -848,21 +692,20 @@ return(
     }} className={`${animatePing} responsive-button bg-gray-700 hover:bg-gray-600 text-white font-semibold border-gray-700`}>Voltar</button>
     }
     
-    {(currentStep === step.length) ? <div>{ (!errors.classeId && !errors.turmaId && !errors.turnoId && !errors.metodoId && fieldClasseId && fieldTurmaId && fieldTurnoId && fieldMetodoId) &&
+    {(currentStep === step.length) ? <div>{ (!errors.classeId && !errors.turmaId  && !errors.metodoPagamentoId && fieldClasseId && fieldTurmaId && fieldMetodoId) &&
     <button type={(currentStep===step.length && complete) ? 'submit' : 'button'} onClick={()=>{
         currentStep === step.length ?
         setComplete(true) :
         setCurrentStep(prev => prev + 1);
-    }} className={`${currentStep === 3 && complete ? `${animateFadeLeft} bg-green-700 hover:bg-green-500 border-green-700`: `${animateFadeLeft}  bg-sky-700 hover:bg-sky-600 border-sky-700`} text-white font-semibold sm:text-sm md:text-[10px] lg:text-[12px] xl:text-[16px]
+    }} className={`${currentStep === 3 && complete ? `${animateFadeLeft} bg-green-700 hover:bg-green-500 border-green-700`: `${animateFadeLeft}  bg-blue-700 hover:bg-blue-600 border-blue-700`} text-white font-semibold sm:text-sm md:text-[10px] lg:text-[12px] xl:text-[16px]
     py-1 sm:py-[2px] lg:py-1 xl:py-2 `} disabled={!isValid}>{!isValid}Cadastrar</button> }</div>: 
     <button type='button' onClick={()=>{
-    const isStep1Valid = !errors.nomeCompleto && !errors.numeroBi && !errors.genero &&
-    !errors.telefone && !errors.dataNascimento && !errors.numeroCasa &&
-    !errors.bairro && !errors.rua && !errors.nomeCompletoMae && !errors.nomeCompletoPai &&
+    const isStep1Valid = !errors?.aluno?.nomeCompleto && !errors?.aluno?.numeroBi && !errors?.aluno?.genero &&
+    !errors?.aluno?.contacto?.telefone && !errors?.aluno?.dataNascimento && !errors?.aluno?.endereco?.numeroCasa && !errors?.aluno?.endereco?.bairro && !errors?.aluno?.endereco?.rua && !errors?.aluno?.nomeCompletoMae && !errors?.aluno?.nomeCompletoPai &&
     fieldNome && fieldBi && fieldGenero && fieldTelefone && fieldDataNascimento &&
     fieldNumeroCasa && fieldBairro && fieldRua && fieldNomeCompleMae && fieldNomeCompletoPai;
 
-  const isResponsavelValid = !Object.values(errors.responsaveis?.[0] || {}).some(Boolean) &&
+  const isResponsavelValid = !Object.values(errors?.aluno?.responsaveis?.[0] || {}).some(Boolean) &&
     fieldRespNome &&
     fieldRespBairro &&
     fieldRespNumeroCasa &&
@@ -886,8 +729,7 @@ return(
     // Retorne ao Step 1 caso as condições de validação não estejam atendidas
     setCurrentStep(1);
   }
-    }} className={`${animatePing} responsive-button bg-sky-700 hover:bg-sky-600 text-white font-semibold border-sky-700`} >Próximo</button>}
-
+    }} className={`${animatePing} responsive-button bg-blue-700 hover:bg-blue-600 text-white font-semibold border-blue-700`} >Próximo</button>}
     
         </div>
            </form>
@@ -897,9 +739,7 @@ return(
       </div>
       
       </div>
-      <MostrarDialog show={showDialog} message={dialogMessage} onClose={() => setShowDialog(false)} />
-
      </div>
- )}</>    
+</>    
 )
 }
