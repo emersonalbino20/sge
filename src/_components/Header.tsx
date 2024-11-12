@@ -1,27 +1,29 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 import {
-	Menu,
-	X,
-	ChevronDown,
+	Home,
 	Users,
 	BookOpen,
 	Calendar,
 	ClipboardList,
-	Settings,
+	Menu,
+	X,
+	ChevronDown,
 	Bell,
+	Settings,
 	User,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
-export default function Header() {
-	const [openSubMenuI, setOpenSubMenuI] = React.useState(false);
-	const [openSubMenuII, setOpenSubMenuII] = React.useState(false);
-	const [openSubMenuIII, setOpenSubMenuIII] = React.useState(false);
-
-	const [menuAberto, setMenuAberto] = React.useState(false);
-	const [subMenuAlunos, setSubMenuAlunos] = React.useState(false);
+function Header() {
+	const [openSubMenu, setOpenSubMenu] = React.useState(null);
+	const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
 	const menuItems = [
+		{
+			titulo: 'Início',
+			icone: <Home className="w-5 h-5 text-white" />,
+			link: '/Home',
+		},
 		{
 			titulo: 'Pessoal',
 			icone: <Users className="w-5 h-5 text-white" />,
@@ -52,47 +54,73 @@ export default function Header() {
 		{
 			titulo: 'Notas e Avaliações',
 			icone: <ClipboardList className="w-5 h-5 text-white" />,
-			link: '/BulletimPage',
+			link: '/ExportBulletinPage',
+		},
+		{
+			titulo: 'Configuração',
+			icone: <Settings className="w-5 h-5 text-white" />,
+			link: '/config',
 		},
 	];
+
+	const toggleSubMenu = (index) => {
+		setOpenSubMenu(openSubMenu === index ? null : index);
+	};
+
+	const toggleMobileMenu = () => {
+		setMobileMenuOpen(!mobileMenuOpen);
+	};
 
 	return (
 		<>
 			{/* Barra Superior */}
 			<nav className="bg-blue-600 text-white">
 				<div className="max-w-7xl mx-auto px-4">
-					<div className="flex justify-between items-center h-16">
-						{/* Logo */}
+					<div className="flex justify-between items-center h-16 md:h-20">
+						{/* Logo 
 						<div className="flex items-center">
-							<span className="text-xl font-bold">Gestão Escolar</span>
+							<span className="text-xl font-bold md:text-2xl">
+								Gestão Escolar
+							</span>
 						</div>
-
+						*/}
 						{/* Menu Desktop */}
-						<div className="hidden md:flex items-center space-x-4">
-							{menuItems.map((item) => (
+						<div className="hidden md:flex items-center space-x-6">
+							{menuItems.map((item, index) => (
 								<div key={item.titulo} className="relative group">
-									<button
-										className="flex items-center px-3 py-2 rounded hover:bg-blue-700 border-none"
-										onClick={() =>
-											item.subItems && setSubMenuAlunos(!subMenuAlunos)
-										}
-									>
-										{item.icone}
-										<span className="ml-2 text-white">{item.titulo}</span>
-										{item.subItems && (
+									{item.subItems ? (
+										<button
+											className="flex items-center px-2 py-2 rounded hover:bg-blue-700 border-none"
+											onClick={() => toggleSubMenu(index)}
+										>
+											{item.icone}
+											<span className="ml-2 text-white text-base">
+												{item.titulo}
+											</span>
 											<ChevronDown className="w-4 h-4 ml-1 text-white" />
-										)}
-									</button>
+										</button>
+									) : (
+										<Link
+											to={item.link}
+											className="flex items-center px-3 py-2 rounded hover:bg-blue-700 border-none"
+										>
+											{item.icone}
+											<span className="ml-2 text-white text-base">
+												{item.titulo}
+											</span>
+										</Link>
+									)}
 
-									{item.subItems && (
-										<div className="absolute hidden group-hover:block w-48 bg-white text-gray-700 rounded shadow-lg z-20">
-											{item.subItems.map((subItem, index) => (
-												<span
-													key={index}
+									{item.subItems && openSubMenu === index && (
+										<div className="absolute block w-48 bg-white text-gray-700 rounded shadow-lg z-20">
+											{item.subItems.map((subItem, subIndex) => (
+												<Link
+													key={subIndex}
+													to={subItem.link}
 													className="block px-4 py-2 hover:bg-gray-100"
 												>
-													<Link to={subItem.link}>{subItem.titulo}</Link>
-												</span>
+													{subItem.titulo}
+												</Link>
 											))}
 										</div>
 									)}
@@ -102,11 +130,8 @@ export default function Header() {
 
 						{/* Ícones da direita */}
 						<div className="hidden md:flex items-center space-x-4">
-							<button className="p-2 rounded hover:bg-blue-700  border-none">
-								<Bell className="w-5 h-5 text-white" />
-							</button>
 							<button className="p-2 rounded hover:bg-blue-700 border-none">
-								<Settings className="w-5 h-5 text-white" />
+								<Bell className="w-5 h-5 text-white" />
 							</button>
 							<button className="p-2 rounded hover:bg-blue-700 border-none">
 								<User className="w-5 h-5 text-white" />
@@ -116,10 +141,10 @@ export default function Header() {
 						{/* Botão Menu Mobile */}
 						<div className="md:hidden">
 							<button
-								onClick={() => setMenuAberto(!menuAberto)}
+								onClick={toggleMobileMenu}
 								className="p-2 rounded hover:bg-blue-700 border-none"
 							>
-								{menuAberto ? (
+								{mobileMenuOpen ? (
 									<X className="w-6 h-6 text-white" />
 								) : (
 									<Menu className="w-6 h-6 text-white" />
@@ -130,54 +155,54 @@ export default function Header() {
 				</div>
 
 				{/* Menu Mobile */}
-				{menuAberto && (
-					<div className="md:hidden">
-						{menuItems.map((item) => (
+				{mobileMenuOpen && (
+					<div className="md:hidden bg-blue-600 px-4 py-2 space-y-2">
+						{menuItems.map((item, index) => (
 							<div key={item.titulo}>
-								<button
-									className="w-full flex items-center px-4 py-2 hover:bg-blue-700 border-none "
-									onClick={() =>
-										item.subItems && setSubMenuAlunos(!subMenuAlunos)
-									}
-								>
-									{item.icone}
-									<span className="ml-2 text-white">{item.titulo}</span>
-									{item.subItems && (
-										<ChevronDown className="w-4 h-4 ml-1 text-white" />
-									)}
-								</button>
-
-								{item.subItems && subMenuAlunos && (
-									<div className="bg-blue-700">
-										{item.subItems.map((subItem, index) => (
-											<span
-												key={index}
-												className="block px-4 py-2 hover:bg-gray-100"
-											>
-												<Link to={subItem.link}>{subItem.titulo}</Link>
+								{item.subItems ? (
+									<>
+										<button
+											className="w-full flex items-center px-4 py-2 hover:bg-blue-700 border-none"
+											onClick={() => toggleSubMenu(index)}
+										>
+											{item.icone}
+											<span className="ml-2 text-white text-base">
+												{item.titulo}
 											</span>
-										))}
-									</div>
+											<ChevronDown className="w-4 h-4 ml-1 text-white" />
+										</button>
+										{openSubMenu === index && (
+											<div className="bg-blue-700 px-4 py-2 space-y-2">
+												{item.subItems.map((subItem, subIndex) => (
+													<Link
+														key={subIndex}
+														to={subItem.link}
+														className="block px-4 py-2 hover:bg-gray-600 text-base"
+													>
+														{subItem.titulo}
+													</Link>
+												))}
+											</div>
+										)}
+									</>
+								) : (
+									<Link
+										to={item.link}
+										className="w-full flex items-center px-4 py-2 hover:bg-blue-700 border-none"
+									>
+										{item.icone}
+										<span className="ml-2 text-white text-base">
+											{item.titulo}
+										</span>
+									</Link>
 								)}
 							</div>
 						))}
-
-						<div className="border-t border-blue-700 px-4 py-2">
-							<div className="flex justify-between">
-								<button className="p-2 rounded hover:bg-blue-700 border-none">
-									<Bell className="w-5 h-5 text-white" />
-								</button>
-								<button className="p-2 rounded hover:bg-blue-700 border-none">
-									<Settings className="w-5 h-5 text-white" />
-								</button>
-								<button className="p-2 rounded hover:bg-blue-700  border-none">
-									<User className="w-5 h-5 text-white" />
-								</button>
-							</div>
-						</div>
 					</div>
 				)}
 			</nav>
 		</>
 	);
 }
+
+export default Header;
