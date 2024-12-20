@@ -1,31 +1,31 @@
-import * as React from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import * as React from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 
-  //Auxilary Functions
+//Auxilary Functions
 
-  /* Show the message error */
-  const collectErrorMessages = (obj) => {
-    let messages = [];
-    for (const key in obj) {
-      if (Array.isArray(obj[key])) {
-        messages = messages.concat(obj[key]);
-      } else if (typeof obj[key] === "object") {
-        messages = messages.concat(collectErrorMessages(obj[key]));
-      }
+/* Show the message error */
+const collectErrorMessages = (obj) => {
+  let messages = [];
+  for (const key in obj) {
+    if (Array.isArray(obj[key])) {
+      messages = messages.concat(obj[key]);
+    } else if (typeof obj[key] === 'object') {
+      messages = messages.concat(collectErrorMessages(obj[key]));
     }
-    return messages;
-  };
-
-  /* Post */
-  export  const auxPostPeriod = (data) => {
-    return (axios.post(`http://localhost:8000/api/turnos/`, data));
   }
+  return messages;
+};
 
-  /* Put */
-  export  const auxPutPeriod = (data) => {
-    return (axios.put(`http://localhost:8000/api/turnos/${data.id}`, data));
-  }
+/* Post */
+export const auxPostPeriod = (data) => {
+  return axios.post(`http://localhost:8000/api/turnos/`, data);
+};
+
+/* Put */
+export const auxPutPeriod = (data) => {
+  return axios.put(`http://localhost:8000/api/turnos/${data.id}`, data);
+};
 
 //Main Functions
 
@@ -33,28 +33,35 @@ import axios from "axios";
 
 export const usePostPeriod = () => {
   const [postError, setResp] = React.useState<string>('');
-  const [postLevel, setLevel] = React.useState<number>(null)
+  const [postLevel, setLevel] = React.useState<number>(null);
   const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: auxPostPeriod,
-      onSuccess: () => {
-        queryClient.invalidateQueries({queryKey: ['turnos']});
-        setResp(`(${count}) Operação realizada com sucesso!`);
-        setLevel(1);
-      },
-      onError: (error) => {
-        if(axios.isAxiosError(error)){
-          if (error.response && error.response.data) {
-            const err = error.response.data?.errors;
-            const errorMessages = collectErrorMessages(err);
-            setResp(`(${count}) ${errorMessages[0]}`);
-            setLevel(2);
-           }
-          }
-      }, onMutate() {
-        setCount(prev=>prev+1);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['turnos'] });
+      setResp(`(${count}) Operação realizada com sucesso!`);
+      setLevel(1);
+    },
+    onError: (error) => {
+      if (axios.isAxiosError(error)) {
+        if (error.response && error.response.data) {
+          const err = error?.response?.data?.errors;
+          const errorMessages = collectErrorMessages(err);
+          setResp(
+            `(${count}) ${
+              error?.response?.data?.errors
+                ? errorMessages[0]
+                : error?.response?.data?.message
+            }`
+          );
+          setLevel(2);
+        }
       }
+    },
+    onMutate() {
+      setCount((prev) => prev + 1);
+    },
   });
   return { postPeriod: mutate, postLevel, postError };
 };
@@ -71,7 +78,7 @@ interface QueryData {
 
 export const usePutPeriod = () => {
   const [putError, setResp] = React.useState<string>('');
-  const [putLevel, setLevel] = React.useState<number>(null)
+  const [putLevel, setLevel] = React.useState<number>(null);
   const [count, setCount] = React.useState<number>(0);
   const queryClient = useQueryClient();
 
@@ -85,16 +92,18 @@ export const usePutPeriod = () => {
     onError: (error) => {
       if (axios.isAxiosError(error)) {
         if (error.response?.data) {
-          const err = error.response.data?.errors;
+          const err =
+            error.response?.data?.message || error.response?.data?.errors;
           const errorMessages = collectErrorMessages(err);
           setResp(errorMessages[0]);
           setResp(`(${count}) Operação realizada com sucesso!`);
           setLevel(2);
         }
       }
-    }, onMutate() {
-      setCount(prev=>prev+1);
-    }
+    },
+    onMutate() {
+      setCount((prev) => prev + 1);
+    },
   });
 
   return { putPeriod: mutate, putError, putLevel };
@@ -103,27 +112,20 @@ export const usePutPeriod = () => {
 //Get
 
 export const useGetPeriodQuery = () => {
-    const { data, isLoading, isError } = useQuery(
-        {
-          queryKey: ['turnos'],
-          queryFn: () => axios.get("http://localhost:8000/api/turnos/")
-        }
-      );
-    
-      return { data, isLoading, isError };
-  };
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['turnos'],
+    queryFn: () => axios.get('http://localhost:8000/api/turnos/'),
+  });
 
-export const useGetIdPeriodQuery = (id: string) => {
-    const { data, isFetched } = useQuery(
-        {
-          queryKey: ['turnos', id],
-          queryFn: () => axios.get(`http://localhost:8000/api/turnos/${id}`),
-          enabled: !!id
-        }
-      );
-    
-      return { dataTurnoById: data, isFetchedTurnoById: isFetched};
+  return { data, isLoading, isError };
 };
 
+export const useGetIdPeriodQuery = (id: string) => {
+  const { data, isFetched } = useQuery({
+    queryKey: ['turnos', id],
+    queryFn: () => axios.get(`http://localhost:8000/api/turnos/${id}`),
+    enabled: !!id,
+  });
 
-
+  return { dataTurnoById: data, isFetchedTurnoById: isFetched };
+};

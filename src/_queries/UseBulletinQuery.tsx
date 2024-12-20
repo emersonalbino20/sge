@@ -17,13 +17,13 @@ const collectErrorMessages = (obj) => {
   return messages;
 };
 
-export const auxPostGrade = (data) => {
-  return axios.post(`http://localhost:8000/api/classes/`, data);
+export const auxPostBulletin = (data) => {
+  return axios.post(`http://localhost:8000/api/notas/`, data);
 };
 
 /* Put */
-export const auxPutGrade = (data) => {
-  return axios.put(`http://localhost:8000/api/classes/${data?.id}`, {
+export const auxPutBulletin = (data) => {
+  return axios.put(`http://localhost:8000/api/notas/${data?.id}`, {
     nomeCompleto: data?.nomeCompleto,
     dataNascimento: data.dataNascimento,
     contacto: {
@@ -36,18 +36,19 @@ export const auxPutGrade = (data) => {
 //Main Functions
 
 //Post
-export const usePostGrade = () => {
+export const usePostBulletin = () => {
   const [postError, setResp] = React.useState<string>(null);
   const [postLevel, setLevel] = React.useState<number>(0);
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
-    mutationFn: auxPostGrade,
+    mutationFn: auxPostBulletin,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['classes'] });
       setResp(' Operação realizada com sucesso!');
       setLevel(1);
     },
     onError: (error) => {
+      console.log(error);
       if (axios.isAxiosError(error)) {
         if (error.response && error.response.data) {
           const err =
@@ -59,16 +60,16 @@ export const usePostGrade = () => {
       }
     },
   });
-  return { postGrade: mutate, postError, postLevel };
+  return { postBulletin: mutate, postError, postLevel };
 };
 
 //Put
-export const usePutGrade = () => {
+export const usePutBulletin = () => {
   const [updateError, setResp] = React.useState<string>(null);
   const [updateLevel, setLevel] = React.useState<number>(0);
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
-    mutationFn: auxPutGrade,
+    mutationFn: auxPutBulletin,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['classes'] });
       setResp(' Operação realizada com sucesso!');
@@ -86,12 +87,12 @@ export const usePutGrade = () => {
       }
     },
   });
-  return { putGrade: mutate, updateError, updateLevel };
+  return { putBulletin: mutate, updateError, updateLevel };
 };
 
 //Get
 
-export const useGetGradeQuery = () => {
+export const useGetBulletinQuery = () => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['classes'],
     queryFn: () => axios.get('http://localhost:8000/api/classes/'),
@@ -100,52 +101,40 @@ export const useGetGradeQuery = () => {
   return { data, isLoading, isError };
 };
 
-export const useGetIdGradedQuery = (id: string) => {
+export const useGetIdBulletindQuery = (id: string) => {
   const { data, isFetched } = useQuery({
     queryKey: ['classes', id],
     queryFn: () => axios.get(`http://localhost:8000/api/classes/${id}`),
     enabled: !!id,
   });
-  return { dataGradeId: data, isFetched };
+  return { dataBulletinId: data, isFetched };
 };
 
-export const useGetIdClassFromGradedQuery = (id) => {
+export const useGetIdClassFromBulletindQuery = (id: number) => {
   const { data, isFetched } = useQuery({
     queryKey: ['turmasclasses', id],
     queryFn: () => axios.get(`http://localhost:8000/api/classes/${id}/turmas`),
     enabled: !!id,
   });
-  return { dataClassGradeId: data };
+  return { dataClassBulletinId: data };
 };
 
-export const useGetNextGradeQuery = (preveousGrade) => {
+export const useGetNextBulletinQuery = (preveousBulletin) => {
   const { data } = useQuery({
-    queryKey: ['nextGrade', preveousGrade],
+    queryKey: ['nextBulletin', preveousBulletin],
     queryFn: () =>
-      axios.get(`http://localhost:8000/api/classes/${preveousGrade}/next`),
-    enabled: !!preveousGrade,
+      axios.get(`http://localhost:8000/api/classes/${preveousBulletin}/next`),
+    enabled: !!preveousBulletin,
   });
   return { data };
 };
 
-export const useGetIdSubjectsGradeQuery = (id) => {
+export const useGetIdSubjectsBulletinQuery = (id) => {
   const { data, isFetched } = useQuery({
     queryKey: ['disciplinasclasse', id],
     queryFn: () =>
       axios.get(`http://localhost:8000/api/classes/${id}/disciplinas`),
     enabled: !!id,
   });
-  return { dataSubjectsGrade: data };
-};
-
-export const useGetSbjtAbsentTeacherGradeQuery = (id, turmaId) => {
-  const { data } = useQuery({
-    queryKey: ['sbjAbsentProfessor', id, turmaId],
-    queryFn: () =>
-      axios.get(
-        `http://localhost:8000/api/classes/${id}/turmas/${turmaId}/disciplinas/absent-professor`
-      ),
-    enabled: !!id,
-  });
-  return { data };
+  return { dataSubjectsBulletin: data };
 };

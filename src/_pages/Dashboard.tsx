@@ -17,10 +17,12 @@ import {
 	FileText,
 } from 'lucide-react';
 
+import Header from './../_components/Header';
+
 const Dashboard = () => {
 	return (
-		<div className="min-h-screen bg-gray-100">
-			{/* Barra Superior */}
+		<div className="m-0 w-screen h-screen bg-gray-50">
+			{/* Barra Superior 
 			<header className="bg-white shadow">
 				<div className="px-8 py-4 flex items-center justify-between">
 					<div className="flex items-center gap-4">
@@ -41,7 +43,8 @@ const Dashboard = () => {
 					</div>
 				</div>
 			</header>
-
+			*/}
+			
 			<main className="p-8">
 				{/* Ações Rápidas */}
 				<div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
