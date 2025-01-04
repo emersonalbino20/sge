@@ -36,7 +36,6 @@ import { Link } from 'react-router-dom';
 import MostrarDialog from './MostrarDialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { collectErrorMessages, matriculaAluno } from '@/_queries/Alunos';
 import {
   useGetCurseQuery,
   useGetIdGradeCurseQuery,

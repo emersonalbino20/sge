@@ -279,7 +279,6 @@ export default function PersonIncharge() {
                                     field.onChange(parseInt(e.target.value));
                                   }}
                                 >
-                                  <option>Selecione o grau</option>
                                   {dataParent?.data?.data?.map((field) => {
                                     return (
                                       <option value={`${field.id}`}>
@@ -578,7 +577,7 @@ export default function PersonIncharge() {
                         {dataPersonInchargeId?.data?.contacto?.telefone}
                       </p>
                     </div>
-                    {dataPersonInchargeId?.data?.endereco?.email && (
+                    {dataPersonInchargeId?.data?.contacto?.email && (
                       <div>
                         <label>email</label>
                         <p className="font-thin text-sm">
