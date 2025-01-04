@@ -53,15 +53,13 @@ import {
   TrashButton,
   UserPlusButton,
 } from './MyButton';
-import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table';
 import Header from './Header';
 import { useHookFormMask } from 'use-mask-input';
 import {
   animateBounce,
   animatePulse,
   animateShake,
-} from '@/AnimationPackage/Animates';
-import { collectErrorMessages } from '@/_queries/Alunos';
+} from '@/_animation/Animates';
 import MostrarDialog from './MostrarDialog';
 import {
   useGetIdTeacherGradesQuery,

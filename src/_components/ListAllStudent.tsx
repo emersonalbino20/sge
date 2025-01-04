@@ -11,7 +11,6 @@ import {
   Search,
 } from 'lucide-react';
 import * as React from 'react';
-import { tdStyle, thStyle, trStyle } from './table';
 import {
   bairroZod,
   dataNascimentoZod,
@@ -45,7 +44,7 @@ import {
 } from '@/components/ui/dialog';
 import { Link } from 'react-router-dom';
 import IPPUImage from './../assets/images/IPPU.png';
-import { animateBounce, animatePulse } from '@/AnimationPackage/Animates';
+import { animateBounce, animatePulse } from '@/_animation/Animates';
 import { setCookies } from '@/_cookies/Cookies';
 import {
   useGetIdClassFromGradedQuery,
@@ -128,26 +127,28 @@ export default function ListAllStudent() {
 
           <div className="grid gap-4 py-4 bg-white">
             <div className="flex flex-col w-full">
-            <fieldset>
-                <legend className="text-sm text-gray-800">Dados da Matrícula</legend>
+              <fieldset>
+                <legend className="text-sm text-gray-800">
+                  Dados da Matrícula
+                </legend>
                 <div className="w-full flex flex-row justify-between px-2">
                   <div className="w-full flex flex-row justify-between px-2">
                     <div>
                       <label>Classe</label>
                       <p className="font-thin text-sm">
-                      {dataStdAtGrade?.data?.nome}
+                        {dataStdAtGrade?.data?.nome}
                       </p>
                     </div>
-                      <div>
-                        <label>Curso</label>
-                        <p className="font-thin text-sm">
+                    <div>
+                      <label>Curso</label>
+                      <p className="font-thin text-sm">
                         {dataStdAtGrade?.data?.curso?.nome}
-                        </p>
-                      </div>
+                      </p>
+                    </div>
                   </div>
                 </div>
               </fieldset>
-            
+
               <fieldset>
                 <legend className="text-sm text-gray-800">Contacto</legend>
                 <div className="w-full flex flex-row justify-between px-2">
@@ -258,7 +259,7 @@ export default function ListAllStudent() {
                   </td>
                 </tr>
               )}
-              {(!isLoading) && (isError || dadosPaginados?.length === 0) && (
+              {!isLoading && (isError || dadosPaginados?.length === 0) && (
                 <tr className="w-96 h-32">
                   <td
                     rowSpan={6}

@@ -31,7 +31,6 @@ import {
   Trash2,
   Trash2Icon,
 } from 'lucide-react';
-import { GraduationCap as Cursos } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import {
   nomeCursoZod,
@@ -58,7 +57,7 @@ import {
   animateBounce,
   animatePulse,
   animateShake,
-} from '@/AnimationPackage/Animates';
+} from '@/_animation/Animates';
 import MostrarDialog from './MostrarDialog';
 import {
   useGetCurseQuery,
@@ -72,14 +71,7 @@ import {
 } from '@/_queries/UseCurseQuery';
 import { useGetSubjectQuery } from '@/_queries/UseSubjectQuery';
 import { AlertErro, AlertSucesso } from './Alert';
-import {
-  CombineButton,
-  CurseButton,
-  EditButton,
-  GradeButton,
-  InfoButton,
-  TrashButton,
-} from './MyButton';
+import { CurseButton, EditButton, GradeButton, InfoButton } from './MyButton';
 
 const TFormCreate = z.object({
   nome: nomeCursoZod,

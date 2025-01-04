@@ -7,7 +7,6 @@ import {
   Search,
 } from 'lucide-react';
 import * as React from 'react';
-import { tdStyle, thStyle, trStyle } from './table';
 import { idZod } from '@/_zodValidations/validations';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -40,15 +39,8 @@ import {
   animateFadeLeft,
   animatePing,
   animateShake,
-} from '@/AnimationPackage/Animates';
+} from '@/_animation/Animates';
 import MostrarDialog from './MostrarDialog';
-import { getTrimestres } from '@/_queries/Trimestres';
-import { useQueries } from '@tanstack/react-query';
-import {
-  getDisciplinasProfessores,
-  getTurmasProfessores,
-} from '@/_queries/Professor';
-import { getTurmasClasse } from '@/_queries/Turmas';
 import { useGetTermQuery } from '@/_queries/UseTermQuery';
 import {
   useGetIdTeacherGradesQuery,

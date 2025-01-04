@@ -54,7 +54,7 @@ import {
   animatePing,
   animatePulse,
   animateShake,
-} from '@/AnimationPackage/Animates';
+} from '@/_animation/Animates';
 import {
   useMutation,
   useQueries,

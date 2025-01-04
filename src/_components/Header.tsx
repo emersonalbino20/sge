@@ -12,6 +12,7 @@ import {
   Bell,
   Settings,
   User,
+  ChevronUp,
 } from 'lucide-react';
 import IPPUImage from './../assets/images/IPPU.png';
 
@@ -93,7 +94,11 @@ function Header() {
                       <span className="ml-2 text-white text-base">
                         {item.titulo}
                       </span>
-                      <ChevronDown className="w-4 h-4 ml-1 text-white" />
+                      {item.subItems && openSubMenu === index ?
+                        <ChevronUp className="w-4 h-4 ml-1 text-white" />
+                        :
+                        <ChevronDown className="w-4 h-4 ml-1 text-white" />
+                          }
                     </button>
                   ) : (
                     <Link

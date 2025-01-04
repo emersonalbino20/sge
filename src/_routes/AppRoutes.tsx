@@ -17,7 +17,6 @@ const AcademicYearPage = lazy(() => import('../_pages/AcademicYearPage'));
 const GradePage = lazy(() => import('../_pages/GradePage'));
 const ClassRoomPage = lazy(() => import('../_pages/ClassRoomPage'));
 const PeriodPage = lazy(() => import('../_pages/PeriodPage'));
-const PaymentPage = lazy(() => import('../_pages/PaymentPage'));
 const ParentsPage = lazy(() => import('../_pages/ParentsPage'));
 const BulletinPage = lazy(() => import('../_pages/BulletinPage'));
 const ExportBulletinPage = lazy(() => import('../_pages/ExportBulletinPage'));
@@ -54,7 +53,6 @@ export default function AppRoutes() {
             <Route path="/GradePage" element={<GradePage />} />
             <Route path="/ClassRoomPage" element={<ClassRoomPage />} />
             <Route path="/PeriodPage" element={<PeriodPage />} />
-            <Route path="/PaymentPage" element={<PaymentPage />} />
             <Route path="/ParentsPage" element={<ParentsPage />} />
             <Route path="/BulletinPage" element={<BulletinPage />} />
             <Route

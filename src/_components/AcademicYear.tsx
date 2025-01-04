@@ -63,25 +63,15 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { tdStyle, thStyle, trStyle, tdStyleButtons } from './table';
 import Header from './Header';
 import {
   animateBounce,
   animatePulse,
   animateShake,
-} from '@/AnimationPackage/Animates';
+} from '@/_animation/Animates';
 import MostrarDialog from './MostrarDialog';
 import { useMutation, useQueries, useQueryClient } from '@tanstack/react-query';
-import {
-  collectErrorMessages,
-  getAnoAcademico,
-  getAnoAcademicoId,
-  patchAnoAcademico,
-  postAnoAcademico,
-  putAnoAcademico,
-} from '@/_queries/AnoAcademico';
 import axios from 'axios';
-import { postTrimestres } from '@/_queries/Trimestres';
 import {
   useGetAcademicQuery,
   useGetIdAcademicQuery,

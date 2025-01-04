@@ -54,7 +54,7 @@ export default [
       "requireStringLiterals": "off",
       "valid-typeof": "off",
       "block-scoped-var": "error",
-     // "camelcase": "",
+      // "camelcase": "",
       //"capitalized-comments": "",always
       "eqeqeq": "error",
       "no-alert": "error",

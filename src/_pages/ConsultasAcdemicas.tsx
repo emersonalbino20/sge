@@ -44,7 +44,7 @@ import { idZod } from '@/_zodValidations/validations';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
-import { animateBounce, animateFadeDown } from '@/AnimationPackage/Animates';
+import { animateBounce, animateFadeDown } from '@/_animation/Animates';
 import {
   useGetIdClassFromGradedQuery,
   useGetIdSubjectsGradeQuery,

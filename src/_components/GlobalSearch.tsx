@@ -43,7 +43,7 @@ import { idZod } from '@/_zodValidations/validations';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
-import { animateBounce, animateFadeDown } from '@/AnimationPackage/Animates';
+import { animateBounce, animateFadeDown } from '@/_animation/Animates';
 import {
   useGetIdClassFromGradedQuery,
   useGetIdSubjectsGradeQuery,
@@ -241,12 +241,12 @@ const GlobalSearch = () => {
               </TabsContent>
               <TabsContent value="alunos" className="space-y-4">
                 <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <Select
-                          options={optionStudents}
-                          onChange={handleChangeStudent}
-                          placeholder="Buscar por alunos..."
-                        />
+                  <div>
+                    <Select
+                      options={optionStudents}
+                      onChange={handleChangeStudent}
+                      placeholder="Buscar por alunos..."
+                    />
                   </div>
                 </div>
               </TabsContent>
@@ -595,11 +595,9 @@ const GlobalSearch = () => {
                                         >
                                           <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
                                         </svg>
-                                        <span>
-                                          Classe: {value?.nome} Classe
-                                        </span>
+                                        <span>{value?.nome} Classe</span>
                                         <span className="font-bold p-2">
-                                          {value?.curso?.nome}
+                                          Curso de {value?.curso?.nome}
                                         </span>
                                         {/*<span>
                                           Total de Turmas: {value?.totalTurmas}

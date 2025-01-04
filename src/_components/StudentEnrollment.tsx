@@ -31,7 +31,7 @@ import {
   animateFadeLeft,
   animatePing,
   animateShake,
-} from '@/AnimationPackage/Animates';
+} from '@/_animation/Animates';
 import { Link } from 'react-router-dom';
 import MostrarDialog from './MostrarDialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';

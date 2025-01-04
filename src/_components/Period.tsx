@@ -58,7 +58,7 @@ import {
   animateBounce,
   animatePulse,
   animateShake,
-} from '@/AnimationPackage/Animates';
+} from '@/_animation/Animates';
 import MostrarDialog from './MostrarDialog';
 import {
   useGetIdPeriodQuery,

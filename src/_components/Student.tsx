@@ -53,7 +53,7 @@ import {
   animatePing,
   animatePulse,
   animateShake,
-} from '@/AnimationPackage/Animates';
+} from '@/_animation/Animates';
 import {
   useMutation,
   useQueries,
@@ -879,10 +879,7 @@ export default function ListStudent() {
         <Header />
         <Tabs defaultValue="students" className="space-y-4">
           <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-4 bg-transparent">
-            <TabsTrigger
-              value="students"
-              className="flex items-center gap-2"
-            >
+            <TabsTrigger value="students" className="flex items-center gap-2">
               Todos Estudantes
             </TabsTrigger>
             <TabsTrigger

@@ -1,25 +1,22 @@
 import * as React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import IPPUImage from './../assets/images/IPPU.png';
-import Footer from './Footer';
-import Cards from './Cards';
 import Header from './Header';
-import SideBar from './SideBar';
-import { animateFadeLeft } from '@/AnimationPackage/Animates';
+import { animateFadeLeft } from '@/_animation/Animates';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-	Users,
-	GraduationCap,
-	Calendar,
-	Bell,
-	Book,
-	Clock,
-	User,
-	DollarSign,
-	BarChart,
-	CheckCircle,
-	AlertCircle,
-	FileText,
+  Users,
+  GraduationCap,
+  Calendar,
+  Bell,
+  Book,
+  Clock,
+  User,
+  DollarSign,
+  BarChart,
+  CheckCircle,
+  AlertCircle,
+  FileText,
 } from 'lucide-react';
 
 export default function HomeBody() {
@@ -45,54 +42,54 @@ export default function HomeBody() {
       <section className="m-0 w-screen h-screen  bg-gray-50">
         <Header />
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-					<Card>
-						<CardContent className="flex items-center gap-4 pt-6">
-							<div className="bg-blue-100 p-3 rounded-lg">
-								<Users className="h-6 w-6 text-blue-600" />
-							</div>
-							<div>
-								<p className="text-sm text-gray-500">Total de Alunos</p>
-								<p className="text-2xl font-bold">1,234</p>
-							</div>
-						</CardContent>
-					</Card>
+          <Card>
+            <CardContent className="flex items-center gap-4 pt-6">
+              <div className="bg-blue-100 p-3 rounded-lg">
+                <Users className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Total de Alunos</p>
+                <p className="text-2xl font-bold">1,234</p>
+              </div>
+            </CardContent>
+          </Card>
 
-					<Card>
-						<CardContent className="flex items-center gap-4 pt-6">
-							<div className="bg-green-100 p-3 rounded-lg">
-								<GraduationCap className="h-6 w-6 text-green-600" />
-							</div>
-							<div>
-								<p className="text-sm text-gray-500">Professores</p>
-								<p className="text-2xl font-bold">48</p>
-							</div>
-						</CardContent>
-					</Card>
+          <Card>
+            <CardContent className="flex items-center gap-4 pt-6">
+              <div className="bg-green-100 p-3 rounded-lg">
+                <GraduationCap className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Professores</p>
+                <p className="text-2xl font-bold">48</p>
+              </div>
+            </CardContent>
+          </Card>
 
-					<Card>
-						<CardContent className="flex items-center gap-4 pt-6">
-							<div className="bg-yellow-100 p-3 rounded-lg">
-								<Book className="h-6 w-6 text-yellow-600" />
-							</div>
-							<div>
-								<p className="text-sm text-gray-500">Turmas Ativas</p>
-								<p className="text-2xl font-bold">32</p>
-							</div>
-						</CardContent>
-					</Card>
+          <Card>
+            <CardContent className="flex items-center gap-4 pt-6">
+              <div className="bg-yellow-100 p-3 rounded-lg">
+                <Book className="h-6 w-6 text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Turmas Ativas</p>
+                <p className="text-2xl font-bold">32</p>
+              </div>
+            </CardContent>
+          </Card>
 
-					<Card>
-						<CardContent className="flex items-center gap-4 pt-6">
-							<div className="bg-purple-100 p-3 rounded-lg">
-								<DollarSign className="h-6 w-6 text-purple-600" />
-							</div>
-							<div>
-								<p className="text-sm text-gray-500">Mensalidades Pagas</p>
-								<p className="text-2xl font-bold">89%</p>
-							</div>
-						</CardContent>
-					</Card>
-				</div>
+          <Card>
+            <CardContent className="flex items-center gap-4 pt-6">
+              <div className="bg-purple-100 p-3 rounded-lg">
+                <DollarSign className="h-6 w-6 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Mensalidades Pagas</p>
+                <p className="text-2xl font-bold">89%</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
         <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
           <div className="lg:grid lg:grid-cols-12 lg:gap-8">
             <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">

@@ -33,7 +33,6 @@ export function Stepper(){
         setComplete(true) :
         setCurrentStep(prev => prev + 1);
     }} className='bg-gray-700 hover:bg-gray-600 text-slate-200 font-medium px-7 py-1 border-gray-700'>{currentStep === step.length ?'Finish' : 'Next'}</button>
-    
     </div>
     </>
 }

@@ -60,7 +60,7 @@ import {
 } from '@/components/ui/form';
 import Select from 'react-select';
 import Header from './Header';
-import { animateBounce, animatePulse } from '@/AnimationPackage/Animates';
+import { animateBounce, animatePulse } from '@/_animation/Animates';
 import {
   useGetIdSubjectQuery,
   useGetSubjectQuery,
