@@ -116,8 +116,6 @@ const TFormConnect = z.object({
   nomeDisciplinas: z.array(z.string()),
 });
 
-type FormProps = z.infer<typeof TForm>;
-type FormPropsUpdate = z.infer<typeof TFormUpdate>;
 export default function Teacher() {
   const form = useForm<z.infer<typeof TForm>>({
     mode: 'all',
@@ -982,21 +980,22 @@ export default function Teacher() {
         <div className="flex items-center justify-between px-4 py-3 border-t">
           <div className="flex-1 flex justify-between sm:hidden">
             <button
-              onClick={() => setPagina(Math.max(1, pagina - 1))}
-              disabled={pagina === 1}
+               onClick={() => setPagina(Math.max(1, pagina - 1))}
+               disabled={pagina === 1}
               className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
             >
               Anterior
             </button>
             <button
-              onClick={() => {
-                fetchNextPage();
-              }}
-              disabled={pagina === totalPaginas}
+            onClick={() => {
+              fetchNextPage();
+              setPagina(Math.min(totalPaginas, pagina + 1));
+            }}
+            disabled={isFetchingNextPage}
               className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
             >
               Próxima
-            </button>
+              </button>
           </div>
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>

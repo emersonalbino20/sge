@@ -11,7 +11,6 @@ import {
   Search,
 } from 'lucide-react';
 import * as React from 'react';
-import { tdStyle, thStyle, trStyle } from './table';
 import {
   bairroZod,
   dataNascimentoZod,
@@ -1213,10 +1212,11 @@ export default function ListStudent() {
                         Anterior
                       </button>
                       <button
-                        onClick={() =>
-                          setPagina(Math.min(totalPaginas, pagina + 1))
-                        }
-                        disabled={pagina === totalPaginas}
+                        onClick={() => {
+                          fetchNextPage();
+                          setPagina(Math.min(totalPaginas, pagina + 1));
+                        }}
+                        disabled={isFetchingNextPage}
                         className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                       >
                         Próxima
