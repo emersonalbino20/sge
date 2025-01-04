@@ -175,7 +175,11 @@ function Header() {
                       <span className="ml-2 text-white text-base">
                         {item.titulo}
                       </span>
-                      <ChevronDown className="w-4 h-4 ml-1 text-white" />
+                      {item.subItems && openSubMenu === index ?
+                        <ChevronUp className="w-4 h-4 ml-1 text-white" />
+                        :
+                        <ChevronDown className="w-4 h-4 ml-1 text-white" />
+                          }
                     </button>
                     {openSubMenu === index && (
                       <div className="bg-blue-700 px-4 py-2 space-y-2">
@@ -183,7 +187,7 @@ function Header() {
                           <Link
                             key={subIndex}
                             to={subItem.link}
-                            className="block px-4 py-2 hover:bg-gray-600 text-base"
+                            className="block px-4 py-2 hover:bg-blue-500 text-base"
                           >
                             {subItem.titulo}
                           </Link>
