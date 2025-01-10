@@ -1,47 +1,42 @@
 <p align="center">
 <img src="./src/assets/images/IPPU.png" alter="LOGO" height="80"/>
-</p>
 
-<span align="center">
+
 
 [redes sociais](#redes-sociais)
 | [contribuir](#-contribuição)
 | [home page](#home-page)
-</span>
 
-<h1 align="left"> Bem Vindo ao SGE</h1>
 
-<h2 align="left">📚 Descrição</h2>
+# Bem Vindo ao SGE
 
-###
+## 📚 Descrição
 
-<p align="left">Este projeto é o <b>frontend</b> de um sistema de gestão escolar desenvolvido em <b>React</b> com integração de <i>API</i> <b>REST</b> para gerenciamento de dados escolares. Ele foi criado para facilitar a gestão de alunos, turmas, professores, notas e mais.
-</p>
+Este projeto é o **frontend** de um sistema de gestão escolar desenvolvido em **React** com integração de _API_ **REST** para gerenciamento de dados escolares. Ele foi criado para facilitar a gestão de alunos, turmas, professores, notas e mais.
 
-<h2 align="left">🚀 Funcionalidades</h2>
 
-<p align="left">
+## 🚀 Funcionalidades
+
 Algumas funcionalidades do sistema:
-</p>
 
-* <p align="left"> Cadastro de alunos, professores e encarregados; </p>
-* <p align="left">Gerenciamento de turmas e disciplinas;</p>
-* <p align="left">Registro de notas escolar;</p>
-* <p align="left">Relatórios financeiros e acadêmicos;</p>
-* <p align="left">Autenticação e autorização de usuários</p>
-
+* Cadastro de alunos, professores e encarregados;
+* Gerenciamento de turmas e disciplinas;
+* Registro de notas escolar;
+* Relatórios financeiros e acadêmicos;
+* Autenticação e autorização de usuários
 
 
-<h2 align="left">🛠 Tecnologias Utilizadas</h2>
 
-* <h3 align="left">Linguagens</h3>
+## 🛠 Tecnologias Utilizadas
+
+* ## Linguagens
 
     <ol align="left">
       <li>TypeScript;
       <li>JavaScript
     </ol>
 
-* <h3 align="left">Bibliotecas</h3>
+* ## Bibliotecas
 
     <ol align="left">
       <li> React;
@@ -51,24 +46,26 @@ Algumas funcionalidades do sistema:
       <li>Tanstack React Query
     </ol>
 
-* <h3 align="left">Ferramentas</h3>
+* ## Ferramentas
     <ol align="left">
     <li>Vscode;
     <li>Swagger;
     <li>Postman
     </ol>
 
-<h2 align="left">🎨 Tema e UI</h2>
+## 🎨 Tema e UI
 
-<blockquote align="left">O sistema utiliza um tema moderno com cores claras e suaves:</blockquote>
+```
+O sistema utiliza um tema moderno com cores claras e suaves:
+```
 
 ```css
 bg-blue-600 & bg-white
 ```
 
-<h2 align="left"> 📂 Estrutura de Pastas</h2>
+##  📂 Estrutura de Pastas
 
-<p align="left">
+
 ├── public/<br>
 ├── src/<br>
 │   ├── _animations/<br>
@@ -79,80 +76,89 @@ bg-blue-600 & bg-white
 ├── assets/<br>
 ├── App.tsx<br>
 └── package.json
-</p>
 
-###
+## 🚀 Instalação e Configuração
 
-<h2 align="left">🚀 Instalação e Configuração</h2>
+#### Clone o repositório:
 
-<h4 align="left">Clone o repositório:</h4>
-
-<blockquote align="left">
+```bash
 git clone https://github.com/emersonalbino20/sge.git
-</blockquote>
+```
 
-<h4 align="left">Entre no directório</h4>
+#### Entre no directório
 
-<blockquote align="left">
+```bash
 cd sge/
-</blockquote>
+```
 
-<h4 align="left">Instale as dependências:</h4>
+#### Instale as dependências:
 
-<blockquote align="left"> 
+```bash
 npm install
-</blockquote>
+```
 
-<h4 align="left">Inicie o servidor de desenvolvimento:</h4>
+#### Inicie o servidor de desenvolvimento:
 
-<blockquote align="left">npm run dev</blockquote>
+```bash
+npm run dev
+```
 
-<h4 align="left">Acesse em seu navegador:</h4>
+#### Acesse em seu navegador:
+
+```
+http://localhost:5731
+```
 
 
-<blockquote align="left">http://localhost:5731</blockquote>
+##  Home Page
 
-
-<h2> Home Page</h2>
-
-<p align="left">Na <i>home Page</i> do sistema é possível  acessar os principais menus, verificar alguns dados estatísticos;</p>
+Na _home Page_ do sistema é possível  acessar os principais menus, verificar alguns dados estatísticos; [clonar repositório](#clone-o-repositório)
 
 ![home page](./src/assets/images/HomePage.png)
-<a><p align="left"><i>clonar repositório</i></p></a>
 
-<h2 align="left">🧪 Testes</h2>
 
-<p align="left">Este projeto ainda não contém testes automatizados. No entanto, é recomendado o uso de <b>Jest</b> e <b>React Testing Library</b> para testes de componentes.
-</p>
+## 🧪 Testes
 
-<h2 align="left">🤝 Contribuição</h2>
+Este projeto ainda não contém testes automatizados. No entanto, é recomendado o uso de **Jest** e **React Testing Library** para testes de componentes.
 
-* <p align="left">Faça um <i>fork</i> do projeto;</p>
-* <p align="left"> Crie uma nova <i>branch</i>: 
-  <blockquote align="left">git checkout -b minha-nova-feature</blockquote>
-  </p>
-* <p align="left">Faça suas modificações e <i>commit</i>: 
-  <blockquote align="left">git commit -m 'Adicionar nova feature'</blockquote>
-  </p>
-* <p align="left">Envie sua <i>branch</i>: 
-  <bloquote align="left">git push origin minha-nova-feature</bloquote>
-  </p>
-* <p align="left">Abra um <i>Pull Request</i></p>
 
-#
-<blockquote align="left">
+## 🤝 Contribuição
+
+* Faça um _fork_ do projeto;
+* Crie uma nova _branch_: 
+
+  ```
+  git checkout -b minha-nova-feature
+  ```
+  
+* Faça suas modificações e _commit_: 
+  
+  ```
+  git commit -m '(feat): Adicionar nova feature'
+  ```
+  
+* Envie sua _branch_: 
+  ```
+  git push origin minha-nova-feature
+  ```
+  
+* Abra um _Pull Request_
+
+
+```
   Aviso!
 
-  Para usar o frontend num todo tens de possuir a [Api Egleston](https://github.com/mateusvalecelestino/egleston-api.git/) clonada e configurada no seu sistema, por ser o frontend dum sistema precisas da parte do beckend.
-</blockquote>
+Para usar o frontend num todo tens de possuir a Api Egleston em: https://github.com/mateusvalecelestino/egleston-api.git/) clonada e configurada no seu sistema, por ser o frontend dum sistema precisas da parte do beckend.
+```
 
-<h2 align="left">📄 Licença</h2>
+## 📄 Licença
 
-<p align="left">
-Este projeto está sob a licença <b>MIT</b>. Veja o arquivo <a href="./LICENSE">LICENSE</a> para mais detalhes.
-</p>
 
-<h2 align="left">Icones Das Tecnológias</h2>
+Este projeto está sob a licença **MIT**. Veja o arquivo [LICENSE](./LICENSE) para mais detalhes.
+
+
+
+## Icones Das Tecnológias
 
 <div align="left">
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original-wordmark.svg" height="40" alt="react logo"  />
@@ -170,13 +176,11 @@ Este projeto está sob a licença <b>MIT</b>. Veja o arquivo <a href="./LICENSE"
   <img height="200" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNnNoN21mMDZyeXk4bHJtZ2VqMnE5OWhveWs5Zm9pOXZ0anJ4OWplYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/gAXtUkBVd8OCbFjauC/giphy.gif"  />
 </div>
 
-<h2 align="left">Redes Sociais</h2>
+## Redes Sociais
 
 [facebook](https://facebook.com)
 | [intagram](https://instagram.com)
 | [linkedin](https://linkedin.com)
 
-<span align="left">
-<a href="#bem-vindo-ao-sge">Ir para o ínicio
-</a>
-</span>
+[Ir para o ínicio](#bem-vindo-ao-sge)
+
