@@ -928,7 +928,7 @@ export default function StudentEnrollment() {
                                       (field) => {
                                         return (
                                           <option value={`${field.id}`}>
-                                            {field.nome}
+                                            {field.nome} ({field?.turno?.nome})
                                           </option>
                                         );
                                       }

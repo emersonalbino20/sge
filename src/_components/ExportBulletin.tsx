@@ -11,7 +11,6 @@ import {
   Search,
 } from 'lucide-react';
 import * as React from 'react';
-import { tdStyle, thStyle, trStyle } from './table';
 import {
   bairroZod,
   dataNascimentoZod,
@@ -34,6 +33,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
 import {
   Dialog,
   DialogContent,
@@ -82,6 +82,16 @@ import {
   usePostConfirmEnrollment,
   usePutStudent,
 } from '@/_queries/UseStudentQuery';
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  pdf,
+  Font,
+  Image,
+} from '@react-pdf/renderer';
 import { useGetPaymentQuery } from '@/_queries/UsePaymentQuery';
 import { AlertErro, AlertSucesso } from './Alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -89,6 +99,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Award, BarChart, Calendar, Download } from 'lucide-react';
 import Select from 'react-select';
+import { useGetIdClassQuery } from '@/_queries/UseClassQuery';
+{
+  /*import robotolight from '../assets/_fonts/Roboto_Slab/static/RobotoSlab-Light.ttf';
+import robotoregular from '../assets/_fonts/Roboto_Slab/static/RobotoSlab-Regular.ttf';
+import robotomedium from '../assets/_fonts/Roboto_Slab/static/RobotoSlab-Medium.ttf';
+import robotobold from '../assets/_fonts/Roboto_Slab/static/RobotoSlab-Bold.ttf';*/
+}
+
 const TFormStepOne = z.object({
   trimestreId: idZod,
   cursoId: idZod,
@@ -98,6 +116,317 @@ const TFormStepOne = z.object({
   alunoId: idZod,
 });
 
+{
+  /*Font.register({
+  family: 'Inter',
+  fonts: [
+    {
+      src: '/src/',
+    },
+    {
+      src: robotolight,
+      fontWeight: 300,
+    },
+    {
+      src: robotoregular,
+      fontWeight: 400,
+    },
+    {
+      src: robotomedium,
+      fontWeight: 500,
+    },
+    {
+      src: robotobold,
+      fontWeight: 700,
+    },
+  ],
+});*/
+}
+
+const styles = StyleSheet.create({
+  page: {
+    padding: '20px 30px',
+    fontFamily: 'Helvetica',
+    fontSize: 9,
+  },
+  header: {
+    flexDirection: 'row',
+    marginBottom: 10,
+    borderBottom: '2px solid #1a365d',
+    paddingBottom: 8,
+    alignItems: 'center',
+  },
+  headerLeft: {
+    width: '20%',
+  },
+  headerCenter: {
+    width: '60%',
+    textAlign: 'center',
+  },
+  headerRight: {
+    width: '20%',
+    textAlign: 'right',
+  },
+  logo: {
+    width: 60,
+    height: 60,
+  },
+  institutionName: {
+    fontSize: 16,
+    fontWeight: 700,
+    marginBottom: 4,
+  },
+  documentTitle: {
+    fontSize: 14,
+    fontWeight: 500,
+    color: '#1a365d',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  documentDescribe: {
+    fontSize: 12,
+    fontWeight: 500,
+    color: '#000',
+    textAlign: 'left',
+    marginBottom: 5,
+  },
+  studentInfo: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 15,
+    gap: 10,
+  },
+  infoItem: {
+    width: '23%',
+  },
+  label: {
+    fontSize: 8,
+    color: '#4a5568',
+    marginBottom: 2,
+  },
+  value: {
+    fontSize: 9,
+    fontWeight: 500,
+  },
+  table: {
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#1a365d',
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#1a365d',
+    color: 'white',
+    padding: 6,
+    fontWeight: 700,
+  },
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+    padding: 6,
+  },
+  disciplinasCol: {
+    width: '50%',
+  },
+  notasCol: {
+    width: '50%',
+    textAlign: 'center',
+  },
+  comportamentoSection: {
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#1a365d',
+    padding: 8,
+    height: 80,
+  },
+  comportamentoGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  comportamentoItem: {
+    width: '30%',
+  },
+  mediaBox: {
+    marginTop: 10,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#1a365d',
+    alignSelf: 'flex-end',
+    width: '150px',
+    height: 50,
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 30,
+    right: 30,
+  },
+  signatures: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 40,
+  },
+  signature: {
+    width: '30%',
+  },
+  signatureLine: {
+    borderTop: '1px solid black',
+    marginTop: 40,
+    marginBottom: 5,
+  },
+  signatureText: {
+    fontSize: 8,
+    textAlign: 'center',
+  },
+});
+
+const ComportamentoField = ({ label, value, rating }) => (
+  <View style={styles.comportamentoItem}>
+    <Text style={styles.label}>{label}</Text>
+    <Text
+      style={[styles.value, { color: rating >= 3 ? '#22c55e' : '#ef4444' }]}
+    >
+      {value}
+    </Text>
+  </View>
+);
+
+const BoletimNotas = ({
+  dadosAluno,
+  dadosInstituicao,
+  notas,
+  comportamento,
+  pontualidade,
+}) => (
+  <Document>
+    <Page size="A4" orientation="portrait" style={styles.page}>
+      {/* Header */}
+      <View style={[styles.header, { marginBottom: 10 }]}>
+        <View style={styles.headerLeft}>
+          <Image style={styles.logo} src={IPPUImage} />
+        </View>
+        <View style={[styles.headerCenter, { width: '60%' }]}>
+          <Text style={styles.institutionName}>{dadosInstituicao.nome}</Text>
+          <Text style={{ fontSize: 10 }}>
+            {dadosInstituicao.endereco} | {dadosInstituicao.contactos}
+          </Text>
+        </View>
+        <View style={styles.headerRight}>
+          <Text style={{ fontSize: 8 }}>Nº: {dadosAluno.numero}</Text>
+          <Text style={{ fontSize: 8 }}>
+            Data: {new Date().toLocaleDateString('pt-PT')}
+          </Text>
+        </View>
+      </View>
+
+      <Text style={styles.documentTitle}>BOLETIM DE NOTAS E AVALIAÇÃO</Text>
+      <Text style={styles.studentInfo}>
+        O(A) aluno(a) {dadosAluno.nomeCompleto}, no ano lectivo{' '}
+        {dadosAluno.anoLetivo}, da {dadosAluno.classe}, nº {dadosAluno.numero},
+        turma {dadosAluno.turma}, sala {dadosAluno.sala}, período{' '}
+        {dadosAluno.turno}, vimos através deste informar o aproveitamento que
+        obteve:
+      </Text>
+      {/* Student Information 
+			<View style={styles.studentInfo}>
+				<Field label="NOME COMPLETO" value={dadosAluno.nomeCompleto} />
+				<Field label="CLASSE" value={dadosAluno.classe} />
+				<Field label="TURMA" value={dadosAluno.turma} />
+				<Field label="SALA" value={dadosAluno.sala} />
+			</View>*/}
+
+      {/* Grades Table */}
+      <View style={styles.table}>
+        <View style={styles.tableHeader}>
+          <Text style={styles.disciplinasCol}>DISCIPLINAS</Text>
+          <Text style={styles.notasCol}>NOTA</Text>
+        </View>
+
+        {notas.map((nota, index) => (
+          <View key={index} style={styles.tableRow}>
+            <Text style={styles.disciplinasCol}>{nota.disciplina}</Text>
+            <Text
+              style={[
+                styles.notasCol,
+                { color: nota.nota >= 10 ? '#22c55e' : '#ef4444' },
+              ]}
+            >
+              {nota.nota}
+            </Text>
+          </View>
+        ))}
+      </View>
+
+      {/* Behavioral Assessment */}
+      <View style={[styles.comportamentoSection, { height: 80 }]}>
+        <Text
+          style={[
+            styles.label,
+            { marginBottom: 5, fontSize: 10, fontWeight: 700 },
+          ]}
+        >
+          AVALIAÇÃO COMPORTAMENTAL
+        </Text>
+        <View style={styles.comportamentoGrid}>
+          <ComportamentoField
+            label="Comportamento"
+            value={comportamento.comportamentoGeral}
+            rating={comportamento.comportamentoRating}
+          />
+          <ComportamentoField
+            label="Pontualidade"
+            value={pontualidade?.pontualidade}
+            rating={pontualidade?.pontualidadeRating}
+          />
+          <ComportamentoField
+            label="Assiduidade"
+            value={comportamento.assiduidade}
+            rating={comportamento.assiduidadeRating}
+          />
+        </View>
+      </View>
+
+      {/* Media Box */}
+      <View style={[styles.mediaBox, { height: 50 }]}>
+        <Text style={[styles.label, { marginBottom: 3 }]}>
+          MÉDIA TRIMESTRAL
+        </Text>
+        <Text
+          style={[
+            styles.value,
+            {
+              fontSize: 12,
+              color: dadosAluno.mediaTrimestral >= 10 ? '#22c55e' : '#ef4444',
+            },
+          ]}
+        >
+          {dadosAluno.mediaTrimestral.toFixed(1)} valores
+        </Text>
+      </View>
+      {/* Footer with signatures */}
+      <View style={styles.footer}>
+        <View style={styles.signatures}>
+          <View style={styles.signature}>
+            <View style={styles.signatureLine} />
+            <Text style={styles.signatureText}>O(A) Professor(a)</Text>
+          </View>
+          <View style={styles.signature}>
+            <View style={styles.signatureLine} />
+            <Text style={styles.signatureText}>O(A) Director(a) de Turma</Text>
+          </View>
+          <View style={styles.signature}>
+            <View style={styles.signatureLine} />
+            <Text style={styles.signatureText}>
+              O(A) Encarregado(a) de Educação
+            </Text>
+          </View>
+        </View>
+      </View>
+    </Page>
+  </Document>
+);
 export default function ExportBulletin() {
   const formStepOne = useForm<z.infer<typeof TFormStepOne>>({
     mode: 'all',
@@ -135,15 +464,17 @@ export default function ExportBulletin() {
     fieldTurmaId
   );
   const { dataSubjectsGrade } = useGetIdSubjectsGradeQuery(fieldClasseId);
-  console.log(dataSubjectsGrade?.data?.data?.length);
+  //console.log(dataSubjectsGrade?.data?.data?.length);
 
   const [buscar, setBuscar] = React.useState(null);
+  const [label, setLabel] = React.useState(null);
   const alunosportuma = data?.pages.flatMap((page) => page.data) ?? [];
   const options = alunosportuma?.map((aluno) => {
     return { value: aluno.id, label: aluno.nomeCompleto };
   });
   const handleChange = (selectedOption) => {
     setBuscar(selectedOption.value);
+    setLabel(selectedOption.label);
   };
   const { data: dataNotes } = useGetStudentNotesQuery(
     buscar,
@@ -166,6 +497,68 @@ export default function ExportBulletin() {
 
   const [counterTurma, setCounterTurma] = React.useState<number>(1);
   const [existeTurma, setExisteTurma] = React.useState<boolean>(false);
+
+  //Data for export bulletin
+  const { dataClass } = useGetIdClassQuery(fieldTurmaId);
+  console.log(dataClass?.data?.classe?.nome);
+  const dadosInstituicao = {
+    nome: 'INSTITUTO POLITÉCNICO PRIVADO ULUMBO',
+    endereco: 'Rua Principal, nº 123 - Luanda, Angola',
+    contactos: 'Tel: +244 923 456 789 | example@email.com',
+  };
+
+  const dadosAluno = {
+    numero: 'A2024/0001',
+    nomeCompleto: label,
+    classe: dataClass?.data?.classe?.nome,
+    turma: dataClass?.data?.nome,
+    sala: dataClass?.data?.sala?.nome,
+    turno: dataClass?.data?.turno?.nome,
+    anoLetivo: '2024',
+    mediaTrimestral: mediaArredondada,
+  };
+
+  const notas = dataNotes?.data?.data;
+  const avali = {
+    comportamentoGeral: 'Muito Bom',
+    comportamentoRating: 4,
+    pontualidade: 'Excelente',
+    pontualidadeRating: 5,
+    assiduidade: 'Muito Bom',
+    assiduidadeRating: 4,
+  };
+  const [comportamentoStd, setComportamentoStd] = React.useState(50);
+  const getFeedback = (val: number) => {
+    if (val === 0) return { pontualidade: 'Baixa', pontualidadeRating: 1 };
+    if (val > 0 && val < 50)
+      return { pontualidade: 'Suficiente', pontualidadeRating: 2 };
+    if (val >= 50 && val < 80)
+      return { pontualidade: 'Boa', pontualidadeRating: 3 };
+    if (val >= 80 && val <= 100)
+      return { pontualidade: 'Muito Boa', pontualidadeRating: 4 };
+  };
+
+  const generatePDF = async () => {
+    try {
+      const blob = await pdf(
+        <BoletimNotas
+          dadosAluno={dadosAluno}
+          dadosInstituicao={dadosInstituicao}
+          notas={notas}
+          comportamento={avali}
+          pontualidade={getFeedback(comportamentoStd)}
+        />
+      ).toBlob();
+      if (!blob) throw new Error('Falha ao gerar o blob do PDF.');
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      console.log('success');
+    } catch (error) {
+      console.log('error to generate pdf:', error);
+    }
+  };
+
   return (
     <>
       <section className="m-0 w-screen h-screen  bg-gray-50">
@@ -455,6 +848,7 @@ export default function ExportBulletin() {
                 <Button
                   variant="outline"
                   className="flex items-center gap-2 text-sm"
+                  onClick={generatePDF}
                 >
                   <Download className="h-4 w-4" />
                   Exportar Boletim
@@ -585,6 +979,20 @@ export default function ExportBulletin() {
                         <div className="mt-6 flex items-center gap-2 text-sm text-gray-500">
                           <Calendar className="h-4 w-4" />
                           Próxima Avaliação:
+                        </div>
+                        <div className="w-full max-w-md mx-auto p-4 bg-white shadow-md rounded-lg">
+                          <h2 className="text-lg font-semibold text-gray-700 mb-2">
+                            Avaliação da Pontualidade
+                          </h2>
+                          <Slider
+                            defaultValue={[comportamentoStd]}
+                            max={100}
+                            step={25}
+                            onValueChange={(val) => setComportamentoStd(val[0])}
+                          />
+                          <p className="mt-2 text-center font-medium text-gray-900">
+                            {getFeedback(comportamentoStd)?.pontualidade}
+                          </p>
                         </div>
                       </CardContent>
                     </Card>
