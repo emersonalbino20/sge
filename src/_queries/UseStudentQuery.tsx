@@ -22,7 +22,7 @@ import { getCookies } from '@/_cookies/Cookies';
 //Logic to generate pdf
 
 // Register fonts for a more professional look
-Font.register({
+/*Font.register({
   family: 'Inter',
   fonts: [
     {
@@ -42,12 +42,12 @@ Font.register({
       fontWeight: 700,
     },
   ],
-});
+});*/
 
 const styles = StyleSheet.create({
   page: {
     padding: '20px 30px',
-    fontFamily: 'Inter',
+    fontFamily: 'Helvetica',
     fontSize: 9,
   },
   header: {
@@ -171,7 +171,9 @@ const ComprovanteMatricula = ({ dadosAluno, dadosInstituicao }) => (
           <Text style={{ fontSize: 10 }}>{dadosInstituicao.contactos}</Text>
         </View>
         <View style={styles.headerRight}>
-          <Text style={{ fontSize: 8 }}>Nº: {dadosAluno?.data?.data?.createdBy?.nome}</Text>
+          <Text style={{ fontSize: 8 }}>
+            Nº: {dadosAluno?.data?.data?.createdBy?.nome}
+          </Text>
           <Text style={{ fontSize: 8 }}>
             Data: {new Date().toLocaleDateString('pt-PT')}
           </Text>
@@ -191,7 +193,10 @@ const ComprovanteMatricula = ({ dadosAluno, dadosInstituicao }) => (
             <Field label="CURSO" value={dadosAluno?.data?.data?.curso?.nome} />
           </View>
           <View style={styles.col4}>
-            <Field label="CLASSE" value={dadosAluno?.data?.data?.classe?.nome} />
+            <Field
+              label="CLASSE"
+              value={dadosAluno?.data?.data?.classe?.nome}
+            />
           </View>
           <View style={styles.col4}>
             <Field label="TURMA" value={dadosAluno?.data?.data?.turma?.nome} />
@@ -213,40 +218,65 @@ const ComprovanteMatricula = ({ dadosAluno, dadosInstituicao }) => (
         <Text style={styles.sectionTitle}>DADOS DO ALUNO</Text>
         <View style={styles.grid}>
           <View style={styles.col2}>
-            <Field label="NOME COMPLETO" value={dadosAluno?.data?.data?.aluno?.nomeCompleto} />
+            <Field
+              label="NOME COMPLETO"
+              value={dadosAluno?.data?.data?.aluno?.nomeCompleto}
+            />
           </View>
           <View style={styles.col2}>
-            <Field label="Nº DO BI" value={dadosAluno?.data?.data?.aluno?.numeroBi} />
+            <Field
+              label="Nº DO BI"
+              value={dadosAluno?.data?.data?.aluno?.numeroBi}
+            />
           </View>
 
           <View style={styles.col2}>
             <Field
               label="DATA DE NASCIMENTO"
-              value={ new Intl.DateTimeFormat('pt-BR', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric'
-                }).format(new Date(dadosAluno?.data?.data?.aluno?.dataNascimento)).replace('.', '')
-              }
+              value={new Intl.DateTimeFormat('pt-BR', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+              })
+                .format(new Date(dadosAluno?.data?.data?.aluno?.dataNascimento))
+                .replace('.', '')}
             />
           </View>
           <View style={styles.col2}>
-            <Field label="GÊNERO" value={dadosAluno?.data?.data?.aluno?.genero} />
+            <Field
+              label="GÊNERO"
+              value={dadosAluno?.data?.data?.aluno?.genero}
+            />
           </View>
           <View style={styles.col2}>
-            <Field label="TELEFONE" value={dadosAluno?.data?.data?.aluno?.contacto.telefone} />
+            <Field
+              label="TELEFONE"
+              value={dadosAluno?.data?.data?.aluno?.contacto.telefone}
+            />
           </View>
           <View style={styles.col2}>
-            <Field label="BAIRRO" value={dadosAluno?.data?.data?.aluno?.endereco.bairro} />
+            <Field
+              label="BAIRRO"
+              value={dadosAluno?.data?.data?.aluno?.endereco.bairro}
+            />
           </View>
           <View style={styles.col2}>
-            <Field label="NOME DO PAI" value={dadosAluno?.data?.data?.aluno?.nomeCompletoPai} />
+            <Field
+              label="NOME DO PAI"
+              value={dadosAluno?.data?.data?.aluno?.nomeCompletoPai}
+            />
           </View>
           <View style={styles.col3}>
-            <Field label="RUA" value={dadosAluno?.data?.data?.aluno?.endereco.rua} />
+            <Field
+              label="RUA"
+              value={dadosAluno?.data?.data?.aluno?.endereco.rua}
+            />
           </View>
           <View style={styles.col2}>
-            <Field label="NOME DA MÃE" value={dadosAluno?.data?.data?.aluno?.nomeCompletoMae} />
+            <Field
+              label="NOME DA MÃE"
+              value={dadosAluno?.data?.data?.aluno?.nomeCompletoMae}
+            />
           </View>
           <View style={styles.col3}>
             <Field
@@ -318,59 +348,59 @@ const ComprovanteMatricula = ({ dadosAluno, dadosInstituicao }) => (
   </Document>
 );
 
-  const dadosInstituicao = {
-    nome: 'INSTITUTO POLITÉCNICO PRIVADO ULUMBO',
-    endereco: 'Rua Principal, nº 123 - Luanda, Angola',
-    contactos: 'Tel: +244 923 456 789 | example@email.com',
-  };
+const dadosInstituicao = {
+  nome: 'INSTITUTO POLITÉCNICO PRIVADO ULUMBO',
+  endereco: 'Rua Principal, nº 123 - Luanda, Angola',
+  contactos: 'Tel: +244 923 456 789 | example@email.com',
+};
 
-  const dadosAluno = {
-    numeroMatricula: 'M2024/0001',
-    curso: 'Engenharia de Software',
-    classe: '10ª Classe',
-    turma: 'A',
-    formaPagamento: 'Mensal',
-    nomeCompleto: 'João Manuel da Silva',
-    nomePai: 'Manuel António da Silva',
-    nomeMae: 'Maria José dos Santos',
-    numeroBI: '123456789LA042',
-    dataNascimento: '15/03/2005',
-    genero: 'Masculino',
+const dadosAluno = {
+  numeroMatricula: 'M2024/0001',
+  curso: 'Engenharia de Software',
+  classe: '10ª Classe',
+  turma: 'A',
+  formaPagamento: 'Mensal',
+  nomeCompleto: 'João Manuel da Silva',
+  nomePai: 'Manuel António da Silva',
+  nomeMae: 'Maria José dos Santos',
+  numeroBI: '123456789LA042',
+  dataNascimento: '15/03/2005',
+  genero: 'Masculino',
+  endereco: {
+    bairro: 'Benfica',
+    rua: 'Rua das Acácias, nº 42',
+    numeroCasa: 'nº 5',
+  },
+  contacto: {
+    telefone: '+244 923 456 789',
+    email: 'joao.silva@email.com',
+  },
+  responsavel: {
+    nomeCompleto: 'Manuel António da Silva',
+    grauParentesco: 'Pai',
     endereco: {
       bairro: 'Benfica',
       rua: 'Rua das Acácias, nº 42',
-      numeroCasa: 'nº 5',
     },
     contacto: {
       telefone: '+244 923 456 789',
-      email: 'joao.silva@email.com',
+      email: 'manuel.silva@email.com',
     },
-    responsavel: {
-      nomeCompleto: 'Manuel António da Silva',
-      grauParentesco: 'Pai',
-      endereco: {
-        bairro: 'Benfica',
-        rua: 'Rua das Acácias, nº 42',
-      },
-      contacto: {
-        telefone: '+244 923 456 789',
-        email: 'manuel.silva@email.com',
-      },
-    },
-  };
+  },
+};
 
-  const generatePDF = async () => {
-    const blob = await pdf(
-      <ComprovanteMatricula
-        dadosAluno={dadosAluno}
-        dadosInstituicao={dadosInstituicao}
-      />
-    ).toBlob();
+const generatePDF = async () => {
+  const blob = await pdf(
+    <ComprovanteMatricula
+      dadosAluno={dadosAluno}
+      dadosInstituicao={dadosInstituicao}
+    />
+  ).toBlob();
 
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
-    setTimeout(() => URL.revokeObjectURL(url), 100);
-  };
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  setTimeout(() => URL.revokeObjectURL(url), 100);
+};
 
 const PAGE_SIZE = 10;
 interface ApiResponse {
@@ -456,12 +486,11 @@ export const usePostStudent = () => {
           dadosInstituicao={dadosInstituicao}
         />
       ).toBlob();
-  
+
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
       setTimeout(() => URL.revokeObjectURL(url), 100);
       console.log(response);
-      
     },
     onError: (error) => {
       console.log(error);
@@ -494,14 +523,21 @@ export const usePostConfirmEnrollment = () => {
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: auxPostConfirmEnrollment,
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       queryClient.invalidateQueries({ queryKey: ['alunos'] });
       setResp(`(${count}) Operação realizada com sucesso!`);
       setLevel(1);
-      const url = window.URL.createObjectURL(
-        new Blob([response.data], { type: 'application/pdf' })
-      );
+      const blob = await pdf(
+        <ComprovanteMatricula
+          dadosAluno={response}
+          dadosInstituicao={dadosInstituicao}
+        />
+      ).toBlob();
+
+      const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 100);
+      console.log(response);
     },
     onError: (error) => {
       console.log(error);

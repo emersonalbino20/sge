@@ -173,13 +173,6 @@ const styles = StyleSheet.create({
   },
 });
 
-const Field = ({ label, value, style = {} }) => (
-  <View style={[styles.infoItem, style]}>
-    <Text style={styles.label}>{label}</Text>
-    <Text style={styles.value}>{value}</Text>
-  </View>
-);
-
 const ComportamentoField = ({ label, value, rating }) => (
   <View style={styles.comportamentoItem}>
     <Text style={styles.label}>{label}</Text>

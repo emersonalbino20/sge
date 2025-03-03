@@ -698,6 +698,7 @@ const GlobalSearch = () => {
                                   <span>Curso: {value?.curso}</span>
                                   <span>Turma: {value?.turma}</span>
                                   <span>Data: {formattedDate}</span>
+                                  ----------------------------------
                                 </li>
                               </ul>
                             );
